@@ -3,7 +3,6 @@ project(navigation)
 
 SET(CMAKE_BUILD_TYPE Debug)
 
-
 ADD_DEFINITIONS(
     -std=c++11 # Or -std=c++0x
     -Wno-deprecated
@@ -14,11 +13,12 @@ find_package (
 )
 
 add_executable (
-    navigation
-    navigation.cpp
+    ${PROJECT_NAME}
+    src/navigation.cpp
+    src/sensors_drivers/logparser.cpp
 )
 
 target_link_libraries (
-    navigation
+    ${PROJECT_NAME}
     ${OpenCV_LIBS}
 )
