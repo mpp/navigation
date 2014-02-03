@@ -16,6 +16,7 @@ add_executable (
     ${PROJECT_NAME}
     src/navigation.cpp
     src/sensors_drivers/logparser.cpp
+#    src/data_manipulation/laserscanrawfilter.cpp
 )
 
 target_link_libraries (

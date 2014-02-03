@@ -1,0 +1,18 @@
+%YAML:1.0
+
+# Configuration file for the navigation package
+
+## Path and filename of the log file
+#  If empty the sw uses real sensors
+logparser:
+    file: "/home/mpp/DODICH/Registrazioni/01051511_ls_sick.csv"
+
+## Parameters for the laser scan raw filter
+#  It filters too near and too far points
+laserscanrawfilter:
+    minDistance: 0.2 # minimum distance threshold (mt)
+    maxDistance: 10.0 # minimum distance threshold (mt)
+    minAngle: -2.35619449 # minimum angle of scan (deg) - 0° is in front of the scanner
+    maxAngle: 2.35619449 # maximum angle of scan (deg) - 0° is in front of the scanner
+
+## Here can go other parameters

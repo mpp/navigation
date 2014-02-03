@@ -1,0 +1,4 @@
+# Configuration file for the navigation package
+
+laserscanrawfilter:
+	minDistance = 0.2

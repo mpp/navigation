@@ -3,14 +3,16 @@
 namespace nav
 {
 
-void parseFile(const std::string &file, std::vector<Frame> &logFrames)
+void parseFile(const cv::FileStorage &fs,
+               std::vector<Frame> &logFrames)
 {
     /// Open the input log file
-    std::ifstream ifsLog(file.c_str());
+    std::string filename = fs["logparser"]["file"];
+    std::ifstream ifsLog(filename.c_str());
 
     if (!ifsLog)
     {
-        std::cerr << "Cannot open file: " << file << std::endl;
+        std::cerr << "Cannot open file: " << filename << std::endl;
         exit(-1);
     }
 
@@ -57,7 +59,7 @@ void parseFile(const std::string &file, std::vector<Frame> &logFrames)
         tk_it++;
         i       = std::stoi(*tk_it);      // i
         tk_it++;
-        dist    = std::stof(*tk_it);      // dist
+        dist = 0.001 * std::stof(*tk_it); // dist
         tk_it++;
         tk_it++;                          // rssi
         tk_it++;                          // gyroh
@@ -74,6 +76,19 @@ void parseFile(const std::string &file, std::vector<Frame> &logFrames)
         currentPT.scan_pt.x = dist * std::cos(currentPT.angle);
         currentPT.scan_pt.y = dist * std::sin(currentPT.angle);
         currentPT.ray = dist;
+
+        /// Filter input data
+        float
+                minAngle = fs["laserscanfilter"]["minAngle"],
+                maxAngle = fs["laserscanfilter"]["maxAngle"],
+                minDistance = fs["laserscanfilter"]["minDistance"],
+                maxDistance = fs["laserscanfilter"]["maxDistance"];
+
+        if (currentPT.angle < minAngle || currentPT.angle > maxAngle ||
+            dist < minDistance || dist > maxDistance)
+        {
+            continue;
+        }
 
         if (frameID > lastFrame)
         {
