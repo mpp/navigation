@@ -9,7 +9,7 @@
 
 #include <boost/tokenizer.hpp>
 
-#include "../utils/commontypes.h"
+#include "../data_types/commontypes.h"
 
 namespace nav
 {

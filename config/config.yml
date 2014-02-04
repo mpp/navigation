@@ -15,4 +15,30 @@ laserscanfilter:
     minAngle: -2.35619449 # minimum angle of scan (deg) - 0° is in front of the scanner
     maxAngle: 2.35619449 # maximum angle of scan (deg) - 0° is in front of the scanner
 
+## GUI parameters
+gui:
+    wHeight: 700
+    wWidth: 1000
+    wFactor: 40 # 1 real meter = factor pixels in the GUI
+    wFontScale: 0.5
+
+    center: [ 500, 350 ]
+
+    poleIDOffset: [ 0.0, -7.0 ]
+    poleRadius: 6
+    lineThickness: 3
+
+    compassWHXY: [ 100, 100, 100, 300 ]
+    compassRadius: 80
+
+    colors: # BGR not RGB
+        red: [ 50,50,255 ]
+        black: [ 0,0,0 ]
+        white: [ 255,255,255 ]
+        darkGray: [ 80,80,80 ]
+        lightGray: [ 190,190,190 ]
+        blue: [ 255,50,50 ]
+        green: [ 50,255,50 ]
+        yellow: [ 50,255,255]   
+
 ## Here can go other parameters

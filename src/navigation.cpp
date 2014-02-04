@@ -33,7 +33,7 @@ int main(int argc, char **argv)
     cv::FileStorage
         fs;
 
-    fs.open(settfilename, cv::FileStorage::READ);
+    fs.open(settfilename, cv::FileStorage::WRITE);
 
     if (!fs.isOpened())
     {
@@ -41,11 +41,14 @@ int main(int argc, char **argv)
         exit(-2);
     }
 
+    fs << "scalar" << cv::Scalar(10,15,20);
+
+    /*
     std::vector<nav::Frame> framesVector;
 
     nav::parseFile(fs, framesVector);
 
-    std::cout << framesVector.size() << std::endl;
+    std::cout << framesVector.size() << std::endl;*/
 }
 
 void help()

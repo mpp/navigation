@@ -1,6 +1,9 @@
 #ifndef COMMONTYPES_H
 #define COMMONTYPES_H
 
+#include "pole.h"
+#include "line.h"
+
 namespace nav {
 
 typedef struct PT_ {
