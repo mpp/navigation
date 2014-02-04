@@ -28,23 +28,14 @@
  */
 
 #include "line.h"
-#include <limits>
 
 namespace vineyard {
-
-int Line::progressive_id_ = 0;
-
+/*
 Line::Line(std::shared_ptr<const std::vector<std::shared_ptr<Pole> > > polesVector)
 {
     poles_vector_ = std::move(polesVector);
     a_ = 0.0;
     d_ = 0.0;
-
-    /// TODO: convert to vector form
-
-    id_ = progressive_id_;
-
-    progressive_id_ = progressive_id_ + 1;
 
     pole_list_ = std::shared_ptr< std::list<PoleIndex> >(new std::list<PoleIndex>());
 }
@@ -57,24 +48,17 @@ Line::Line(std::shared_ptr<const std::vector<std::shared_ptr<Pole> > > polesVect
 
     /// TODO: convert to vector form
 
-    id_ = progressive_id_;
-
-    progressive_id_ = progressive_id_ + 1;
-
     pole_list_ = std::shared_ptr< std::list<PoleIndex> >(new std::list<PoleIndex>());
 }
-
-Line::Line(std::shared_ptr<const std::vector<std::shared_ptr<Pole> > > polesVector, const cv::Vec4d &lineParams)
+*/
+Line::Line(std::shared_ptr<const std::vector<std::shared_ptr<Pole> > > &polesVector,
+           const cv::Vec4d &lineParams)
 {
-    poles_vector_ = std::move(polesVector);
+    poles_vector_ = polesVector;
 
     setLineParameters(lineParams);
 
-    id_ = progressive_id_;
-
-    progressive_id_ = progressive_id_ + 1;
-
-    pole_list_ = std::shared_ptr< std::list<PoleIndex> >(new std::list<PoleIndex>());
+    pole_list_.reset();
 }
 
 void Line::setLineParameters(const cv::Vec4d &lineParameters)
@@ -106,7 +90,7 @@ Line::~Line()
 
 void Line::insert(PoleIndex idx)
 {
-    pole_list_->push_back(idx);
+    insert_tail(idx);
 }
 
 void Line::insert_head(PoleIndex idx)
@@ -119,7 +103,7 @@ void Line::insert_tail(PoleIndex idx)
     pole_list_->push_back(idx);
 }
 
-const std::shared_ptr<std::list<PoleIndex> > Line::getPolesList() const
+const std::shared_ptr< const std::list<PoleIndex> > & Line::getPolesList() const
 {
     return pole_list_;
 }

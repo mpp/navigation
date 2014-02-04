@@ -33,6 +33,7 @@
 
 #include <list>
 #include <memory>
+#include <limits>
 
 #include "pole.h"
 
@@ -60,44 +61,58 @@ class Line
 
 public:
 
-    /** I need methods to:
-     *  - get the head and tail
-     *  - get start and stop point for line drawing
-     *  + track the line
-     *      - line ID
-     *      - how to track a line??
-     *      - track for ghost poles...
-     *  - set/get the line color
-     */
+    /*
+    Line(std::shared_ptr<const std::vector< Pole::Ptr > > polesVector);
 
-    Line(std::shared_ptr<const std::vector<std::shared_ptr<Pole> > > polesVector);
-
-    Line(std::shared_ptr<const std::vector<std::shared_ptr<Pole> > > polesVector,
+    Line(std::shared_ptr<const std::vector< Pole::Ptr > > polesVector,
          double a,
          double d);
+    */
 
-    Line(std::shared_ptr<const std::vector<std::shared_ptr<Pole> > > polesVector,
+    /*!
+     * \brief Line setup a line with a vector of poles and its parameters
+     * \param polesVector
+     * \param lineParams
+     */
+    Line(std::shared_ptr<const std::vector< Pole::Ptr > > &polesVector,
          const cv::Vec4d &lineParams);
 
     ~Line();
 
     void setLineParameters(const cv::Vec4d &lineParameters);
 
+    /*!
+     * \brief insert assign a pole to the line
+     * \param idx
+     */
     void insert(PoleIndex idx);
 
+    /*!
+     * \brief insert_head assign a pole to the line and insert its index in the head of the list
+     * \param idx
+     */
     void insert_head(PoleIndex idx);
 
+    /*!
+     * \brief insert_tail assign a pole to the line and insert its index in the tail of the list
+     * \param idx
+     */
     void insert_tail(PoleIndex idx);
-
-    int ID() const { return id_; }
-
-    cv::Scalar getColor() const { return color_; }
 
     double a() const { return a_; }
     double d() const { return d_; }
 
-    const std::shared_ptr< std::list<PoleIndex> > getPolesList() const;
+    /*!
+     * \brief getPolesList return a ref to the indices of the poles assigned to the line
+     * \return
+     */
+    const std::shared_ptr< const std::list<PoleIndex> > & getPolesList() const;
 
+    /*!
+     * \brief computeLineExtremes compute the extremes of a segment of the line for drawing purposes
+     * \param a start point
+     * \param b end point
+     */
     void computeLineExtremes(cv::Point2d &a, cv::Point2d &b) const;
 
 // private methods
@@ -106,26 +121,18 @@ private:
 // private data
 private:
 
-    int
-        id_;
-
     std::shared_ptr< std::list<PoleIndex> >
-        pole_list_;             //< indices of the pole array the head and the tail of the list are the extremes of the line
+        pole_list_;             //!< indices of the pole array the head and the tail of the list are the extremes of the line
 
-    std::shared_ptr< const std::vector< std::shared_ptr<Pole> > >
-        poles_vector_;        //< a reference to the poles vector
+    std::shared_ptr< const std::vector< Pole::Ptr > >
+        poles_vector_;          //!< a reference to the poles vector
 
     double
-        a_,                     //< the slope of the line -> y = ax + d
-        d_;                     //< the distance from the origin -> y = ax + d
+        a_,                     //!< the slope of the line -> y = ax + d
+        d_;                     //!< the distance from the origin -> y = ax + d
 
     cv::Vec4d
-        line_parameters_;       // (vx, vy, x0, y0) where: (vx, vy) is a vector colinear to the line and (x0, y0) is a point on the line
-
-    //DEBUG VARIABLES
-    cv::Scalar color_;
-
-    static int progressive_id_;
+        line_parameters_;       //!< (vx, vy, x0, y0) where: (vx, vy) is a vector colinear to the line and (x0, y0) is a point on the line
 };
 
 } // namespace vineyard

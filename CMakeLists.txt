@@ -18,6 +18,7 @@ add_executable (
     src/sensors_drivers/logparser.cpp
     src/utils/gui.cpp
     src/data_types/pole.cpp
+    src/data_types/line.cpp
 )
 
 target_link_libraries (
