@@ -3,6 +3,8 @@
 
 #include <opencv2/opencv.hpp>
 
+#include "../data_types/commontypes.h"
+
 namespace nav
 {
 
@@ -10,32 +12,40 @@ class gui
 {
 public:
     gui(const cv::FileStorage &fs);
-/*
+
     void drawHUD(cv::Mat &image);
 
+    void drawCompass(cv::Mat &image,
+                     const float angle);
+
     void drawPolePoints(cv::Mat &image,
-                        const std::shared_ptr<vineyard::Pole> &pole);
+                        vineyard::Pole::ConstPtr &pole);
 
     void drawPoleID(cv::Mat &image,
-                    const std::shared_ptr<vineyard::Pole> &pole);
+                    vineyard::Pole::ConstPtr &pole);
 
     void drawPole(cv::Mat &image,
-                  const std::shared_ptr<vineyard::Pole> &pole,
+                  vineyard::Pole::ConstPtr &pole,
                   const cv::Scalar &color);
 
     void drawPoles(cv::Mat &image,
-                   const std::vector< std::shared_ptr<vineyard::Pole> > &polesVector);
+                   const std::vector< vineyard::Pole::Ptr > &polesVector);
 
     void drawLine(cv::Mat &image,
-                  const std::vector< std::shared_ptr<vineyard::Pole> > &polesVector,
+                  const std::vector< vineyard::Pole::Ptr > &polesVector,
                   const vineyard::Line &line);
-    */
+
 private:
 
     int width_;
     int height_;
     int factor_; // 1mt = factor pixels
     double font_scale_;
+
+    float min_radius_;
+    float max_radius_;
+    float min_angle_;
+    float max_angle_;
 
     cv::Point2i pole_id_offset_;
     int radius_;

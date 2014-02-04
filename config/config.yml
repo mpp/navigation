@@ -11,7 +11,7 @@ logparser:
 #  It filters too near and too far points
 laserscanfilter:
     minDistance: 0.2 # minimum distance threshold (mt)
-    maxDistance: 10.0 # minimum distance threshold (mt)
+    maxDistance: 7.0 # minimum distance threshold (mt)
     minAngle: -2.35619449 # minimum angle of scan (deg) - 0° is in front of the scanner
     maxAngle: 2.35619449 # maximum angle of scan (deg) - 0° is in front of the scanner
 
@@ -22,23 +22,23 @@ gui:
     wFactor: 40 # 1 real meter = factor pixels in the GUI
     wFontScale: 0.5
 
-    center: [ 500, 350 ]
+    center: [ 615, 350 ]
 
     poleIDOffset: [ 0.0, -7.0 ]
     poleRadius: 6
     lineThickness: 3
 
-    compassWHXY: [ 100, 100, 100, 300 ]
-    compassRadius: 80
+    compassWHXY: [ 100, 100, 115, 315 ]
+    compassRadius: 45
 
     colors: # BGR not RGB
-        red: [ 50,50,255 ]
-        black: [ 0,0,0 ]
-        white: [ 255,255,255 ]
-        darkGray: [ 80,80,80 ]
-        lightGray: [ 190,190,190 ]
-        blue: [ 255,50,50 ]
-        green: [ 50,255,50 ]
-        yellow: [ 50,255,255]   
+        red: [ 50,50,255,0 ]
+        black: [ 0,0,0,0 ]
+        white: [ 255,255,255,0 ]
+        darkGray: [ 80,80,80,0 ]
+        lightGray: [ 190,190,190,0 ]
+        blue: [ 255,50,50,0 ]
+        green: [ 50,255,50,0 ]
+        yellow: [ 50,255,255,0 ]   
 
 ## Here can go other parameters

@@ -3,6 +3,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "sensors_drivers/logparser.h"
+#include "utils/gui.h"
 
 void help();
 
@@ -33,7 +34,7 @@ int main(int argc, char **argv)
     cv::FileStorage
         fs;
 
-    fs.open(settfilename, cv::FileStorage::WRITE);
+    fs.open(settfilename, cv::FileStorage::READ);
 
     if (!fs.isOpened())
     {
@@ -41,7 +42,23 @@ int main(int argc, char **argv)
         exit(-2);
     }
 
-    fs << "scalar" << cv::Scalar(10,15,20);
+    nav::gui GUI(fs);
+
+    cv::Mat image;
+    cv::namedWindow("navigation gui");
+
+    char c = 0;
+    float angle = 0;
+    float angleIncrement = M_PI / 8;
+
+    while (c != 'q')
+    {
+        GUI.drawHUD(image);
+        GUI.drawCompass(image, angle);
+        angle += angleIncrement;
+        cv::imshow("navigation gui", image);
+        c = cv::waitKey(33);
+    }
 
     /*
     std::vector<nav::Frame> framesVector;
