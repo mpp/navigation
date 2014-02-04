@@ -18,14 +18,17 @@ public:
     void drawCompass(cv::Mat &image,
                      const float angle);
 
+    void drawPoints(cv::Mat &image,
+                    const std::vector<cv::Point2f> &pointsVector);
+
     void drawPolePoints(cv::Mat &image,
-                        vineyard::Pole::ConstPtr &pole);
+                        const vineyard::Pole::Ptr &pole);
 
     void drawPoleID(cv::Mat &image,
-                    vineyard::Pole::ConstPtr &pole);
+                    const vineyard::Pole::Ptr &pole);
 
     void drawPole(cv::Mat &image,
-                  vineyard::Pole::ConstPtr &pole,
+                  const vineyard::Pole::Ptr &pole,
                   const cv::Scalar &color);
 
     void drawPoles(cv::Mat &image,
@@ -33,7 +36,7 @@ public:
 
     void drawLine(cv::Mat &image,
                   const std::vector< vineyard::Pole::Ptr > &polesVector,
-                  const vineyard::Line &line);
+                  const vineyard::Line::Ptr &line);
 
 private:
 
@@ -47,10 +50,10 @@ private:
     float min_angle_;
     float max_angle_;
 
-    cv::Point2i pole_id_offset_;
+    cv::Point2f pole_id_offset_;
     int radius_;
     int thickness_;
-    cv::Point2i center_;
+    cv::Point2f center_;
 
     int compass_width_;
     int compass_height_;

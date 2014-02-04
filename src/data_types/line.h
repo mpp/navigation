@@ -41,7 +41,7 @@ namespace vineyard {
 
 typedef struct LineParams_
 {
-    double
+    float
         vx,             // (vx,vy) is a vector parallel to the line
         vy,
         x0,             // (x0,y0) is a point on the line
@@ -50,7 +50,7 @@ typedef struct LineParams_
     int
         head_pole_ID;   // The ID of the head pole of the line
 
-    double
+    float
         head_pole_x,    // Position of the head pole
         head_pole_y;
 
@@ -61,25 +61,20 @@ class Line
 
 public:
 
-    /*
-    Line(std::shared_ptr<const std::vector< Pole::Ptr > > polesVector);
-
-    Line(std::shared_ptr<const std::vector< Pole::Ptr > > polesVector,
-         double a,
-         double d);
-    */
+    typedef std::shared_ptr<Line> Ptr;
+    typedef std::shared_ptr<Line const> ConstPtr;
 
     /*!
      * \brief Line setup a line with a vector of poles and its parameters
      * \param polesVector
      * \param lineParams
      */
-    Line(std::shared_ptr<const std::vector< Pole::Ptr > > &polesVector,
-         const cv::Vec4d &lineParams);
+    Line(const std::shared_ptr< const std::vector< Pole::Ptr > > &polesVector,
+         const LineParams &lineParams);
 
     ~Line();
 
-    void setLineParameters(const cv::Vec4d &lineParameters);
+    void setLineParameters(const LineParams &lineParameters);
 
     /*!
      * \brief insert assign a pole to the line
@@ -99,21 +94,18 @@ public:
      */
     void insert_tail(PoleIndex idx);
 
-    double a() const { return a_; }
-    double d() const { return d_; }
-
     /*!
      * \brief getPolesList return a ref to the indices of the poles assigned to the line
      * \return
      */
-    const std::shared_ptr< const std::list<PoleIndex> > & getPolesList() const;
+    const std::list<PoleIndex> &getPolesList() const;
 
     /*!
      * \brief computeLineExtremes compute the extremes of a segment of the line for drawing purposes
      * \param a start point
      * \param b end point
      */
-    void computeLineExtremes(cv::Point2d &a, cv::Point2d &b) const;
+    void computeLineExtremes(cv::Point2f &a, cv::Point2f &b) const;
 
 // private methods
 private:
@@ -121,18 +113,14 @@ private:
 // private data
 private:
 
-    std::shared_ptr< std::list<PoleIndex> >
+    std::list<PoleIndex>
         pole_list_;             //!< indices of the pole array the head and the tail of the list are the extremes of the line
 
     std::shared_ptr< const std::vector< Pole::Ptr > >
         poles_vector_;          //!< a reference to the poles vector
 
-    double
-        a_,                     //!< the slope of the line -> y = ax + d
-        d_;                     //!< the distance from the origin -> y = ax + d
-
-    cv::Vec4d
-        line_parameters_;       //!< (vx, vy, x0, y0) where: (vx, vy) is a vector colinear to the line and (x0, y0) is a point on the line
+    LineParams
+        line_parameters_;
 };
 
 } // namespace vineyard

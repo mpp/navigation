@@ -64,9 +64,9 @@ void gui::drawHUD(cv::Mat &image)
     cv::circle(image, center_, min_radius_ * factor_, black_);
     cv::circle(image, center_, max_radius_ * factor_, black_);
 
-    cv::Point2i pt1(floor(std::cos(max_angle_) * max_radius_ * factor_),
+    cv::Point2f pt1(floor(std::cos(max_angle_) * max_radius_ * factor_),
                     floor(std::sin(max_angle_) * max_radius_ * factor_));
-    cv::Point2i pt2(floor(std::cos(min_angle_) * max_radius_ * factor_),
+    cv::Point2f pt2(floor(std::cos(min_angle_) * max_radius_ * factor_),
                     floor(std::sin(min_angle_) * max_radius_ * factor_));
 
     cv::line(image, center_, center_ + pt1, black_);
@@ -93,7 +93,7 @@ void gui::drawHUD(cv::Mat &image)
 
 void gui::drawCompass(cv::Mat &image, const float angle)
 {
-    const float normalizedAngle = angle + M_PI/2;
+    const float normalizedAngle = angle + M_PI;
     cv::Point2i compassCenter(compass_x_ + compass_width_/2, compass_y_ + compass_height_/2);
 
     cv::Point2i north(std::cos(normalizedAngle)*compass_radius_,
@@ -120,6 +120,92 @@ void gui::drawCompass(cv::Mat &image, const float angle)
 
     cv::fillPoly(image, pptUpper, npt, 1, red_);
     cv::fillPoly(image, pptLower, npt, 1, white_);
+}
+
+void gui::drawPoints(cv::Mat &image,
+                     const std::vector<cv::Point2f> &pointsVector)
+{
+    for (auto p : pointsVector)
+    {
+        cv::line(image, center_+factor_*p, center_+factor_*p+cv::Point2f(1,1), black_);
+    }
+}
+
+void gui::drawPoleID(cv::Mat &image,
+                     const vineyard::Pole::Ptr &pole)
+{
+    cv::putText(image, std::to_string(pole->ID()),
+                (pole->getCentroid() * factor_) + center_ + pole_id_offset_, cv::FONT_HERSHEY_SIMPLEX,
+                font_scale_, darkGray_);
+}
+
+void gui::drawPolePoints(cv::Mat &image,
+                         const vineyard::Pole::Ptr &pole)
+{
+    for (auto p : (*pole->getPointsVector()))
+    {
+        cv::line(image, center_+factor_*p, center_+factor_*p+cv::Point2f(1,1), black_);
+    }
+}
+void gui::drawPole(cv::Mat &image,
+                   const vineyard::Pole::Ptr &pole,
+                   const cv::Scalar &color)
+{
+    cv::circle(image, (pole->getCentroid() * factor_) + center_,
+               radius_, color, thickness_);
+}
+
+void gui::drawPoles(cv::Mat &image,
+                    const std::vector<vineyard::Pole::Ptr> &polesVector)
+{
+    for (auto p : polesVector)
+    {
+        //std::cout << p->getStatus() << std::endl;
+        if (p->getStatus() == vineyard::Pole::LOST_TRACK)
+        {
+            drawPole(image, p, red_);
+            drawPoleID(image, p);
+        }
+        else if (p->getStatus() == vineyard::Pole::VALID)
+        {
+            drawPolePoints(image, p);
+            drawPole(image, p, darkGray_);
+            drawPoleID(image, p);
+        }
+    }
+}
+
+void gui::drawLine(cv::Mat &image,
+                   const std::vector<vineyard::Pole::Ptr> &polesVector,
+                   const vineyard::Line::Ptr &line)
+{
+    int k = 0;
+    const std::list<vineyard::PoleIndex> list = line->getPolesList();
+    int size = list.size();
+    for (vineyard::PoleIndex IDX : list)
+    {
+        if (0 == k)
+        {
+            drawPole(image, polesVector[IDX], blue_);
+            drawPoleID(image, polesVector[IDX]);
+        }
+        else if (k == (size - 1))
+        {
+            drawPole(image, polesVector[IDX], yellow_);
+            drawPoleID(image, polesVector[IDX]);
+        }
+        else
+        {
+            drawPole(image, polesVector[IDX], green_);
+            drawPoleID(image, polesVector[IDX]);
+        }
+
+        k++;
+    }
+
+    cv::Point2f pta,ptb;
+    line->computeLineExtremes(pta,ptb);
+    cv::line(image, pta*factor_+center_, ptb*factor_+center_, red_, 2);
 }
 
 }

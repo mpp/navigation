@@ -74,7 +74,7 @@ void parseFile(const cv::FileStorage &fs,
         // 540 measures from -135° to + 135°
         currentPT.angle = (accuracy * i - 135.0) * toRadian;
         currentPT.scan_pt.x = dist * std::cos(currentPT.angle);
-        currentPT.scan_pt.y = dist * std::sin(currentPT.angle);
+        currentPT.scan_pt.y = (-1) * dist * std::sin(currentPT.angle);
         currentPT.ray = dist;
 
         /// Filter input data
@@ -105,7 +105,7 @@ void parseFile(const cv::FileStorage &fs,
             currentFrame.epoch = epoch;
             currentFrame.frameID = frameID;
             currentFrame.oper_t = oper_t;
-            currentFrame.bearing = beardeg;
+            currentFrame.bearing = (beardeg-180)*toRadian;
             // Remember to clear the points vector
             currentFrame.points.clear();
         }

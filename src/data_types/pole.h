@@ -78,6 +78,11 @@ public:
     ~Pole();
 
     /*!
+     * \brief requestID request a unique ID for the pole
+     */
+    void requestID();
+
+    /*!
      * \brief getCentroid
      * \return the centroid
      */
@@ -116,7 +121,7 @@ public:
      * \brief updatePointsVector
      * \param newPointsVector
      */
-    void updatePointsVector(const std::shared_ptr< std::vector<cv::Point2f> > &newPointsVector);
+    void updatePointsVector(const std::shared_ptr< const std::vector<cv::Point2f> > &newPointsVector);
 
 // Private methods
 private:

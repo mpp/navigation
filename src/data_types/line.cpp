@@ -30,62 +30,25 @@
 #include "line.h"
 
 namespace vineyard {
-/*
-Line::Line(std::shared_ptr<const std::vector<std::shared_ptr<Pole> > > polesVector)
-{
-    poles_vector_ = std::move(polesVector);
-    a_ = 0.0;
-    d_ = 0.0;
 
-    pole_list_ = std::shared_ptr< std::list<PoleIndex> >(new std::list<PoleIndex>());
-}
-
-Line::Line(std::shared_ptr<const std::vector<std::shared_ptr<Pole> > > polesVector, double a, double d)
-{
-    poles_vector_ = std::move(polesVector);
-    a_ = a;
-    d_ = d;
-
-    /// TODO: convert to vector form
-
-    pole_list_ = std::shared_ptr< std::list<PoleIndex> >(new std::list<PoleIndex>());
-}
-*/
-Line::Line(std::shared_ptr<const std::vector<std::shared_ptr<Pole> > > &polesVector,
-           const cv::Vec4d &lineParams)
+Line::Line(const std::shared_ptr< const std::vector<std::shared_ptr<Pole> > > &polesVector,
+           const LineParams &lineParams)
 {
     poles_vector_ = polesVector;
 
     setLineParameters(lineParams);
 
-    pole_list_.reset();
+    pole_list_.clear();
 }
 
-void Line::setLineParameters(const cv::Vec4d &lineParameters)
+void Line::setLineParameters(const LineParams &lineParameters)
 {
     line_parameters_ = lineParameters;
-
-    // lineParams = (vx, vy, x0, y0)
-    // vector form to y = ax + d form:
-    // a = vy/vx
-    // d = y0 - a*x0
-    /// check by 0 division
-    if (0.0 == lineParameters[0])
-    {
-        a_ = std::numeric_limits<double>::max();
-    }
-    else
-    {
-        a_ = lineParameters[1]/lineParameters[0];
-    }
-    d_ = lineParameters[3] - a_ * lineParameters[2];
 }
 
 Line::~Line()
 {
     poles_vector_.reset();
-    //poles_vector_.~__shared_ptr();
-    pole_list_.~__shared_ptr();
 }
 
 void Line::insert(PoleIndex idx)
@@ -95,32 +58,36 @@ void Line::insert(PoleIndex idx)
 
 void Line::insert_head(PoleIndex idx)
 {
-    pole_list_->push_front(idx);
+    pole_list_.push_front(idx);
 }
 
 void Line::insert_tail(PoleIndex idx)
 {
-    pole_list_->push_back(idx);
+    pole_list_.push_back(idx);
 }
 
-const std::shared_ptr< const std::list<PoleIndex> > & Line::getPolesList() const
+const std::list<PoleIndex> &Line::getPolesList() const
 {
     return pole_list_;
 }
 
-void Line::computeLineExtremes(cv::Point2d &a, cv::Point2d &b) const
+void Line::computeLineExtremes(cv::Point2f &a, cv::Point2f &b) const
 {
-    double
+    float
+            k1 = 0.0,
+            k2 = 0.0,
             x = 0.0,
             y = 0.0,
             dx = 0.0,
             dy = 0.0;
-    cv::Point2d polePt;
+    cv::Point2f polePt;
 
     // head point
-    polePt = (*poles_vector_)[pole_list_->front()]->getCentroid();
-    y = a_ * polePt.x + d_;
-    x = (polePt.y - d_) / a_;
+    polePt = (*poles_vector_)[pole_list_.front()]->getCentroid();
+    k1 = (polePt.x - line_parameters_.x0) / line_parameters_.vx;
+    k2 = (polePt.y - line_parameters_.y0) / line_parameters_.vy;
+    y = line_parameters_.y0 + k1*line_parameters_.vy;
+    x = line_parameters_.x0 + k2*line_parameters_.vx;
 
     dx = std::abs(polePt.x - x);
     dy = std::abs(polePt.y - y);
@@ -138,9 +105,11 @@ void Line::computeLineExtremes(cv::Point2d &a, cv::Point2d &b) const
     }
 
     // tail point
-    polePt = (*poles_vector_)[pole_list_->back()]->getCentroid();
-    y = a_ * polePt.x + d_;
-    x = (polePt.y - d_) / a_;
+    polePt = (*poles_vector_)[pole_list_.back()]->getCentroid();
+    k1 = (polePt.x - line_parameters_.x0) / line_parameters_.vx;
+    k2 = (polePt.y - line_parameters_.y0) / line_parameters_.vy;
+    y = line_parameters_.y0 + k1*line_parameters_.vy;
+    x = line_parameters_.x0 + k2*line_parameters_.vx;
 
     dx = std::abs(polePt.x - x);
     dy = std::abs(polePt.y - y);

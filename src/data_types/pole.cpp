@@ -41,8 +41,10 @@ Pole::Pole(const std::shared_ptr< const std::vector<cv::Point2f> > &pointsVector
     initializeAvailableIDs();
 
     status_ = VALID;
-    id_ = available_ids_.top();
-    available_ids_.pop();
+    id_ = -1;// = available_ids_.top();
+    //available_ids_.pop();
+
+    //std::cout << available_ids_.top() << std::endl;
 
     freshness_ = 5;
 
@@ -94,7 +96,16 @@ Pole::Pole(const int id, const float x, const float y)
 
 Pole::~Pole()
 {
-    available_ids_.push(id_);
+    if (id_ != -1)
+    {
+        available_ids_.push(id_);
+    }
+}
+
+void Pole::requestID()
+{
+    id_ = available_ids_.top();
+    available_ids_.pop();
 }
 
 cv::Point2f Pole::getCentroid() const
@@ -170,7 +181,7 @@ void Pole::updateCentroid(const cv::Point2f &newCentroid)
     centroid_ = cv::Point2f(estimated.at<float>(0),estimated.at<float>(1));
 }
 
-void Pole::updatePointsVector(const std::shared_ptr< std::vector<cv::Point2f> > &newPointsVector)
+void Pole::updatePointsVector(const std::shared_ptr< const std::vector<cv::Point2f> > &newPointsVector)
 {
     points_vector_.reset();
     points_vector_ = newPointsVector;

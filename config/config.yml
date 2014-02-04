@@ -11,9 +11,23 @@ logparser:
 #  It filters too near and too far points
 laserscanfilter:
     minDistance: 0.2 # minimum distance threshold (mt)
-    maxDistance: 7.0 # minimum distance threshold (mt)
+    maxDistance: 6.0 # minimum distance threshold (mt)
     minAngle: -2.35619449 # minimum angle of scan (deg) - 0° is in front of the scanner
     maxAngle: 2.35619449 # maximum angle of scan (deg) - 0° is in front of the scanner
+
+## Parameters for the poles extractor class
+poleExtractor:
+    clusterTolerance: 0.12 # the maximum distance between two points of the same pole
+    minClusterSize: 2 # the minimum number of point to define a pole
+    maxClusterSize: 20 # the maximum number of point that can rely to a pole
+    maximumPolesDistance: 0.2 # the maximum distance between 2 poles candidate to be considered the same pole, for tracking purposes
+    branchingFactor: 10 # for the FLANN Hierarchical clustering
+    iterations: 100 # for the FLANN Hierarchical clustering
+
+## Parameters for the line extractor class
+lineExtractor:
+    maxPoleDistance: 2.0 # the maximum distance (mt) between two poles that are assigned to the same line
+
 
 ## GUI parameters
 gui:
