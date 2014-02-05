@@ -1,5 +1,8 @@
 #include "ekftrajectoryerrorestimator.h"
 
+namespace nav
+{
+
 EKFTrajectoryErrorEstimator::EKFTrajectoryErrorEstimator()
 {
     // 3 dinamic parameters: y, theta, phi
@@ -11,6 +14,28 @@ EKFTrajectoryErrorEstimator::EKFTrajectoryErrorEstimator()
     ekf_measurement_noise_ = cv::Mat::zeros(3, 3, CV_32F);
 
     /// TODO: set the initial statePost, how??
+}
+
+void EKFTrajectoryErrorEstimator::setupControlMatrix(const float linearVelocity,
+                                                     const float angularVelocity,
+                                                     cv::Mat &control)
+{
+    control = cv::Mat::zeros(2,1,CV_32F);
+    control.at<float>(0) = linearVelocity;
+    control.at<float>(1) = angularVelocity;
+}
+
+void EKFTrajectoryErrorEstimator::setupMeasurementMatrix(const vineyard::LineParams &lineParams,
+                                                         const float compassValue,
+                                                         cv::Mat &measurement)
+{
+    ///0
+    ///|>====D TODO: use the code in the lab PC to complete this matrix
+    ///0
+    measurement = cv::Mat::zeros(3,1,CV_32F);
+    measurement.at<float>(0) = 0.0;
+    measurement.at<float>(1) = 0.0;
+    measurement.at<float>(2) = compassValue;
 }
 
 void EKFTrajectoryErrorEstimator::computeGJacobian()
@@ -47,3 +72,5 @@ void EKFTrajectoryErrorEstimator::estimate(const cv::Mat &control,
     predicted.dtheta = ekf_estimator_.statePre.at<float>(1);
     predicted.dphi = ekf_estimator_.statePre.at<float>(2);
 }
+
+} // namespace nav

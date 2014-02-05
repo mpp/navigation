@@ -1,5 +1,8 @@
 #include "linefollowermp.h"
 
+namespace nav
+{
+
 LineFollowerMP::LineFollowerMP(const cv::FileStorage &fs,
                                const float desiredX,
                                const float desiredTheta)
@@ -39,3 +42,5 @@ float LineFollowerMP::computeAngularVelocity(const float v,
 
     return -1 * k_theta * errorTheta - k_x * errorX * v * std::sin(errorTheta) / errorTheta;
 }
+
+} // namespace nav

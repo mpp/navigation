@@ -3,6 +3,11 @@
 
 #include <opencv2/opencv.hpp>
 
+#include "../data_types/line.h"
+
+namespace nav
+{
+
 typedef struct SystemState_
 {
     float dy;
@@ -14,6 +19,14 @@ class EKFTrajectoryErrorEstimator
 {
 public:
     EKFTrajectoryErrorEstimator();
+
+    void setupMeasurementMatrix(const vineyard::LineParams &lineParams,
+                                const float compassValue,
+                                cv::Mat &measurement);
+
+    void setupControlMatrix(const float linearVelocity,
+                            const float angularVelocity,
+                            cv::Mat &control);
 
     void estimate(const cv::Mat &control,
                   const cv::Mat &measurement,
@@ -38,5 +51,7 @@ private:
 
     float tx_;
 };
+
+} // namespace nav
 
 #endif // EKFTRAJECTORYERRORESTIMATOR_H

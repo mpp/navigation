@@ -3,6 +3,9 @@
 
 #include <opencv2/opencv.hpp>
 
+namespace nav
+{
+
 class LineFollowerMP
 {
 public:
@@ -50,5 +53,7 @@ private:
     const float kXLimitMultiplier;  //!< right phisical limit of the error_x_ variable
 
 };
+
+} // namespace nav
 
 #endif // LINEFOLLOWERMP_H
