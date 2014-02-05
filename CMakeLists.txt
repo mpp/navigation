@@ -27,6 +27,7 @@ add_executable(
     src/data_manipulation/poleextractor.cpp
     src/data_manipulation/lineextractor.cpp
     src/data_manipulation/ekftrajectoryerrorestimator.cpp
+    src/motion_planners/linefollowermp.cpp
 )
 
 target_link_libraries(

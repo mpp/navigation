@@ -85,9 +85,7 @@ int main(int argc, char **argv)
         vineyard::Pole::Ptr nearest;
         pe.findNearestPole(*polesVector, false, nearest);
 
-
         std::vector<cv::Point2f> ptVector;
-        std::vector< std::vector<int> > idxVector;
         for (nav::PT pt : f.points)
         {
             ptVector.push_back(pt.scan_pt);

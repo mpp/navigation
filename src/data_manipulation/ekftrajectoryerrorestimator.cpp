@@ -10,6 +10,7 @@ EKFTrajectoryErrorEstimator::EKFTrajectoryErrorEstimator()
     ekf_process_noise_ = cv::Mat::zeros(3, 3, CV_32F);
     ekf_measurement_noise_ = cv::Mat::zeros(3, 3, CV_32F);
 
+    /// TODO: set the initial statePost, how??
 }
 
 void EKFTrajectoryErrorEstimator::computeGJacobian()

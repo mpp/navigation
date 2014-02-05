@@ -1,35 +1,85 @@
 %YAML:1.0
 
-# Configuration file for the navigation package
+###############################################################################
+##                                                                           ##
+## Configuration file for the navigation package                             ##
+##                                                                           ##
+###############################################################################
 
+##---------------------------------------------------------------------------##
 ## Path and filename of the log file
-#  If empty the sw uses real sensors
+##---------------------------------------------------------------------------##
 logparser:
-    file: "/home/mpp/DODICH/Registrazioni/01051511_ls_sick.csv"
+    #  If empty the sw uses real sensors
+    file: "/home/mpp/DODICH/Registrazioni/01051511_ls_sick.csv" 
 
+##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
-#  It filters too near and too far points
+##---------------------------------------------------------------------------##
 laserscanfilter:
-    minDistance: 0.2 # minimum distance threshold (mt)
-    maxDistance: 6.0 # minimum distance threshold (mt)
-    minAngle: -2.35619449 # minimum angle of scan (deg) - 0° is in front of the scanner
-    maxAngle: 2.35619449 # maximum angle of scan (deg) - 0° is in front of the scanner
+    # minimum distance threshold (mt)
+    minDistance: 0.2 
 
+    # minimum distance threshold (mt)
+    maxDistance: 6.0 
+
+    # minimum angle of scan (deg) - 0° is in front of the scanner
+    minAngle: -2.35619449 
+
+    # maximum angle of scan (deg) - 0° is in front of the scanner
+    maxAngle: 2.35619449 
+
+##---------------------------------------------------------------------------##
 ## Parameters for the poles extractor class
+##---------------------------------------------------------------------------##
 poleExtractor:
-    clusterTolerance: 0.12 # the maximum distance between two points of the same pole
-    minClusterSize: 2 # the minimum number of point to define a pole
-    maxClusterSize: 20 # the maximum number of point that can rely to a pole
-    maximumPolesDistance: 0.2 # the maximum distance between 2 poles candidate to be considered the same pole, for tracking purposes
-    branchingFactor: 10 # for the FLANN Hierarchical clustering
-    iterations: 100 # for the FLANN Hierarchical clustering
+    # the maximum distance between two points of the same pole
+    clusterTolerance: 0.12 
 
+    # the minimum number of point to define a pole
+    minClusterSize: 2 
+
+    # the maximum number of point that can rely to a pole
+    maxClusterSize: 20 
+
+    # the maximum distance between 2 poles candidates to be considered the same pole, for tracking purposes
+    maximumPolesDistance: 0.2 
+
+    # for the FLANN Hierarchical clustering (deprecated)
+    branchingFactor: 10 
+
+    # for the FLANN Hierarchical clustering (deprecated)
+    iterations: 100 
+
+##---------------------------------------------------------------------------##
 ## Parameters for the line extractor class
+##---------------------------------------------------------------------------##
 lineExtractor:
-    maxPoleDistance: 2.0 # the maximum distance (mt) between two poles that are assigned to the same line
+    # the maximum distance (mt) between two poles that are assigned to the same line
+    maxPoleDistance: 2.0 
 
+##---------------------------------------------------------------------------##
+## Parameters for the navigation planners
+##---------------------------------------------------------------------------##
+globalMP:
+    # maximum linear velocity m/s
+    maxV: 2.0 
 
+    # maximum angular velocity rad/s
+    maxOmega: 2.0
+
+# Following the indication of: http://www.inaut.unsj.edu.ar/Files/Ca1277_03.pdf 
+lineFollower: 
+    ## !!BEWARE!! that changes in maxV and maxOmega involve changes in theese variables
+    a1: 2 
+    a2: 2 
+    k1: 1 # k1 + k2*u_max <= omega_max, nel caso di (u_max, omega_max) = (2, 2)
+    k2: 0.5 
+    limitMultiplier: 4
+
+##---------------------------------------------------------------------------##
 ## GUI parameters
+##---------------------------------------------------------------------------##
 gui:
     wHeight: 700
     wWidth: 1000
