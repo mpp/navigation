@@ -46,6 +46,11 @@ void Line::setLineParameters(const LineParams &lineParameters)
     line_parameters_ = lineParameters;
 }
 
+LineParams Line::getLineParameters()
+{
+    return line_parameters_;
+}
+
 Line::~Line()
 {
     poles_vector_.reset();

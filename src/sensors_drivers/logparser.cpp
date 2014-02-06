@@ -105,7 +105,7 @@ void parseFile(const cv::FileStorage &fs,
             currentFrame.epoch = epoch;
             currentFrame.frameID = frameID;
             currentFrame.oper_t = oper_t;
-            currentFrame.bearing = (beardeg-180)*toRadian;
+            currentFrame.bearing = beardeg*toRadian;
             // Remember to clear the points vector
             currentFrame.points.clear();
         }

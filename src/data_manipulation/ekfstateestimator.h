@@ -1,5 +1,5 @@
-#ifndef EKFTRAJECTORYERRORESTIMATOR_H
-#define EKFTRAJECTORYERRORESTIMATOR_H
+#ifndef EKFSTATEESTIMATOR_H
+#define EKFSTATEESTIMATOR_H
 
 #include <opencv2/opencv.hpp>
 
@@ -15,10 +15,10 @@ typedef struct SystemState_
     float dphi;
 } SystemState;
 
-class EKFTrajectoryErrorEstimator
+class EKFStateEstimator
 {
 public:
-    EKFTrajectoryErrorEstimator();
+    EKFStateEstimator();
 
     void setupMeasurementMatrix(const vineyard::LineParams &lineParams,
                                 const float compassValue,
@@ -37,9 +37,15 @@ private:
 
     void computeHJacobian();
 
+    void g();
+
+    void h(const cv::Mat &measurement);
+
     cv::KalmanFilter ekf_estimator_;
 
     cv::Mat ekf_control_;
+
+    cv::Mat ekf_state_post_;
 
     cv::Mat ekf_process_noise_;
 
@@ -54,4 +60,4 @@ private:
 
 } // namespace nav
 
-#endif // EKFTRAJECTORYERRORESTIMATOR_H
+#endif // EKFSTATEESTIMATOR_H

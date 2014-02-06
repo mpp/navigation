@@ -4,6 +4,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "../data_types/commontypes.h"
+#include "../data_manipulation/ekfstateestimator.h"
 
 namespace nav
 {
@@ -13,7 +14,7 @@ class gui
 public:
     gui(const cv::FileStorage &fs);
 
-    void drawHUD(cv::Mat &image);
+    void drawHUD(cv::Mat &image, const int frameNumber);
 
     void drawCompass(cv::Mat &image,
                      const float angle);
@@ -38,6 +39,8 @@ public:
                   const std::vector< vineyard::Pole::Ptr > &polesVector,
                   const vineyard::Line::Ptr &line);
 
+    void drawState(cv::Mat &image,
+                   const nav::SystemState &state);
 private:
 
     int width_;

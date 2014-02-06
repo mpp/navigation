@@ -76,6 +76,8 @@ public:
 
     void setLineParameters(const LineParams &lineParameters);
 
+    LineParams getLineParameters();
+
     /*!
      * \brief insert assign a pole to the line
      * \param idx

@@ -56,7 +56,7 @@ gui::gui(const cv::FileStorage &fs)
     compass_radius_ = fs["gui"]["compassRadius"];
 }
 
-void gui::drawHUD(cv::Mat &image)
+void gui::drawHUD(cv::Mat &image, const int frameNumber)
 {
     /// Draw the scan area
     image = cv::Mat(cv::Size(width_, height_), CV_8UC3, lightGray_);
@@ -89,11 +89,14 @@ void gui::drawHUD(cv::Mat &image)
     cv::putText(image, "E", cv::Point2i(compass_x_ + compass_width_ + 1, compass_y_ + compass_height_/2 + 5),
                 cv::FONT_HERSHEY_SIMPLEX, font_scale_, yellow_);
 
+    cv::putText(image, "FRAME: " + std::to_string(frameNumber), cv::Point2i(5,15),
+                cv::FONT_HERSHEY_SIMPLEX, font_scale_, yellow_);
+
 }
 
 void gui::drawCompass(cv::Mat &image, const float angle)
 {
-    const float normalizedAngle = angle + M_PI;
+    const float normalizedAngle = angle;
     cv::Point2i compassCenter(compass_x_ + compass_width_/2, compass_y_ + compass_height_/2);
 
     cv::Point2i north(std::cos(normalizedAngle)*compass_radius_,
@@ -206,6 +209,22 @@ void gui::drawLine(cv::Mat &image,
     cv::Point2f pta,ptb;
     line->computeLineExtremes(pta,ptb);
     cv::line(image, pta*factor_+center_, ptb*factor_+center_, red_, 2);
+}
+
+void gui::drawState(cv::Mat &image,
+                    const SystemState &state)
+{
+    // draw the distance with a circle
+    cv::circle(image, center_, state.dy * factor_, blue_);
+
+    // draw the angle with a line
+    cv::Point2f ptA(0,0), ptB;
+    float d = state.dy * factor_;
+    ptB.x = d * std::cos(state.dtheta);
+    ptB.y = d * std::sin(state.dtheta);
+    cv::line(image, center_ + ptA, center_ + ptB, blue_);
+    cv::line(image, center_ + ptA, center_ + cv::Point2f(d,0), black_);
+
 }
 
 }

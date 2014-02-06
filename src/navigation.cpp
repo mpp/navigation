@@ -5,10 +5,23 @@
 #include "data_manipulation/poleextractor.h"
 #include "data_manipulation/lineextractor.h"
 
+#include "data_manipulation/ekfstateestimator.h"
+
 #include "sensors_drivers/logparser.h"
 #include "utils/gui.h"
 
 void help();
+
+const double DBL_EPS_COMP = 1 - DBL_EPSILON; // DBL_EPSILON is defined in <limits.h>.
+inline double RandU() {
+    return DBL_EPSILON + ((double) rand()/RAND_MAX);
+}
+inline double RandN2(double mu, double sigma) {
+    return mu + (rand()%2 ? -1.0 : 1.0)*sigma*pow(-log(DBL_EPS_COMP*RandU()), 0.5);
+}
+inline double RandN() {
+    return RandN2(0, 0.1);
+}
 
 int main(int argc, char **argv)
 {
@@ -63,6 +76,9 @@ int main(int argc, char **argv)
     vineyard::PoleExtractor pe(fs);
     vineyard::LineExtractor le(fs);
     std::shared_ptr< std::vector< vineyard::Pole::Ptr > > polesVector;
+    vineyard::LineParams lineParams;
+
+    nav::EKFStateEstimator ekf;
 
     for (nav::Frame f : framesVector)
     {
@@ -91,7 +107,7 @@ int main(int argc, char **argv)
             ptVector.push_back(pt.scan_pt);
         }
 
-        GUI.drawHUD(image);
+        GUI.drawHUD(image, f.frameID);
         GUI.drawCompass(image, f.bearing);
         GUI.drawPoints(image, ptVector);
         GUI.drawPoles(image, *polesVector);
@@ -101,8 +117,22 @@ int main(int argc, char **argv)
             vineyard::Line::Ptr line;
             le.extractLineFromNearestPole(polesVector, nearest, line);
             GUI.drawLine(image, *polesVector, line);
+            lineParams = line->getLineParameters();
         }
 
+        if (f.frameID >= 500)
+        {
+            /// Update the EKF
+            cv::Mat measurement, control;
+            nav::SystemState state;
+            ekf.setupMeasurementMatrix(lineParams, f.bearing, measurement);
+            ekf.setupControlMatrix(RandN2(1,0.2),RandN2(0,0.2),control);
+            ekf.estimate(control, measurement, state);
+
+            GUI.drawState(image, state);
+
+            std::cout << state.dy << " - " << state.dtheta << " - " << state.dphi << std::endl;
+        }
         cv::imshow("navigation gui", image);
         c = cv::waitKey(33);
     }
