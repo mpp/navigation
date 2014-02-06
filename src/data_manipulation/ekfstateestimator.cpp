@@ -90,8 +90,8 @@ void EKFStateEstimator::computeGJacobian()
             *(cv::Mat_<float>(3,3) << 1, dt_ * v * std::cos(theta), 0,
                                       0, 1, 0,
                                       0, 0, 1);
-    std::cout << "Transition matrix: " << std::endl;
-    std::cout << ekf_estimator_.transitionMatrix << std::endl;
+//    std::cout << "Transition matrix: " << std::endl;
+//    std::cout << ekf_estimator_.transitionMatrix << std::endl;
 }
 
 void EKFStateEstimator::computeHJacobian()
