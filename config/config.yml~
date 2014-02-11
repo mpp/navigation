@@ -11,7 +11,7 @@
 ##---------------------------------------------------------------------------##
 logparser:
     #  If empty the sw uses real sensors
-    file: "/home/mpp/DODICH/Registrazioni/01051511_ls_sick.csv" 
+    file: "/home/dodich/DODICH/Registrazioni/01051511_ls_sick.csv" 
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
@@ -40,7 +40,7 @@ poleExtractor:
     minClusterSize: 2 
 
     # the maximum number of point that can rely to a pole
-    maxClusterSize: 20 
+    maxClusterSize: 100 
 
     # the maximum distance between 2 poles candidates to be considered the same pole, for tracking purposes
     maximumPolesDistance: 0.2 
@@ -49,14 +49,16 @@ poleExtractor:
     branchingFactor: 10 
 
     # for the FLANN Hierarchical clustering (deprecated)
-    iterations: 100 
+    iterations: 60 
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the line extractor class
 ##---------------------------------------------------------------------------##
 lineExtractor:
     # the maximum distance (mt) between two poles that are assigned to the same line
-    maxPoleDistance: 2.0 
+    maxPoleDistance: 1.6 
+    reps: 0.0001 # Sufficient accuracy for the radius (distance between the coordinate origin and the line).
+    aeps: 0.0001 # Sufficient accuracy for the angle. 0.01 would be a good default value for reps and aeps.
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the navigation planners
@@ -70,12 +72,16 @@ globalMP:
 
 # Following the indication of: http://www.inaut.unsj.edu.ar/Files/Ca1277_03.pdf 
 lineFollower: 
+    desiredDistance: 2.0 # desired distance from the line
+    desiredTheta: 0.0 # desired angle divergence from the line
+
     ## !!BEWARE!! that changes in maxV and maxOmega involve changes in theese variables
     a1: 2 
     a2: 2 
-    k1: 1 // k1 + k2*u_max <= omega_max, nel caso di (u_max, omega_max) = (2, 2)
+    k1: 1 # k1 + k2*u_max <= omega_max, nel caso di (u_max, omega_max) = (2, 2)
     k2: 0.5 
     limitMultiplier: 4
+    
 
 ##---------------------------------------------------------------------------##
 ## GUI parameters

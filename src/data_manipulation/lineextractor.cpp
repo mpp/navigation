@@ -33,8 +33,10 @@ namespace vineyard
 {
 
 LineExtractor::LineExtractor(const cv::FileStorage &fs)
+    : maximum_pole_distance_(fs["lineExtractor"]["maxPoleDistance"]),
+      reps_(fs["lineExtractor"]["reps"]),
+      aeps_(fs["lineExtractor"]["aeps"])
 {
-    maximum_pole_distance_ = fs["lineExtractor"]["maxPoleDistance"];
 }
 
 void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std::vector< Pole::Ptr > > polesVector,
@@ -131,8 +133,51 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
 
     // Fit the line and set the parameters in the line object
     cv::Vec4f lineParamVec;
-    cv::fitLine(linePoints, lineParamVec, CV_DIST_FAIR, 0, 0.01, 0.01);
+    cv::fitLine(linePoints, lineParamVec, CV_DIST_HUBER, 0, reps_, aeps_);
 
+    /*
+    // Prepare data for RANSAC line fit
+    int N = linePoints.size();
+    float x[N],
+          y[N];
+
+    float param[2];
+    float maxError = 0.4f;
+
+    int niter = 500;
+
+    bool inliers[N];
+
+    int i = 0;
+    for (cv::Point2f p : linePoints)
+    {
+        x[i] = p.x;
+        y[i] = p.y;
+
+        i++;
+    }
+
+    // Call RANSAC
+
+    RANSAC_line(x, y, N, param, niter, maxError, inliers, true);
+
+    // Print Outliers
+    std::cout << "Outliers: ";
+    int l = 0;
+    for (auto idx : temp.getPolesList())
+    {
+        if (!inliers[l])
+        {
+            std::cout << (*polesVector)[idx]->ID() << " - ";
+        }
+        l++;
+    }
+    std::cout << std::endl;
+
+
+
+    paramToPointVect(param, lineParamVec);
+    */
 
     lineParam.head_pole_ID = currentNearestNeighbor->ID();
     lineParam.head_pole_x = currentNearestNeighbor->getCentroid().x;
@@ -146,217 +191,5 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
 
     line = std::make_shared<Line>(temp);
 }
-
-/*void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std::vector<std::shared_ptr<Pole> > > polesVector,
-                                               const std::shared_ptr<Pole> &nearest,
-                                               Line &line)
-{
-
-    // Initialize a list of poles' indices
-    PoleIndex
-            actualNearestNeighborIndex;
-    std::list<int>
-            indices(polesVector->size(), 0);
-
-    for (int i = 0; i < polesVector->size(); i++)
-    {
-        if ((*polesVector)[i]->ID() != nearest->ID())
-        {
-            indices.push_back(i);
-        }
-        else
-        {
-            actualNearestNeighborIndex = i;
-        }
-    }
-
-    // Initialize the line
-    line.insert_head(actualNearestNeighborIndex);
-
-    //std::cout << "Right line: " << nearest->ID();
-
-    // I need to extract only the forward line
-    // so I recursively search forward for the nearest neighbor the actual pole
-    std::shared_ptr<Pole>
-            actualNearestNeighbor = nearest;
-    cv::Point2d
-            actualCenter = actualNearestNeighbor->getCentroid();
-
-    // Initialize a vector of point for the line fitting algorithm
-    std::vector<cv::Point2f>
-            linePoints;
-    linePoints.push_back(actualCenter);
-    for (;;)
-    {
-        double minSDistance = std::numeric_limits<double>::max();
-        std::shared_ptr<Pole> newNearestNeighbor;
-        bool found = false;
-        for (auto i : indices)
-        {
-            // search for the forward nearest neighbor
-            if ((*polesVector)[i]->getCentroid().x > actualCenter.x)
-            {
-                double diff1 = actualCenter.x - (*polesVector)[i]->getCentroid().x;
-                double diff2 = actualCenter.y - (*polesVector)[i]->getCentroid().y;
-                double actualSDistance = diff1*diff1 + diff2*diff2;
-
-                if (actualSDistance < maximum_pole_distance_*maximum_pole_distance_)
-                {
-                    found = true;
-                    newNearestNeighbor = (*polesVector)[i];
-                    actualNearestNeighborIndex = i;
-                    break;
-                }
-
-                if (actualSDistance < minSDistance && actualSDistance < maximum_pole_distance_*maximum_pole_distance_)
-                {
-                    found = true;
-                    minSDistance = actualSDistance;
-                    newNearestNeighbor = (*polesVector)[i];
-                    actualNearestNeighborIndex = i;
-                }
-            }
-        }
-        if (found == true)
-        {
-            actualNearestNeighbor = newNearestNeighbor;
-            actualCenter = actualNearestNeighbor->getCentroid();
-            found = false;
-            // remove this pole from the list
-            indices.remove(actualNearestNeighborIndex);
-            // update the line with the new pole
-            line.insert_head(actualNearestNeighborIndex);
-            // push the pole's center in the vector of line's points
-            linePoints.push_back(actualCenter);
-
-            //std::cout << " - " << actualNearestNeighbor->ID();
-        }
-        else
-        {
-            break;
-        }
-    }
-    //std::cout << std::endl;
-
-    // Fit the line and set the parameters in the line object
-    /// TODO: mind the trunkation from double to float...
-    cv::Vec4f lineParams;
-    cv::fitLine(linePoints, lineParams, CV_DIST_FAIR, 0, 0.01, 0.01);
-    line.setLineParameters(lineParams);
-
-    //std::cout << lineParams << std::endl;
-}*/
-
-/*void LineExtractor::extractLines(const std::vector< std::shared_ptr<Pole> > &polesVector,
-                                 std::vector<std::shared_ptr<Line> > &linesVector)
-{
-    /// Setup the poles's cloud O(n)
-    pcl::PointCloud<pcl::PointXYZ>::Ptr
-            polesCloud(new pcl::PointCloud<pcl::PointXYZ>());
-
-    for (auto p : polesVector)
-    {
-        pcl::PointXYZ
-                pt(p->getCentroid().x, p->getCentroid().y, 0.0);
-
-        polesCloud->push_back(pt);
-    }
-    polesCloud->width = (int) polesCloud->points.size ();
-    polesCloud->height = 1;
-
-    /// Clusterize it O(nlogn)
-    pcl::EuclideanClusterExtraction<pcl::PointXYZ>
-            ec;
-    std::vector<pcl::PointIndices>
-            clusterIndices;
-
-    ec.setClusterTolerance (maximum_pole_distance_);
-    ec.setMinClusterSize (min_cluster_size_);
-    ec.setMaxClusterSize (max_cluster_size_);
-    ec.setSearchMethod (search_tree_);
-    ec.setInputCloud (polesCloud);
-    ec.extract (clusterIndices);
-
-    for (auto indices : clusterIndices)
-    {
-        std::cout << "Cluster: ";
-        for (auto i : indices.indices)
-        {
-            std::cout << polesVector[i]->ID() << " - ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << std::endl;
-
-    /// Check lines inliers and outliers with RANSAC O(T(C1+C2n)) T:iterations Cx:constant
-    // input: cloud and indices of cluster's poles,
-    // output: indices of line's poles (inliers)
-    std::vector<pcl::PointIndices>
-            linesIndices;
-    std::vector<double>
-            aVector,
-            dVector;
-
-    /// TODO: remove magic numbers -> move to a config file
-    ransacLine2D(polesCloud,
-                 clusterIndices,
-                 0.1, 50, 0.8, 3,
-                 linesIndices,
-                 aVector,
-                 dVector);
-
-    /// For each line extract the head and the tail.
-    //  Then add the whole vector in the output list
-
-
-    // Debug check:
-    if (linesIndices.size() != aVector.size() || aVector.size() != dVector.size())
-    {
-        std::cerr << "Bad vectors sizes!!" << std::endl;
-    }
-
-    for (int i = 0; i < linesIndices.size(); i++)
-    {
-        // search for the extremes
-        int
-                headIndex = -1,     // the index of the head in the line
-                tailIndex = -1;     // the index of the tail in the line
-
-        pcl::PointXYZ
-                headPoint(-kLargeNumber, -kLargeNumber, 0.0),          // head and tail
-                tailPoint(kLargeNumber, kLargeNumber, 0.0);
-
-        // Initialize the line
-        std::shared_ptr<Line> l(new Line(std::shared_ptr<const std::vector<std::shared_ptr<Pole> > >(
-                   std::make_shared<const std::vector<std::shared_ptr<Pole> > >(polesVector)), aVector[i], dVector[i]));
-
-        for (auto IDX : linesIndices[i].indices)
-        {
-            // If on top/right put on head
-            if (polesCloud->points[IDX].x > headPoint.x || polesCloud->points[IDX].y > headPoint.y)
-            {
-                headIndex = IDX;
-                headPoint = polesCloud->points[IDX];
-                l->insert_head(IDX);
-            }
-            // If on bottom/left put on tail
-            else if (polesCloud->points[IDX].x < tailPoint.x || polesCloud->points[IDX].y < tailPoint.y)
-            {
-                tailIndex = IDX;
-                tailPoint = polesCloud->points[IDX];
-                l->insert_tail(IDX);
-            }
-            // Else put as second element
-            else
-            {
-                l->insert(IDX);
-            }
-        }
-
-        linesVector.push_back(l);
-    }
-
-    //std::cout << "DEBUG" << std::endl;
-}*/
 
 } // namespace vineyard

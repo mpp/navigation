@@ -227,4 +227,11 @@ void gui::drawState(cv::Mat &image,
 
 }
 
+void gui::printGiorgiosValue(cv::Mat &image,
+                             const float value)
+{
+    cv::putText(image, "GIORGIO'S VALUE: " + std::to_string(value), cv::Point2i(5,35),
+                cv::FONT_HERSHEY_SIMPLEX, font_scale_, yellow_);
+}
+
 }

@@ -41,6 +41,9 @@ public:
 
     void drawState(cv::Mat &image,
                    const nav::SystemState &state);
+
+    void printGiorgiosValue(cv::Mat &image,
+                            const float value);
 private:
 
     int width_;

@@ -35,6 +35,7 @@
 #include <memory>
 
 #include "../data_types/line.h"
+#include "../utils/ransac.h"
 
 namespace vineyard
 {
@@ -67,9 +68,14 @@ private:
     double
         maximum_pole_distance_;
     unsigned int
-        min_cluster_size_;          //< minimum number of poles in a line cluster
+        min_cluster_size_;          //!< minimum number of poles in a line cluster
     unsigned int
-        max_cluster_size_;          //< maximum number of poles in a line cluster
+        max_cluster_size_;          //!< maximum number of poles in a line cluster
+
+    double
+        reps_,                       //!< Sufficient accuracy for the radius (distance between the coordinate origin and the line).
+        aeps_;                       //!< Sufficient accuracy for the angle. 0.01 would be a good default value for reps and aeps.
+
 };
 
 } // namespace vineyard

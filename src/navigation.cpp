@@ -2,12 +2,15 @@
 
 #include <opencv2/opencv.hpp>
 
+#include "sensors_drivers/logparser.h"
+
 #include "data_manipulation/poleextractor.h"
 #include "data_manipulation/lineextractor.h"
 
 #include "data_manipulation/ekfstateestimator.h"
 
-#include "sensors_drivers/logparser.h"
+#include "motion_planners/linefollowermp.h"
+
 #include "utils/gui.h"
 
 void help();
@@ -80,6 +83,8 @@ int main(int argc, char **argv)
 
     nav::EKFStateEstimator ekf;
 
+    vineyard::Line::Ptr line;
+
     for (nav::Frame f : framesVector)
     {
         pcl::PointCloud<pcl::PointXYZ>::Ptr
@@ -112,12 +117,16 @@ int main(int argc, char **argv)
         GUI.drawPoints(image, ptVector);
         GUI.drawPoles(image, *polesVector);
 
-        if (nearest)
+        if (nearest && f.frameID >= 400)
         {
-            vineyard::Line::Ptr line;
             le.extractLineFromNearestPole(polesVector, nearest, line);
             GUI.drawLine(image, *polesVector, line);
             lineParams = line->getLineParameters();
+        }
+
+        if (f.frameID == 1619)
+        {
+            std::cout << "HALT" << std::endl;
         }
 
         if (f.frameID >= 500)
@@ -131,7 +140,34 @@ int main(int argc, char **argv)
 
             GUI.drawState(image, state);
 
-            std::cout << state.dy << " - " << state.dtheta << " - " << state.dphi << std::endl;
+            //std::cout << state.dy << " - " << state.dtheta << " - " << state.dphi << std::endl;
+
+            // Motion planners for line following
+            float desiredX = fs["lineFollower"]["desiredDistance"];
+            float desiredTheta = fs["lineFollower"]["desiredTheta"];
+            nav::LineFollowerMP lineFollower(fs,
+                                             desiredX,
+                                             desiredTheta);
+
+            float errorX = desiredX - state.dy;
+            float errorTheta = desiredTheta - state.dtheta;
+            float linear = lineFollower.computeLinearVelocity(errorX, errorTheta);
+            float angular = lineFollower.computeAngularVelocity(linear, errorX, errorTheta);
+
+            float giorgios_value = 0.0f;
+            if (angular == 0.0 || lineFollower.kMaxOmega == 0.0)
+            {
+                giorgios_value = 0.0;
+            }
+            else
+            {
+                // la prima divisione è per estrarre il segno di angular
+                // la seconda parte è la proporzione "max_omega : 25 = angular : value"
+                giorgios_value = (std::abs(angular) / angular) * (std::abs(angular) * 25 / lineFollower.kMaxOmega);
+            }
+
+            GUI.printGiorgiosValue(image, giorgios_value);
+
         }
         cv::imshow("navigation gui", image);
         c = cv::waitKey(33);

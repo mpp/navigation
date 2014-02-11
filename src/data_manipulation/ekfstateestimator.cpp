@@ -10,8 +10,12 @@ EKFStateEstimator::EKFStateEstimator()
     // 2 control parameters: v, omega
     ekf_estimator_.init(3,3,2);
 
-    ekf_process_noise_ = cv::Mat::eye(3, 3, CV_32F);
     ekf_process_noise_ = cv::Mat::zeros(3, 3, CV_32F);
+    ekf_process_noise_.at<float>(0,0) = 0.1;
+    ekf_process_noise_.at<float>(0,1) = 0.05;
+    ekf_process_noise_.at<float>(1,1) = 0.2;
+    ekf_process_noise_.at<float>(1,0) = 0.05;
+    ekf_process_noise_.at<float>(2,2) = 0.1;
     ekf_measurement_noise_ = cv::Mat::zeros(3, 3, CV_32F);
 
     tx_ = 1;

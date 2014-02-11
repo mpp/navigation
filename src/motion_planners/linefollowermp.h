@@ -48,6 +48,8 @@ private:
         k1_,
         k2_;
 
+// public constants
+public:
     const float kMaxV;
     const float kMaxOmega;
     const float kXLimitMultiplier;  //!< right phisical limit of the error_x_ variable
