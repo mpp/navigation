@@ -39,6 +39,9 @@ public:
                   const std::vector< vineyard::Pole::Ptr > &polesVector,
                   const vineyard::Line::Ptr &line);
 
+    void drawLastLine(cv::Mat &image,
+                      const vineyard::Line::Ptr &line);
+
     void drawState(cv::Mat &image,
                    const nav::SystemState &state);
 
@@ -67,11 +70,14 @@ private:
     int compass_y_;
     int compass_radius_;
 
+    float line_tollerance_;
+
     cv::Scalar red_;
     cv::Scalar darkGray_;
     cv::Scalar white_;
     cv::Scalar black_;
     cv::Scalar green_;
+    cv::Scalar lightGreen_;
     cv::Scalar lightGray_;
     cv::Scalar blue_;
     cv::Scalar yellow_;

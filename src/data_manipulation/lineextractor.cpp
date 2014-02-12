@@ -35,17 +35,39 @@ namespace vineyard
 LineExtractor::LineExtractor(const cv::FileStorage &fs)
     : maximum_pole_distance_(fs["lineExtractor"]["maxPoleDistance"]),
       reps_(fs["lineExtractor"]["reps"]),
-      aeps_(fs["lineExtractor"]["aeps"])
+      aeps_(fs["lineExtractor"]["aeps"]),
+      max_distance_from_last_line_(fs["lineExtractor"]["maxDistanceFromLastLine"])
 {
+}
+
+float LineExtractor::distanceLinePole(const LineParams &lineParam,
+                                      const Point2f &poleCenter)
+{
+    float k1,k2,x,y,dx,dy;
+    k1 = (poleCenter.x - lineParam.x0) / lineParam.vx;
+    k2 = (poleCenter.y - lineParam.y0) / lineParam.vy;
+    y = lineParam.y0 + k1*lineParam.vy;
+    x = lineParam.x0 + k2*lineParam.vx;
+
+    dx = std::abs(poleCenter.x - x);
+    dy = std::abs(poleCenter.y - y);
+    return (dx < dy) ? dx : dy;
 }
 
 void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std::vector< Pole::Ptr > > polesVector,
                                                const Pole::Ptr &nearest,
-                                               Line::Ptr &line)
+                                               Line::Ptr &line,
+                                               const bool useLastLine)
 {
     LineParams lineParam;
     // Initialize a temporary Line container
     Line temp(polesVector, lineParam);
+
+    // If I already have a line I use it as a reference to accept or refuse poles
+    if (useLastLine)
+    {
+        lineParam = line->getLineParameters();
+    }
 
     // Initialize a list of poles' indices
     PoleIndex
@@ -79,11 +101,14 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
             linePoints;
     linePoints.push_back(currentCenter);
 
+    std::cout << std::endl;
+
     for (;;)
     {
         float minSDistance = std::numeric_limits<float>::max();
         Pole::Ptr newNearestNeighbor;
         bool found = false;
+        float nearestLineDistance = 0.0f;
         for (auto i : indices)
         {
             // search for the forward nearest neighbor
@@ -93,25 +118,31 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
                 float diff2 = currentCenter.y - (*polesVector)[i]->getCentroid().y;
                 float currentSDistance = diff1*diff1 + diff2*diff2;
 
-                /*if (currentSDistance < maximum_pole_distance_*maximum_pole_distance_)
-                {
-                    found = true;
-                    newNearestNeighbor = (*polesVector)[i];
-                    currentNearestNeighborIndex = i;
-                    break;
-                }*/
-
                 if (currentSDistance < minSDistance && currentSDistance < maximum_pole_distance_*maximum_pole_distance_)
                 {
-                    found = true;
-                    minSDistance = currentSDistance;
-                    newNearestNeighbor = (*polesVector)[i];
-                    currentNearestNeighborIndex = i;
+                    // If I already have a line I use it as a reference to accept or refuse poles
+                    float d = 0.0f;
+                    if (useLastLine)
+                    {
+                        // Compute the distance from the pole to the line
+                        d = distanceLinePole(lineParam, (*polesVector)[i]->getCentroid());
+                        std::cout << (*polesVector)[i]->ID() << ":" << d << " - ";
+                    }
+                    // If there is not a line, d will be 0.0f
+                    if (d <= max_distance_from_last_line_)
+                    {
+                        found = true;
+                        nearestLineDistance = d;
+                        minSDistance = currentSDistance;
+                        newNearestNeighbor = (*polesVector)[i];
+                        currentNearestNeighborIndex = i;
+                    }
                 }
             }
         }
         if (found == true)
         {
+            std::cout << "Pole in line:" << (*polesVector)[currentNearestNeighborIndex]->ID() << std::endl;
             currentNearestNeighbor = newNearestNeighbor;
             currentCenter = currentNearestNeighbor->getCentroid();
             found = false;
@@ -127,9 +158,11 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
         }
         else
         {
+            std::cout << std::endl;
             break;
         }
     }
+
 
     // Fit the line and set the parameters in the line object
     cv::Vec4f lineParamVec;

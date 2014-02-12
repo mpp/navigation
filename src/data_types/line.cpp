@@ -132,4 +132,58 @@ void Line::computeLineExtremes(cv::Point2f &a, cv::Point2f &b) const
     }
 }
 
+void Line::computeLineExtremes2(cv::Point2f &a, cv::Point2f &b) const
+{
+    float
+            k1 = 0.0,
+            k2 = 0.0,
+            x = 0.0,
+            y = 0.0,
+            dx = 0.0,
+            dy = 0.0;
+    cv::Point2f polePt(-7,0);
+
+    k1 = (polePt.x - line_parameters_.x0) / line_parameters_.vx;
+    k2 = (polePt.y - line_parameters_.y0) / line_parameters_.vy;
+    y = line_parameters_.y0 + k1*line_parameters_.vy;
+    x = line_parameters_.x0 + k2*line_parameters_.vx;
+
+    dx = std::abs(polePt.x - x);
+    dy = std::abs(polePt.y - y);
+
+    // project the point in x and in y on the line, take the nearer
+    if (dx < dy)
+    {
+        a.x = x;
+        a.y = polePt.y;
+    }
+    else
+    {
+        a.x = polePt.x;
+        a.y = y;
+    }
+
+    // tail point
+    polePt = cv::Point2f(7,0);
+    k1 = (polePt.x - line_parameters_.x0) / line_parameters_.vx;
+    k2 = (polePt.y - line_parameters_.y0) / line_parameters_.vy;
+    y = line_parameters_.y0 + k1*line_parameters_.vy;
+    x = line_parameters_.x0 + k2*line_parameters_.vx;
+
+    dx = std::abs(polePt.x - x);
+    dy = std::abs(polePt.y - y);
+
+    // project the point in x and in y on the line, take the nearer
+    if (dx < dy)
+    {
+        b.x = x;
+        b.y = polePt.y;
+    }
+    else
+    {
+        b.x = polePt.x;
+        b.y = y;
+    }
+}
+
 } // namespace vineyard

@@ -32,11 +32,14 @@ gui::gui(const cv::FileStorage &fs)
     center_.x = center[0];
     center_.y = center[1];
 
+    line_tollerance_ = fs["lineExtractor"]["maxDistanceFromLastLine"];
+
     red_        = read(fs["gui"]["colors"]["red"]);
     darkGray_   = read(fs["gui"]["colors"]["darkGray"]);
     white_      = read(fs["gui"]["colors"]["white"]);
     black_      = read(fs["gui"]["colors"]["black"]);
     green_      = read(fs["gui"]["colors"]["green"]);
+    lightGreen_  = read(fs["gui"]["colors"]["lightGreen"]);
     lightGray_  = read(fs["gui"]["colors"]["lightGray"]);
     blue_       = read(fs["gui"]["colors"]["blue"]);
     yellow_     = read(fs["gui"]["colors"]["yellow"]);
@@ -209,6 +212,15 @@ void gui::drawLine(cv::Mat &image,
     cv::Point2f pta,ptb;
     line->computeLineExtremes(pta,ptb);
     cv::line(image, pta*factor_+center_, ptb*factor_+center_, red_, 2);
+}
+
+
+void gui::drawLastLine(cv::Mat &image,
+                       const vineyard::Line::Ptr &line)
+{
+    cv::Point2f pta,ptb;
+    line->computeLineExtremes2(pta,ptb);
+    cv::line(image, pta*factor_+center_, ptb*factor_+center_, lightGreen_, factor_*line_tollerance_);
 }
 
 void gui::drawState(cv::Mat &image,

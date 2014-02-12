@@ -57,16 +57,22 @@ public:
      */
     void extractLineFromNearestPole(const std::shared_ptr< const std::vector< Pole::Ptr > > polesVector,
                                     const Pole::Ptr &nearest,
-                                    Line::Ptr &line);
+                                    Line::Ptr &line,
+                                    const bool useLastLine = false);
 
 // private methods
 private:
+
+    float distanceLinePole(const LineParams &lineParam,
+                           const cv::Point2f &poleCenter);
 
 // private data
 private:
 
     double
         maximum_pole_distance_;
+    float
+        max_distance_from_last_line_;
     unsigned int
         min_cluster_size_;          //!< minimum number of poles in a line cluster
     unsigned int

@@ -108,6 +108,7 @@ public:
      * \param b end point
      */
     void computeLineExtremes(cv::Point2f &a, cv::Point2f &b) const;
+    void computeLineExtremes2(cv::Point2f &a, cv::Point2f &b) const;
 
 // private methods
 private:

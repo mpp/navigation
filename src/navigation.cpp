@@ -114,12 +114,27 @@ int main(int argc, char **argv)
 
         GUI.drawHUD(image, f.frameID);
         GUI.drawCompass(image, f.bearing);
+
+        bool useLastLine = false;
+        if (line)
+        {
+            if (line->getPolesList().size() <= 2)
+            {
+                useLastLine = false;
+            }
+            else
+            {
+                //draw last line with tollerance
+                useLastLine = true;
+                GUI.drawLastLine(image, line);
+            }
+        }
         GUI.drawPoints(image, ptVector);
         GUI.drawPoles(image, *polesVector);
 
         if (nearest && f.frameID >= 400)
         {
-            le.extractLineFromNearestPole(polesVector, nearest, line);
+            le.extractLineFromNearestPole(polesVector, nearest, line, useLastLine);
             GUI.drawLine(image, *polesVector, line);
             lineParams = line->getLineParameters();
         }
@@ -170,7 +185,7 @@ int main(int argc, char **argv)
 
         }
         cv::imshow("navigation gui", image);
-        c = cv::waitKey(33);
+        c = cv::waitKey(15);
     }
 
 

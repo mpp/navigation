@@ -57,6 +57,7 @@ poleExtractor:
 lineExtractor:
     # the maximum distance (mt) between two poles that are assigned to the same line
     maxPoleDistance: 1.8 
+    maxDistanceFromLastLine: 0.6
     reps: 0.0001 # Sufficient accuracy for the radius (distance between the coordinate origin and the line).
     aeps: 0.0001 # Sufficient accuracy for the angle. 0.01 would be a good default value for reps and aeps.
 
@@ -108,7 +109,8 @@ gui:
         darkGray: [ 80,80,80,0 ]
         lightGray: [ 190,190,190,0 ]
         blue: [ 255,50,50,0 ]
-        green: [ 50,255,50,0 ]
+        green: [ 50,200,50,0 ]
+        lightGreen: [ 150,255,150,0 ]
         yellow: [ 50,255,255,0 ]   
 
 ## Here can go other parameters
