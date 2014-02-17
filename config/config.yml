@@ -10,15 +10,23 @@
 ## Path and filename of the log file
 ##---------------------------------------------------------------------------##
 logparser:
-    #  If empty the sw uses real sensors
-    file: "/home/dodich/DODICH/Registrazioni/01051511_ls_sick.csv" 
+    # Frame per second of the log playback
+    waitkey: 33
+    # If empty the sw uses real sensors
+    
+    # Caso 1 - fine filare
+#    file: /home/mpp/DODICH/Registrazioni/02161602_ls_sick.csv
+    # Caso 2 - filare a sinistra
+#   file: "/home/mpp/DODICH/Registrazioni/01051511_ls_sick.csv" 
+    # Caso 3 - rotazione a sinistra
+    file: /home/mpp/DODICH/Registrazioni/12011112_ls_sx_sick.csv
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
 ##---------------------------------------------------------------------------##
 laserscanfilter:
     # minimum distance threshold (mt)
-    minDistance: 0.2 
+    minDistance: 1.1 
 
     # minimum distance threshold (mt)
     maxDistance: 6.0 
@@ -60,6 +68,7 @@ lineExtractor:
     maxDistanceFromLastLine: 0.6
     reps: 0.0001 # Sufficient accuracy for the radius (distance between the coordinate origin and the line).
     aeps: 0.0001 # Sufficient accuracy for the angle. 0.01 would be a good default value for reps and aeps.
+    minLineSize: 4 # Minimum number of poles for a line
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the navigation planners

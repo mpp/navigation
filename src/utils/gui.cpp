@@ -227,7 +227,7 @@ void gui::drawState(cv::Mat &image,
                     const SystemState &state)
 {
     // draw the distance with a circle
-    cv::circle(image, center_, state.dy * factor_, blue_);
+    cv::circle(image, center_, std::abs(state.dy) * factor_, blue_);
 
     // draw the angle with a line
     cv::Point2f ptA(0,0), ptB;

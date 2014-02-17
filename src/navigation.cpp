@@ -66,6 +66,11 @@ int main(int argc, char **argv)
     cv::Mat image;
     cv::namedWindow("navigation gui");
 
+    int waitkey;
+    fs["logparser"]["waitkey"] >> waitkey;
+    int minLineSize;
+    fs["lineExtractor"]["minLineSize"] >> minLineSize;
+
     char c = 0;
     //float angle = 0;
     //float angleIncrement = M_PI / 8;
@@ -118,7 +123,7 @@ int main(int argc, char **argv)
         bool useLastLine = false;
         if (line)
         {
-            if (line->getPolesList().size() <= 2)
+            if (line->getPolesList().size() <= minLineSize)
             {
                 useLastLine = false;
             }
@@ -185,7 +190,7 @@ int main(int argc, char **argv)
 
         }
         cv::imshow("navigation gui", image);
-        c = cv::waitKey(15);
+        c = cv::waitKey(waitkey);
     }
 
 
