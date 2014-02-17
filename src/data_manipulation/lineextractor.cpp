@@ -59,6 +59,11 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
                                                Line::Ptr &line,
                                                const bool useLastLine)
 {
+    if (!nearest || !polesVector)
+    {
+        return;
+    }
+
     LineParams lineParam;
     // Initialize a temporary Line container
     Line temp(polesVector, lineParam);
@@ -102,6 +107,71 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
     linePoints.push_back(currentCenter);
 
     //std::cout << std::endl;
+
+    // Try to do the same for backward poles
+    for (;;)
+    {
+        float minSDistance = std::numeric_limits<float>::max();
+        Pole::Ptr newNearestNeighbor;
+        bool found = false;
+        float nearestLineDistance = 0.0f;
+        for (auto i : indices)
+        {
+            // search for the forward nearest neighbor
+            if ((*polesVector)[i]->getCentroid().x < currentCenter.x)
+            {
+                float diff1 = currentCenter.x - (*polesVector)[i]->getCentroid().x;
+                float diff2 = currentCenter.y - (*polesVector)[i]->getCentroid().y;
+                float currentSDistance = diff1*diff1 + diff2*diff2;
+
+                if (currentSDistance < minSDistance && currentSDistance < maximum_pole_distance_*maximum_pole_distance_)
+                {
+                    // If I already have a line I use it as a reference to accept or refuse poles
+                    float d = 0.0f;
+                    if (useLastLine)
+                    {
+                        // Compute the distance from the pole to the line
+                        d = distanceLinePole(lineParam, (*polesVector)[i]->getCentroid());
+                        //std::cout << (*polesVector)[i]->ID() << ":" << d << " - ";
+                    }
+                    // If there is not a line, d will be 0.0f
+                    if (d <= max_distance_from_last_line_)
+                    {
+                        found = true;
+                        nearestLineDistance = d;
+                        minSDistance = currentSDistance;
+                        newNearestNeighbor = (*polesVector)[i];
+                        currentNearestNeighborIndex = i;
+                    }
+                }
+            }
+        }
+        if (found == true)
+        {
+            //std::cout << "Pole in line:" << (*polesVector)[currentNearestNeighborIndex]->ID() << std::endl;
+            currentNearestNeighbor = newNearestNeighbor;
+            currentCenter = currentNearestNeighbor->getCentroid();
+            found = false;
+
+            // remove this pole from the list
+            indices.remove(currentNearestNeighborIndex);
+
+            // push the pole's center in the vector of line's points
+            linePoints.push_back(currentCenter);
+
+            // push the pole in the temporary container
+            temp.insert_head(currentNearestNeighborIndex);
+        }
+        else
+        {
+            //std::cout << std::endl;
+            break;
+        }
+    }
+
+
+    currentNearestNeighbor = nearest;
+    currentCenter = currentNearestNeighbor->getCentroid();
 
     for (;;)
     {
@@ -161,8 +231,8 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
             //std::cout << std::endl;
             break;
         }
-    }
 
+    }
 
     // Fit the line and set the parameters in the line object
     cv::Vec4f lineParamVec;

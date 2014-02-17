@@ -150,7 +150,7 @@ int main(int argc, char **argv)
             GUI.printOperation(image, "OTHER");
         }
 
-        if (nearest && f.frameID >= 400 && lineFollower)
+        if (nearest && /*f.frameID >= 400 && */lineFollower)
         {
             le.extractLineFromNearestPole(polesVector, nearest, line, useLastLine);
             GUI.drawLine(image, *polesVector, line);
