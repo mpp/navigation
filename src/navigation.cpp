@@ -70,6 +70,8 @@ int main(int argc, char **argv)
     fs["logparser"]["waitkey"] >> waitkey;
     int minLineSize;
     fs["lineExtractor"]["minLineSize"] >> minLineSize;
+    float minHeadPoleDistance;
+    fs["lineFollower"]["minHeadPoleDistance"] >> minHeadPoleDistance;
 
     char c = 0;
     //float angle = 0;
@@ -89,6 +91,8 @@ int main(int argc, char **argv)
     nav::EKFStateEstimator ekf;
 
     vineyard::Line::Ptr line;
+
+    bool lineFollower = true;
 
     for (nav::Frame f : framesVector)
     {
@@ -137,19 +141,36 @@ int main(int argc, char **argv)
         GUI.drawPoints(image, ptVector);
         GUI.drawPoles(image, *polesVector);
 
-        if (nearest && f.frameID >= 400)
+        if (lineFollower)
+        {
+            GUI.printOperation(image, "LINE FOLLOWER");
+        }
+        else
+        {
+            GUI.printOperation(image, "OTHER");
+        }
+
+        if (nearest && f.frameID >= 400 && lineFollower)
         {
             le.extractLineFromNearestPole(polesVector, nearest, line, useLastLine);
             GUI.drawLine(image, *polesVector, line);
             lineParams = line->getLineParameters();
+
+
+            // Check the head pole distance
+            float headPoleDistance = 0.0;
+            int headPoleIndex = line->getPolesList().front();
+            cv::Point2f headPoleCenter = (*polesVector)[headPoleIndex]->getCentroid();
+            headPoleDistance = cv::norm(headPoleCenter);
+
+            if (headPoleDistance < minHeadPoleDistance)
+            {
+                std::cout << "!!! - LINE END REACHED - !!!" << std::endl;
+                lineFollower = false;
+            }
         }
 
-        if (f.frameID == 1619)
-        {
-            std::cout << "HALT" << std::endl;
-        }
-
-        if (f.frameID >= 500)
+        if (f.frameID >= 500 && lineFollower)
         {
             /// Update the EKF
             cv::Mat measurement, control;

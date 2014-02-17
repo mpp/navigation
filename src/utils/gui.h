@@ -45,6 +45,9 @@ public:
     void drawState(cv::Mat &image,
                    const nav::SystemState &state);
 
+    void printOperation(cv::Mat &image,
+                        const std::string operation);
+
     void printGiorgiosValue(cv::Mat &image,
                             const float value);
 private:

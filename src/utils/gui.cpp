@@ -246,4 +246,11 @@ void gui::printGiorgiosValue(cv::Mat &image,
                 cv::FONT_HERSHEY_SIMPLEX, font_scale_, yellow_);
 }
 
+void gui::printOperation(cv::Mat &image,
+                         const std::string operation)
+{
+    cv::putText(image, "OPERATION: " + operation, cv::Point2i(5,65),
+                cv::FONT_HERSHEY_SIMPLEX, font_scale_, red_);
+}
+
 }

@@ -101,7 +101,7 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
             linePoints;
     linePoints.push_back(currentCenter);
 
-    std::cout << std::endl;
+    //std::cout << std::endl;
 
     for (;;)
     {
@@ -126,7 +126,7 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
                     {
                         // Compute the distance from the pole to the line
                         d = distanceLinePole(lineParam, (*polesVector)[i]->getCentroid());
-                        std::cout << (*polesVector)[i]->ID() << ":" << d << " - ";
+                        //std::cout << (*polesVector)[i]->ID() << ":" << d << " - ";
                     }
                     // If there is not a line, d will be 0.0f
                     if (d <= max_distance_from_last_line_)
@@ -142,7 +142,7 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
         }
         if (found == true)
         {
-            std::cout << "Pole in line:" << (*polesVector)[currentNearestNeighborIndex]->ID() << std::endl;
+            //std::cout << "Pole in line:" << (*polesVector)[currentNearestNeighborIndex]->ID() << std::endl;
             currentNearestNeighbor = newNearestNeighbor;
             currentCenter = currentNearestNeighbor->getCentroid();
             found = false;
@@ -158,7 +158,7 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
         }
         else
         {
-            std::cout << std::endl;
+            //std::cout << std::endl;
             break;
         }
     }
