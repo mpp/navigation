@@ -16,7 +16,13 @@ EKFStateEstimator::EKFStateEstimator()
     ekf_process_noise_.at<float>(1,1) = 0.2;
     ekf_process_noise_.at<float>(1,0) = 0.05;
     ekf_process_noise_.at<float>(2,2) = 0.1;
+
     ekf_measurement_noise_ = cv::Mat::zeros(3, 3, CV_32F);
+    ekf_measurement_noise_.at<float>(0,0) = 0.1;
+    ekf_measurement_noise_.at<float>(0,1) = 0.05;
+    ekf_measurement_noise_.at<float>(1,1) = 0.2;
+    ekf_measurement_noise_.at<float>(1,0) = 0.05;
+    ekf_measurement_noise_.at<float>(2,2) = 0.1;
 
     tx_ = 1;
     dt_ = 0.01;
@@ -25,8 +31,8 @@ EKFStateEstimator::EKFStateEstimator()
 }
 
 void EKFStateEstimator::setupControlMatrix(const float linearVelocity,
-                                                     const float angularVelocity,
-                                                     cv::Mat &control)
+                                           const float angularVelocity,
+                                           cv::Mat &control)
 {
     control = cv::Mat::zeros(2,1,CV_32F);
     control.at<float>(0) = linearVelocity;

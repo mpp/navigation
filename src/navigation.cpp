@@ -28,7 +28,7 @@ inline double RandN() {
 
 int main(int argc, char **argv)
 {
-    std::cout << "Hi" << std::endl;
+    //std::cout << "Hi" << std::endl;
 
     //////
     /// Check arguments and set the locale
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
         help();
     }
 
-    std::cout << std::fixed << std::setprecision(6) << "Hello!" << std::endl;
+    std::cout << std::fixed << std::setprecision(6) /*<< "Hello!"*/ << std::endl;
     setlocale(LC_NUMERIC, "C");
 
     //////
@@ -208,6 +208,8 @@ int main(int argc, char **argv)
             }
 
             GUI.printGiorgiosValue(image, giorgios_value);
+
+            //std::cout << f.frameID << ";" << state.dy << ";" << state.dtheta << ";" << state.dphi << ";" << linear << ";" << angular << ";" << giorgios_value << ";" << std::endl;
 
         }
         cv::imshow("navigation gui", image);
