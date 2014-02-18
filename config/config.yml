@@ -12,16 +12,30 @@
 logparser:
     # Frame per second of the log playback
     waitkey: 33
+
     # If empty the sw uses real sensors
-    
-    # Caso 1 - fine filare
-#    file: /home/mpp/DODICH/Registrazioni/02161602_ls_sick.csv
-    # Caso 2 - filare a sinistra
-#    file: "/home/mpp/DODICH/Registrazioni/01051511_ls_sick.csv" 
-    # Caso 3 - rotazione a sinistra
-    file: /home/mpp/DODICH/Registrazioni/12011112_ls_sx_sick.csv
-    # Caso 4 - interno del box
-#    file: /home/mpp/DODICH/Registrazioni/02161159_ls_sick.csv
+    #
+    # Opzioni path
+    #
+    # -- Portatile
+    # /home/mpp/DODICH/Registrazioni/
+    # -- Laboratiorio
+    # /home/dodich/DODICH/Registrazioni/
+    path: /home/dodich/DODICH/Registrazioni/
+
+    # Opzioni
+    #
+    # -- Caso 1 - fine filare
+    # 02161602_ls_sick.csv
+    # -- Caso 2 - filare a sinistra
+    # 01051511_ls_sick.csv
+    # -- Caso 3 - rotazione a sinistra
+    # 12011112_ls_sx_sick.csv
+    # -- Caso 4 - interno del box
+    # 02161159_ls_sick.csv
+    # -- Caso 5 - box-filare-testate
+    # 02180842_ls_sick.csv
+    file: "02180842_ls_sick.csv"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
@@ -94,7 +108,7 @@ lineFollower:
     k2: 0.5 
     limitMultiplier: 4
 
-    minHeadPoleDistance: 2.0 # When the head pole is nearer than this threshold the robot have reched the end of the line
+    minHeadPoleDistance: 2.5 # When the head pole is nearer than this threshold the robot have reched the end of the line
     
 
 ##---------------------------------------------------------------------------##

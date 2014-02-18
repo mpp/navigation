@@ -7,8 +7,9 @@ void parseFile(const cv::FileStorage &fs,
                std::vector<Frame> &logFrames)
 {
     /// Open the input log file
+    std::string path = fs["logparser"]["path"];
     std::string filename = fs["logparser"]["file"];
-    std::ifstream ifsLog(filename.c_str());
+    std::ifstream ifsLog((path + filename).c_str());
 
     if (!ifsLog)
     {
