@@ -32,7 +32,7 @@ inline double RandN() {
 
 int main(int argc, char **argv)
 {
-    std::cout << "Hi" << std::endl;
+    //std::cout << "Hi" << std::endl;
 
     //////
     /// Check arguments and set the locale
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
         help();
     }
 
-    std::cout << std::fixed << std::setprecision(6) << "Hello!" << std::endl;
+    std::cout << std::fixed << std::setprecision(6) /*<< "Hello!"*/ << std::endl;
     setlocale(LC_NUMERIC, "C");
 
     //////
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
             GUI.printOperation(image, "OTHER");
         }
 
-        if (nearest && /*f.frameID >= 400 && */lineFollower)
+        if (nearest && f.frameID >= 3500 && lineFollower)
         {
             le.extractLineFromNearestPole(polesVector, nearest, line, useLastLine);
             GUI.drawLine(image, *polesVector, line);
@@ -167,14 +167,14 @@ int main(int argc, char **argv)
             cv::Point2f headPoleCenter = (*polesVector)[headPoleIndex]->getCentroid();
             headPoleDistance = cv::norm(headPoleCenter);
 
-            if (headPoleDistance < minHeadPoleDistance)
+            if (headPoleDistance < minHeadPoleDistance && headPoleCenter.x < 0)
             {
-                std::cout << "!!! - LINE END REACHED - !!!" << std::endl;
+                std::cout << "!!! " << f.frameID << " - LINE END REACHED - !!!" << std::endl;
                 lineFollower = false;
             }
         }
 
-        if (f.frameID >= 500 && lineFollower)
+        if (f.frameID >= 3500 && lineFollower)
         {
             /// Update the EKF
             cv::Mat measurement, control;
@@ -212,6 +212,8 @@ int main(int argc, char **argv)
             }
 
             GUI.printGiorgiosValue(image, giorgios_value);
+
+            //std::cout << f.frameID << ";" << state.dy << ";" << state.dtheta << ";" << state.dphi << ";" << linear << ";" << angular << ";" << giorgios_value << ";" << std::endl;
 
         }
         cv::imshow("navigation gui", image);
