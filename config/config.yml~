@@ -17,9 +17,9 @@ logparser:
     # Caso 1 - fine filare
 #    file: /home/mpp/DODICH/Registrazioni/02161602_ls_sick.csv
     # Caso 2 - filare a sinistra
-    file: "/home/mpp/DODICH/Registrazioni/01051511_ls_sick.csv" 
+#    file: "/home/mpp/DODICH/Registrazioni/01051511_ls_sick.csv" 
     # Caso 3 - rotazione a sinistra
-#    file: /home/mpp/DODICH/Registrazioni/12011112_ls_sx_sick.csv
+    file: /home/mpp/DODICH/Registrazioni/12011112_ls_sx_sick.csv
     # Caso 4 - interno del box
 #    file: /home/mpp/DODICH/Registrazioni/02161159_ls_sick.csv
 

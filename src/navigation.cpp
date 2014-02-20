@@ -15,6 +15,8 @@
 
 void help();
 
+//////
+/// RANDOM NUMBER GENERATOR
 const double DBL_EPS_COMP = 1 - DBL_EPSILON; // DBL_EPSILON is defined in <limits.h>.
 inline double RandU() {
     return DBL_EPSILON + ((double) rand()/RAND_MAX);
@@ -25,6 +27,8 @@ inline double RandN2(double mu, double sigma) {
 inline double RandN() {
     return RandN2(0, 0.1);
 }
+///
+//////
 
 int main(int argc, char **argv)
 {
