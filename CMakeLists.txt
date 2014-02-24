@@ -29,6 +29,7 @@ add_executable(
     src/data_manipulation/lineextractor.cpp
     src/data_manipulation/ekfstateestimator.cpp
     src/motion_planners/linefollowermp.cpp
+    src/motion_planners/endlineturnmp.cpp
 )
 
 target_link_libraries(
