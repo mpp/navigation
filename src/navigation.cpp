@@ -9,9 +9,14 @@
 
 #include "data_manipulation/ekfstateestimator.h"
 
+#include "data_manipulation/egomotionestimator.h"
+
 #include "motion_planners/linefollowermp.h"
 
 #include "utils/gui.h"
+
+//#define LINE_FOLLOWER_
+#define EGOMOTION_ESTIMATION_
 
 void help();
 
@@ -84,15 +89,24 @@ int main(int argc, char **argv)
     std::cout << framesVector.size() << std::endl;
 
     vineyard::PoleExtractor pe(fs);
-    vineyard::LineExtractor le(fs);
     std::shared_ptr< std::vector< vineyard::Pole::Ptr > > polesVector;
+
+#ifdef LINE_FOLLOWER_
     vineyard::LineParams lineParams;
+    vineyard::LineExtractor le(fs);
 
     nav::EKFStateEstimator ekf;
 
     vineyard::Line::Ptr line;
 
     bool lineFollower = true;
+#endif
+#ifdef EGOMOTION_ESTIMATION_
+    nav::EgoMotionEstimator ego(4);
+    bool egoInitialized = false;
+    cv::Matx23f transform;
+    cv::Point2f headPole;
+#endif
 
     for (nav::Frame f : framesVector)
     {
@@ -111,10 +125,27 @@ int main(int argc, char **argv)
         tempCloud->height = 1;
 
         pe.elaborateCloud(tempCloud, polesVector);
-/*
+
+#ifdef LINE_FOLLOWER_
         vineyard::Pole::Ptr nearest;
         pe.findNearestPole(*polesVector, false, nearest);
-*/
+#endif
+
+#ifdef EGOMOTION_ESTIMATION_
+        if (!egoInitialized)
+        {
+            ego.initializePolesVector(polesVector);
+            egoInitialized = true;
+            // set manually the head pole, for testing purposes
+            headPole = (*polesVector)[1]->getCentroid();
+        }
+        else
+        {
+            ego.computeRigidTransform(polesVector, transform);
+            headPole.x = transform(0,0) * headPole.x + transform(0,1) * headPole.y + transform(0,2);
+            headPole.y = transform(1,0) * headPole.x + transform(1,1) * headPole.y + transform(1,2);
+        }
+#endif
         std::vector<cv::Point2f> ptVector;
         for (nav::PT pt : f.points)
         {
@@ -123,7 +154,10 @@ int main(int argc, char **argv)
 
         GUI.drawHUD(image, f.frameID);
         GUI.drawCompass(image, f.bearing);
-/*
+
+        GUI.drawHeadPole(image,headPole);
+
+#ifdef LINE_FOLLOWER_
         bool useLastLine = false;
         if (line)
         {
@@ -138,10 +172,11 @@ int main(int argc, char **argv)
                 GUI.drawLastLine(image, line);
             }
         }
-*/
+#endif
         GUI.drawPoints(image, ptVector);
         GUI.drawPoles(image, *polesVector);
-/*
+
+#ifdef LINE_FOLLOWER_
         if (lineFollower)
         {
             GUI.printOperation(image, "LINE FOLLOWER");
@@ -213,7 +248,7 @@ int main(int argc, char **argv)
             //std::cout << f.frameID << ";" << state.dy << ";" << state.dtheta << ";" << state.dphi << ";" << linear << ";" << angular << ";" << giorgios_value << ";" << std::endl;
 
         }
-*/
+#endif
         cv::imshow("navigation gui", image);
         c = cv::waitKey(waitkey);
     }

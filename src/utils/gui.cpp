@@ -253,4 +253,11 @@ void gui::printOperation(cv::Mat &image,
                 cv::FONT_HERSHEY_SIMPLEX, font_scale_, red_);
 }
 
+void gui::drawHeadPole(cv::Mat &image,
+                       const cv::Point2f &headPole)
+{
+    cv::circle(image, (headPole * factor_) + center_,
+               radius_, blue_, thickness_);
+}
+
 }
