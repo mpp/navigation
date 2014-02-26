@@ -19,7 +19,7 @@ logparser:
     #
     # -- Portatile
     # /home/mpp/DODICH/Registrazioni/
-    # -- Laboratiorio
+    # -- Laboratorio
     # /home/dodich/DODICH/Registrazioni/
     path: /home/dodich/DODICH/Registrazioni/
 
@@ -108,7 +108,7 @@ lineFollower:
     k2: 0.5 
     limitMultiplier: 4
 
-    minHeadPoleDistance: 2.0 # When the head pole is nearer than this threshold the robot have reched the end of the line
+    minHeadPoleDistance: 2.5 # When the head pole is nearer than this threshold the robot have reched the end of the line
     
 
 ##---------------------------------------------------------------------------##

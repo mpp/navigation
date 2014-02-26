@@ -19,7 +19,7 @@ logparser:
     #
     # -- Portatile
     # /home/mpp/DODICH/Registrazioni/
-    # -- Laboratiorio
+    # -- Laboratorio
     # /home/dodich/DODICH/Registrazioni/
     path: /home/dodich/DODICH/Registrazioni/
 
@@ -35,7 +35,7 @@ logparser:
     # 02161159_ls_sick.csv
     # -- Caso 5 - box-filare-testate
     # 02180842_ls_sick.csv
-    file: "02180842_ls_sick.csv"
+    file: "12011112_ls_sx_sick.csv"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
