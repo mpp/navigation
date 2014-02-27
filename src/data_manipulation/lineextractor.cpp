@@ -36,7 +36,8 @@ LineExtractor::LineExtractor(const cv::FileStorage &fs)
     : maximum_pole_distance_(fs["lineExtractor"]["maxPoleDistance"]),
       reps_(fs["lineExtractor"]["reps"]),
       aeps_(fs["lineExtractor"]["aeps"]),
-      max_distance_from_last_line_(fs["lineExtractor"]["maxDistanceFromLastLine"])
+      max_distance_from_last_line_(fs["lineExtractor"]["maxDistanceFromLastLine"]),
+      min_line_size_(fs["lineExtractor"]["minLineSize"])
 {
 }
 
@@ -234,53 +235,14 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
 
     }
 
+    if (temp.getPolesList().size() < min_line_size_)
+    {
+        line.reset();
+        return;
+    }
     // Fit the line and set the parameters in the line object
     cv::Vec4f lineParamVec;
     cv::fitLine(linePoints, lineParamVec, CV_DIST_HUBER, 0, reps_, aeps_);
-
-    /*
-    // Prepare data for RANSAC line fit
-    int N = linePoints.size();
-    float x[N],
-          y[N];
-
-    float param[2];
-    float maxError = 0.4f;
-
-    int niter = 500;
-
-    bool inliers[N];
-
-    int i = 0;
-    for (cv::Point2f p : linePoints)
-    {
-        x[i] = p.x;
-        y[i] = p.y;
-
-        i++;
-    }
-
-    // Call RANSAC
-
-    RANSAC_line(x, y, N, param, niter, maxError, inliers, true);
-
-    // Print Outliers
-    std::cout << "Outliers: ";
-    int l = 0;
-    for (auto idx : temp.getPolesList())
-    {
-        if (!inliers[l])
-        {
-            std::cout << (*polesVector)[idx]->ID() << " - ";
-        }
-        l++;
-    }
-    std::cout << std::endl;
-
-
-
-    paramToPointVect(param, lineParamVec);
-    */
 
     lineParam.head_pole_ID = currentNearestNeighbor->ID();
     lineParam.head_pole_x = currentNearestNeighbor->getCentroid().x;

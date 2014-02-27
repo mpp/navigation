@@ -53,6 +53,10 @@ public:
 
     void drawHeadPole(cv::Mat &image,
                       const cv::Point2f &headPole);
+
+    void drawTarget(cv::Mat &image,
+                    const cv::Point2f &targetPoint,
+                    const cv::Point2f &targetDirection);
 private:
 
     int width_;

@@ -15,7 +15,7 @@
 
 #include "utils/gui.h"
 
-//#define LINE_FOLLOWER_
+#define LINE_FOLLOWER_
 #define EGOMOTION_ESTIMATION_
 
 void help();
@@ -103,13 +103,16 @@ int main(int argc, char **argv)
 
     vineyard::Line::Ptr line;
 
-    bool lineFollower = true;
+    bool lineFollower = false;
 #endif
 #ifdef EGOMOTION_ESTIMATION_
     nav::EgoMotionEstimator ego(4);
     bool egoInitialized = false;
     cv::Matx23f transform;
-    cv::Point2f headPole;
+    cv::Point2f headPole, targetPoint, targetDirection;
+    float startBearing;
+    float k = 1.5f; // target distance from line
+    int headPoleID = -1;
 #endif
 
     for (nav::Frame f : framesVector)
@@ -136,18 +139,100 @@ int main(int argc, char **argv)
 #endif
 
 #ifdef EGOMOTION_ESTIMATION_
+
+        if (f.frameID == 430)
+        {
+            std::cout << "debug" << std::endl;
+        }
         if (!egoInitialized)
         {
             ego.initializePolesVector(polesVector);
             egoInitialized = true;
             // set manually the head pole, for testing purposes
             headPole = (*polesVector)[1]->getCentroid();
+            targetPoint = (*polesVector)[1]->getCentroid() + cv::Point2f(0,-k);
+            targetDirection = targetPoint + cv::Point2f(-1,0);
+            startBearing = f.bearing;
         }
         else
         {
-            ego.computeRigidTransform(polesVector, transform);
-            headPole.x = transform(0,0) * headPole.x + transform(0,1) * headPole.y + transform(0,2);
-            headPole.y = transform(1,0) * headPole.x + transform(1,1) * headPole.y + transform(1,2);
+            if (headPoleID == -1)
+            {
+                ego.computeRigidTransform(polesVector, transform);
+
+                float hx = headPole.x,
+                      hy = headPole.y;
+                headPole.x = transform(0,0) * hx + transform(0,1) * hy + transform(0,2);
+                headPole.y = transform(1,0) * hx + transform(1,1) * hy + transform(1,2);
+                float tx = targetPoint.x,
+                      ty = targetPoint.y;
+                targetPoint.x = transform(0,0) * tx + transform(0,1) * ty + transform(0,2);
+                targetPoint.y = transform(1,0) * tx + transform(1,1) * ty + transform(1,2);
+                float dx = targetDirection.x,
+                      dy = targetDirection.y;
+                targetDirection.x = transform(0,0) * dx + transform(0,1) * dy + transform(0,2);
+                targetDirection.y = transform(1,0) * dx + transform(1,1) * dy + transform(1,2);
+            }
+
+            float steeredAngle = f.bearing - startBearing;
+
+            std::cout << "#------------------------------#" << std::endl;
+            std::cout << "steeredAngle: " << steeredAngle * 180 / M_PI << "°" << std::endl;
+
+            std::cout << "target angle: " << (M_PI/2 - steeredAngle) * 180 / M_PI << std::endl;
+            std::cout << "direction angle: " << (M_PI - steeredAngle) * 180 / M_PI << std::endl;
+
+            for (vineyard::Pole_Ptr p : (*polesVector))
+            {
+                if (headPoleID == -1)
+                {
+                    // distance pole-headPole
+                    float distancePH = cv::norm(cv::Point2f(p->getCentroid().x - headPole.x, p->getCentroid().y - headPole.y));
+
+                    if (distancePH < 1.5f && f.frameID >= 300)
+                    {
+                        if (headPoleID == -1)
+                        {
+                            std::cout << "Vedo palo di testa" << std::endl;
+                            headPole = p->getCentroid();
+                            headPoleID = p->ID();
+                        }
+                        targetPoint.x = k * std::cos(M_PI/2 - steeredAngle) + headPole.x;
+                        targetPoint.y = -1 * k * std::sin(M_PI/2 - steeredAngle) + headPole.y;
+                        targetDirection.x =  std::cos(M_PI - steeredAngle) + targetPoint.x;
+                        targetDirection.y = -1 * std::sin(M_PI - steeredAngle) + targetPoint.y;
+                    }
+                }
+                else
+                {
+                    for (vineyard::Pole_Ptr p : (*polesVector))
+                    {
+                        if (p->ID() == headPoleID)
+                        {
+                            headPole = p->getCentroid();
+                            break;
+                        }
+                    }
+
+                    targetPoint.x = k * std::cos(M_PI/2 - steeredAngle) + headPole.x;
+                    targetPoint.y = -1 * k * std::sin(M_PI/2 - steeredAngle) + headPole.y;
+                    targetDirection.x =  std::cos(M_PI - steeredAngle) + targetPoint.x;
+                    targetDirection.y = -1 * std::sin(M_PI - steeredAngle) + targetPoint.y;
+
+                    if (steeredAngle >= M_PI/2)
+                    {
+                        lineFollower = true;
+                    }
+                }
+            }
+        }
+
+        // Now compute the linear and angular velocities
+        if (!lineFollower || !line)
+        {
+            float r = cv::norm(targetPoint);
+            float targetDirectionAngle = std::atan2(targetDirection.y-targetPoint.y, targetDirection.x-targetPoint.x);
+            float targetAngle = std::atan2(targetPoint.y, targetPoint.x);
         }
 #endif
         std::vector<cv::Point2f> ptVector;
@@ -158,8 +243,6 @@ int main(int argc, char **argv)
 
         GUI.drawHUD(image, f.frameID);
         GUI.drawCompass(image, f.bearing);
-
-        GUI.drawHeadPole(image,headPole);
 
 #ifdef LINE_FOLLOWER_
         bool useLastLine = false;
@@ -180,6 +263,11 @@ int main(int argc, char **argv)
         GUI.drawPoints(image, ptVector);
         GUI.drawPoles(image, *polesVector);
 
+#ifdef EGOMOTION_ESTIMATION_
+        GUI.drawHeadPole(image,headPole);
+        GUI.drawTarget(image,targetPoint, targetDirection);
+#endif
+
 #ifdef LINE_FOLLOWER_
         if (lineFollower)
         {
@@ -190,32 +278,37 @@ int main(int argc, char **argv)
             GUI.printOperation(image, "OTHER");
         }
 
-        if (nearest && f.frameID >= 3500 && lineFollower)
+        if (nearest /*&& f.frameID >= 300*/ && lineFollower)
         {
             le.extractLineFromNearestPole(polesVector, nearest, line, useLastLine);
-            GUI.drawLine(image, *polesVector, line);
-            lineParams = line->getLineParameters();
 
-
-            // Check the head pole distance
-            float headPoleDistance = 0.0;
-            int headPoleIndex = line->getPolesList().front();
-            cv::Point2f headPoleCenter = (*polesVector)[headPoleIndex]->getCentroid();
-            headPoleDistance = cv::norm(headPoleCenter);
-
-            if (headPoleDistance < minHeadPoleDistance && headPoleCenter.x < 0)
+            if (line)
             {
-                std::cout << "!!! " << f.frameID << " - LINE END REACHED - !!!" << std::endl;
-                lineFollower = false;
+                GUI.drawLine(image, *polesVector, line);
+                lineParams = line->getLineParameters();
+
+
+                // Check the head pole distance
+                float headPoleDistance = 0.0;
+                int headPoleIndex = line->getPolesList().front();
+                cv::Point2f headPoleCenter = (*polesVector)[headPoleIndex]->getCentroid();
+                headPoleDistance = cv::norm(headPoleCenter);
+
+                if (headPoleDistance < minHeadPoleDistance && headPoleCenter.x < 0)
+                {
+                    std::cout << "!!! " << f.frameID << " - LINE END REACHED - !!!" << std::endl;
+                    lineFollower = false;
+                }
             }
         }
 
-        if (f.frameID >= 3500 && lineFollower)
+        if (/*f.frameID >= 3500 &&*/ lineFollower && line)
         {
             /// Update the EKF
             cv::Mat measurement, control;
             nav::SystemState state;
             ekf.setupMeasurementMatrix(lineParams, f.bearing, measurement);
+            /// TODO: set the correct input (linear and angular velocity)
             ekf.setupControlMatrix(RandN2(1,0.2),RandN2(0,0.2),control);
             ekf.estimate(control, measurement, state);
 

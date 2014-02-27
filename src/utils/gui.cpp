@@ -257,7 +257,17 @@ void gui::drawHeadPole(cv::Mat &image,
                        const cv::Point2f &headPole)
 {
     cv::circle(image, (headPole * factor_) + center_,
-               radius_, blue_, thickness_);
+               radius_, green_, thickness_);
+}
+
+void gui::drawTarget(cv::Mat &image,
+                     const cv::Point2f &targetPoint,
+                     const cv::Point2f &targetDirection)
+{
+    cv::circle(image, (targetPoint * factor_) + center_,
+               radius_, red_, thickness_);
+
+    cv::line(image, (targetPoint * factor_) + center_, (targetDirection * factor_) + center_, red_, 2);
 }
 
 }
