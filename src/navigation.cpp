@@ -12,6 +12,7 @@
 #include "data_manipulation/egomotionestimator.h"
 
 #include "motion_planners/linefollowermp.h"
+#include "motion_planners/endlineturnmp.h"
 
 #include "utils/gui.h"
 
@@ -107,12 +108,15 @@ int main(int argc, char **argv)
 #endif
 #ifdef EGOMOTION_ESTIMATION_
     nav::EgoMotionEstimator ego(4);
+    nav::EndLineTurnMP UTurnMP(fs);
     bool egoInitialized = false;
     cv::Matx23f transform;
     cv::Point2f headPole, targetPoint, targetDirection;
     float startBearing;
     float k = 1.5f; // target distance from line
     int headPoleID = -1;
+
+    std::cout << "targetDirectionAngle;targetAngle;r;theta;sigma;linear;angular" << std::endl;
 #endif
 
     for (nav::Frame f : framesVector)
@@ -176,11 +180,11 @@ int main(int argc, char **argv)
 
             float steeredAngle = f.bearing - startBearing;
 
-            std::cout << "#------------------------------#" << std::endl;
-            std::cout << "steeredAngle: " << steeredAngle * 180 / M_PI << "°" << std::endl;
+            //std::cout << "#------------------------------#" << std::endl;
+            //std::cout << "steeredAngle: " << steeredAngle * 180 / M_PI << "°" << std::endl;
 
-            std::cout << "target angle: " << (M_PI/2 - steeredAngle) * 180 / M_PI << std::endl;
-            std::cout << "direction angle: " << (M_PI - steeredAngle) * 180 / M_PI << std::endl;
+            //std::cout << "target angle: " << (M_PI/2 - steeredAngle) * 180 / M_PI << std::endl;
+            //std::cout << "direction angle: " << (M_PI - steeredAngle) * 180 / M_PI << std::endl;
 
             for (vineyard::Pole_Ptr p : (*polesVector))
             {
@@ -230,9 +234,17 @@ int main(int argc, char **argv)
         // Now compute the linear and angular velocities
         if (!lineFollower || !line)
         {
+            float targetDirectionAngle = std::atan2(-(targetDirection.y-targetPoint.y), targetDirection.x-targetPoint.x);
+            float targetAngle = std::atan2(-1 * targetPoint.y, targetPoint.x);
+
             float r = cv::norm(targetPoint);
-            float targetDirectionAngle = std::atan2(targetDirection.y-targetPoint.y, targetDirection.x-targetPoint.x);
-            float targetAngle = std::atan2(targetPoint.y, targetPoint.x);
+            float theta = targetDirectionAngle - targetAngle;
+            float sigma = targetAngle;
+
+            float linear = UTurnMP.computeLinearVelocity(r,theta,sigma);
+            float angular = UTurnMP.computeAngularVelocity(linear,r,theta,sigma);
+
+            std::cout << targetDirectionAngle << ";" << targetAngle << ";" << r << ";" << theta << ";" << sigma << ";" << linear << ";" << angular << std::endl;
         }
 #endif
         std::vector<cv::Point2f> ptVector;
