@@ -50,6 +50,9 @@ public:
 
     void printGiorgiosValue(cv::Mat &image,
                             const float value);
+
+    void drawHeadPole(cv::Mat &image,
+                      const cv::Point2f &headPole);
 private:
 
     int width_;

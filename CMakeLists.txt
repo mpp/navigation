@@ -29,6 +29,7 @@ add_executable(
     src/data_manipulation/poleextractor.cpp
     src/data_manipulation/lineextractor.cpp
     src/data_manipulation/ekfstateestimator.cpp
+    src/data_manipulation/egomotionestimator.cpp
     src/motion_planners/linefollowermp.cpp
     src/motion_planners/endlineturnmp.cpp
 )

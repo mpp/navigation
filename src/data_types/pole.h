@@ -123,6 +123,15 @@ public:
      */
     void updatePointsVector(const std::shared_ptr< const std::vector<cv::Point2f> > &newPointsVector);
 
+    /*!
+     * \brief idSort sorting function by ASC ID
+     * \param a
+     * \param b
+     * \return
+     */
+    static inline bool idSort(const Pole::ConstPtr a, const Pole::ConstPtr b) { return idSort(*a, *b); }
+    static inline bool idSort(const Pole a, const Pole b) { return a.id_ > b.id_; }
+
 // Private methods
 private:
 
