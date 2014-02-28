@@ -43,7 +43,7 @@ logparser:
 ##---------------------------------------------------------------------------##
 laserscanfilter:
     # minimum distance threshold (mt)
-    minDistance: 0.2 
+    minDistance: 1.1 
 
     # minimum distance threshold (mt)
     maxDistance: 6.0 

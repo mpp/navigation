@@ -2,6 +2,8 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <deque>
+
 #include "sensors_drivers/logparser.h"
 
 #include "data_manipulation/poleextractor.h"
@@ -20,6 +22,7 @@
 #define EGOMOTION_ESTIMATION_
 
 void help();
+void checkValueAndEnqueue(deque<float> &queue, const float value);
 
 //////
 /// RANDOM NUMBER GENERATOR
@@ -52,7 +55,7 @@ int main(int argc, char **argv)
         help();
     }
 
-    std::cout << std::fixed << std::setprecision(6) /*<< "Hello!"*/ << std::endl;
+    std::cout << std::fixed << std::setprecision(6);
     setlocale(LC_NUMERIC, "C");
 
     //////
@@ -91,7 +94,7 @@ int main(int argc, char **argv)
 
     nav::parseFile(fs, framesVector);
 
-    std::cout << framesVector.size() << std::endl;
+    //std::cout << framesVector.size() << std::endl;
 
     vineyard::PoleExtractor pe(fs);
     std::shared_ptr< std::vector< vineyard::Pole::Ptr > > polesVector;
@@ -116,7 +119,12 @@ int main(int argc, char **argv)
     float k = 1.5f; // target distance from line
     int headPoleID = -1;
 
-    std::cout << "targetDirectionAngle;targetAngle;r;theta;sigma;linear;angular" << std::endl;
+    const float maxV = fs["globalMP"]["maxV"];
+
+    float linearVelocity, angularVelocity;
+    deque<float> rightVel, leftVel;
+
+    std::cout << "targetDirectionAngle;targetAngle;r;theta;sigma;linear;angular;leftVel;rightVel" << std::endl;
 #endif
 
     for (nav::Frame f : framesVector)
@@ -231,21 +239,6 @@ int main(int argc, char **argv)
             }
         }
 
-        // Now compute the linear and angular velocities
-        if (!lineFollower || !line)
-        {
-            float targetDirectionAngle = std::atan2(-(targetDirection.y-targetPoint.y), targetDirection.x-targetPoint.x);
-            float targetAngle = std::atan2(-1 * targetPoint.y, targetPoint.x);
-
-            float r = cv::norm(targetPoint);
-            float theta = targetDirectionAngle - targetAngle;
-            float sigma = targetAngle;
-
-            float linear = UTurnMP.computeLinearVelocity(r,theta,sigma);
-            float angular = UTurnMP.computeAngularVelocity(linear,r,theta,sigma);
-
-            std::cout << targetDirectionAngle << ";" << targetAngle << ";" << r << ";" << theta << ";" << sigma << ";" << linear << ";" << angular << std::endl;
-        }
 #endif
         std::vector<cv::Point2f> ptVector;
         for (nav::PT pt : f.points)
@@ -275,11 +268,6 @@ int main(int argc, char **argv)
         GUI.drawPoints(image, ptVector);
         GUI.drawPoles(image, *polesVector);
 
-#ifdef EGOMOTION_ESTIMATION_
-        GUI.drawHeadPole(image,headPole);
-        GUI.drawTarget(image,targetPoint, targetDirection);
-#endif
-
 #ifdef LINE_FOLLOWER_
         if (lineFollower)
         {
@@ -298,6 +286,10 @@ int main(int argc, char **argv)
             {
                 GUI.drawLine(image, *polesVector, line);
                 lineParams = line->getLineParameters();
+
+                //// TEST allineamento al filare del target
+
+                targetDirection = targetPoint + cv::Point2f(lineParams.vx, lineParams.vy);
 
 
                 // Check the head pole distance
@@ -325,7 +317,7 @@ int main(int argc, char **argv)
             ekf.estimate(control, measurement, state);
 
             GUI.drawState(image, state);
-
+/*
             //std::cout << state.dy << " - " << state.dtheta << " - " << state.dphi << std::endl;
 
             // Motion planners for line following
@@ -352,17 +344,112 @@ int main(int argc, char **argv)
                 giorgios_value = (std::abs(angular) / angular) * (std::abs(angular) * 25 / lineFollower.kMaxOmega);
             }
 
-            GUI.printGiorgiosValue(image, giorgios_value);
+            GUI.printGiorgiosValue(image, giorgios_value);*/
 
             //std::cout << f.frameID << ";" << state.dy << ";" << state.dtheta << ";" << state.dphi << ";" << linear << ";" << angular << ";" << giorgios_value << ";" << std::endl;
 
         }
 #endif
+
+#ifdef EGOMOTION_ESTIMATION_
+
+
+        // Now compute the linear and angular velocities
+        float targetDirectionAngle = std::atan2(-(targetDirection.y-targetPoint.y), targetDirection.x-targetPoint.x);
+        float targetAngle = std::atan2(-1 * targetPoint.y, targetPoint.x);
+
+        targetDirectionAngle = targetDirectionAngle >= M_PI ? targetDirectionAngle - 2 * M_PI : targetDirectionAngle;
+        targetDirectionAngle = targetDirectionAngle < -M_PI ? targetDirectionAngle + 2 * M_PI : targetDirectionAngle;
+        targetAngle = targetAngle >= M_PI ? targetAngle - 2 * M_PI : targetAngle;
+        targetAngle = targetAngle < -M_PI ? targetAngle + 2 * M_PI : targetAngle;
+
+
+        float r = cv::norm(targetPoint);
+        float theta = targetDirectionAngle - targetAngle;
+        float sigma = targetAngle;
+
+        // controllo fine operazione
+        float epsilon = 0.4;
+        if (r <= epsilon)
+        {
+            cv::waitKey();
+            return 0;
+        }
+
+        linearVelocity = UTurnMP.computeLinearVelocity(r,theta,sigma);
+        angularVelocity = UTurnMP.computeAngularVelocity(linearVelocity,r,theta,sigma);
+
+        float robotWidth = 0.6;
+        float wheelRadius = 0.35;
+
+        float lv = (linearVelocity + robotWidth * angularVelocity) / wheelRadius;
+        float rv = (linearVelocity - robotWidth * angularVelocity) / wheelRadius;
+
+        lv = lv > 0.05 ? lv : 0.05;
+        rv = rv > 0.05 ? rv : 0.05;
+
+        float maxWheelVelocityValue = (maxV + robotWidth * maxV * M_PI / 4) / wheelRadius;
+
+        lv = lv / maxWheelVelocityValue;
+        rv = rv / maxWheelVelocityValue;
+
+        checkValueAndEnqueue(leftVel, lv);
+        checkValueAndEnqueue(rightVel, rv);
+
+        std::cout << targetDirectionAngle << ";" << targetAngle << ";" << r << ";" << theta << ";" << sigma << ";" << linearVelocity << ";" << angularVelocity << ";" << leftVel.back() << ";" << rightVel.back() << std::endl;
+
+        GUI.drawHeadPole(image,headPole);
+        GUI.drawTarget(image,targetPoint, targetDirection);
+#endif
+
         cv::imshow("navigation gui", image);
         c = cv::waitKey(waitkey);
     }
 
 
+}
+
+void checkValueAndEnqueue(deque<float> &queue, const float value)
+{
+    // buffer size
+    int k = 5;
+    int size = queue.size();
+    if (size == 0)
+    {
+        queue.push_back(value);
+        return;
+    }
+
+    // check if the value is in range with the others
+    float min = std::numeric_limits<float>::max(),
+          max = -std::numeric_limits<float>::max(),
+          average = 0.0f;
+    for (float v : queue)
+    {
+        average = average + v;
+        if (v < min)
+        {
+            min = v;
+        }
+        if (v > max)
+        {
+            max = v;
+        }
+    }
+    average = average / size;
+
+    float epsilon = 0.15f;
+    float variance = std::abs(value - average);
+
+    if (variance <= epsilon)
+    {
+        queue.push_back(value);
+
+        if (queue.size() >= k)
+        {
+            queue.pop_front();
+        }
+    }
 }
 
 void help()
