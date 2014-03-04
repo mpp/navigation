@@ -190,6 +190,29 @@ int main(int argc, char **argv)
         c = GUI->show();
     }
 
+    /**
+     * TODO
+
+        linearVelocity = UTurnMP.computeLinearVelocity(r,theta,sigma);
+        angularVelocity = UTurnMP.computeAngularVelocity(linearVelocity,r,theta,sigma);
+
+        float robotWidth = 0.6;
+        float wheelRadius = 0.35;
+
+        float lv = (linearVelocity + robotWidth * angularVelocity) / wheelRadius;
+        float rv = (linearVelocity - robotWidth * angularVelocity) / wheelRadius;
+
+        lv = lv > 0.05 ? lv : 0.05;
+        rv = rv > 0.05 ? rv : 0.05;
+
+        float maxWheelVelocityValue = (maxV + robotWidth * maxV * M_PI / 4) / wheelRadius;
+
+        lv = lv / maxWheelVelocityValue;
+        rv = rv / maxWheelVelocityValue;
+
+        checkValueAndEnqueue(leftVel, lv);
+        checkValueAndEnqueue(rightVel, rv);
+        */
 
 }
 
