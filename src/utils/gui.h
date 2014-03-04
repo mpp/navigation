@@ -12,52 +12,47 @@ namespace nav
 class gui
 {
 public:
-    gui(const cv::FileStorage &fs);
+    gui(const cv::FileStorage &fs, const std::string winName, const int waitTime);
 
-    void drawHUD(cv::Mat &image, const int frameNumber);
+    char show();
 
-    void drawCompass(cv::Mat &image,
-                     const float angle);
+    void refresh();
 
-    void drawPoints(cv::Mat &image,
-                    const std::vector<cv::Point2f> &pointsVector);
+    void drawHUD(const int frameNumber);
 
-    void drawPolePoints(cv::Mat &image,
-                        const vineyard::Pole::Ptr &pole);
+    void drawCompass(const float angle);
 
-    void drawPoleID(cv::Mat &image,
-                    const vineyard::Pole::Ptr &pole);
+    void drawPoints(const std::vector<cv::Point2f> &pointsVector);
 
-    void drawPole(cv::Mat &image,
-                  const vineyard::Pole::Ptr &pole,
+    void drawPolePoints(const vineyard::Pole::Ptr &pole);
+
+    void drawPoleID(const vineyard::Pole::Ptr &pole);
+
+    void drawPole(const vineyard::Pole::Ptr &pole,
                   const cv::Scalar &color);
 
-    void drawPoles(cv::Mat &image,
-                   const std::vector< vineyard::Pole::Ptr > &polesVector);
+    void drawPoles(const std::vector< vineyard::Pole::Ptr > &polesVector);
 
-    void drawLine(cv::Mat &image,
-                  const std::vector< vineyard::Pole::Ptr > &polesVector,
+    void drawLine(const std::vector< vineyard::Pole::Ptr > &polesVector,
                   const vineyard::Line::Ptr &line);
 
-    void drawLastLine(cv::Mat &image,
-                      const vineyard::Line::Ptr &line);
+    void drawLastLine(const vineyard::Line::Ptr &line);
 
-    void drawState(cv::Mat &image,
-                   const nav::SystemState &state);
+    void drawState(const nav::SystemState &state);
 
-    void printOperation(cv::Mat &image,
-                        const std::string operation);
+    void printOperation(const std::string operation);
 
-    void printGiorgiosValue(cv::Mat &image,
-                            const float value);
+    void printGiorgiosValue(const float value);
 
-    void drawHeadPole(cv::Mat &image,
-                      const cv::Point2f &headPole);
+    void drawHeadPole(const cv::Point2f &headPole);
 
-    void drawTarget(cv::Mat &image,
-                    const cv::Point2f &targetPoint,
+    void drawTarget(const cv::Point2f &targetPoint,
                     const cv::Point2f &targetDirection);
 private:
+
+    cv::Mat image_;
+    std::string win_name_;
+    int wait_time_;
 
     int width_;
     int height_;

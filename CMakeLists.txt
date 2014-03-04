@@ -21,7 +21,7 @@ add_executable(
     ${PROJECT_NAME}
     src/navigation.cpp
     src/sensors_drivers/logparser.cpp
-    src/sensors_drivers/phidgetdevice.cpp
+#    src/sensors_drivers/phidgetdevice.cpp
     src/utils/gui.cpp
     src/utils/ransac.cpp
     src/data_types/pole.cpp
@@ -32,6 +32,7 @@ add_executable(
     src/data_manipulation/egomotionestimator.cpp
     src/motion_planners/linefollowermp.cpp
     src/motion_planners/endlineturnmp.cpp
+    src/operations/motionoperation.cpp
 )
 
 target_link_libraries(
@@ -44,5 +45,5 @@ target_link_libraries(
     ${PCL_OCTREE_LIBRARIES}
     ${PCL_SEGMENTATION_LIBRARIES}
     ${PCL_IO_LIBRARIES}
-    phidget21
+#    phidget21
 )

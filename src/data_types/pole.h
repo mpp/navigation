@@ -117,6 +117,8 @@ public:
      */
     void updateCentroid(const cv::Point2f &newCentroid);
 
+    void updateCentroid(const cv::Point2f &newCentroid, const cv::Matx22f &control);
+
     /*!
      * \brief updatePointsVector
      * \param newPointsVector

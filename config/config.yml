@@ -11,7 +11,7 @@
 ##---------------------------------------------------------------------------##
 logparser:
     # Frame per second of the log playback
-    waitkey: 33
+    waitkey: 100
 
     # If empty the sw uses real sensors
     #
@@ -22,7 +22,7 @@ logparser:
     # /home/mpp/DODICH/Registrazioni/
     # -- Laboratorio
     # /home/dodich/DODICH/Registrazioni/
-    path: /home/mpp/DODICH/Registrazioni/
+    path: /home/dodich/DODICH/Registrazioni/
 
     # Opzioni
     #
@@ -36,17 +36,24 @@ logparser:
     # 02161159_ls_sick.csv
     # -- Caso 5 - box-filare-testate
     # 02180842_ls_sick.csv
-    file: "12011112_ls_sx_sick.csv"
+    # -- Caso 6 - nuova rotazione
+    # 02281618_ls_sick.csv
+    file: "02281618_ls_sick.csv"
 
+    # Here goes the operation, it can be
+    # L001
+    # R001
+    # ...
+    operation: "L003"
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
 ##---------------------------------------------------------------------------##
 laserscanfilter:
     # minimum distance threshold (mt)
-    minDistance: 0.2 
+    minDistance: 1.1 
 
     # minimum distance threshold (mt)
-    maxDistance: 6.0 
+    maxDistance: 7.5 
 
     # minimum angle of scan (deg) - 0° is in front of the scanner
     minAngle: -2.35619449 
@@ -109,12 +116,18 @@ lineFollower:
     k2: 0.5 
     limitMultiplier: 4
 
-    minHeadPoleDistance: 2.5 # When the head pole is nearer than this threshold the robot have reched the end of the line
+    minHeadPoleDistance: 1.5 # When the head pole is nearer than this threshold the robot have reched the end of the line
     
+# Following the indication of: http://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 Uturn:
+    k1: 1
+    k2: 10
+    k3:  1
     epsilon: 0.2
     beta: 0.4
     gamma: 2
+    headPoleThreshold: 1.5
+    endEpsilon: 1.0
 
 ##---------------------------------------------------------------------------##
 ## GUI parameters
@@ -122,7 +135,7 @@ Uturn:
 gui:
     wHeight: 700
     wWidth: 1000
-    wFactor: 40 # 1 real meter = factor pixels in the GUI
+    wFactor: 40 # 1 real meter = factor*pixels in the GUI
     wFontScale: 0.5
 
     center: [ 615, 350 ]

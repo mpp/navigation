@@ -57,7 +57,7 @@ Pole::Pole(const std::shared_ptr< const std::vector<cv::Point2f> > &pointsVector
     computeCentroid();
 
     // Setup KALMAN
-    kf_pole_.init(4,2,0);
+    kf_pole_.init(4,2,2);
     kf_state_ = cv::Mat(4, 1, CV_32F);
     kf_process_noise_ = cv::Mat(4, 1, CV_32FC1);
     kf_measurement_ = cv::Mat::zeros(2, 1, CV_32F);
@@ -77,7 +77,7 @@ Pole::Pole(const std::shared_ptr< const std::vector<cv::Point2f> > &pointsVector
     // This means to have a low measureNoiseCovariance and an high processNoiseCovariance.
     cv::setIdentity(kf_pole_.measurementMatrix);
     cv::setIdentity(kf_pole_.processNoiseCov, cv::Scalar::all(0.01));
-    cv::setIdentity(kf_pole_.measurementNoiseCov, cv::Scalar::all(1e-3));
+    cv::setIdentity(kf_pole_.measurementNoiseCov, cv::Scalar::all(1e-4));
     cv::setIdentity(kf_pole_.errorCovPost, cv::Scalar::all(0.1));
 
     kf_pole_.gain *(cv::Mat_<float>(4, 2) << 0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9);

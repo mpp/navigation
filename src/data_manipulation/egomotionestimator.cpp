@@ -86,8 +86,12 @@ void EgoMotionEstimator::computeRigidTransform(const std::shared_ptr<std::vector
     previous_poles_vector_.swap(currentPolesVector);
 
     // Pass the common subset to the rigid transform estimator
-    transform = cv::estimateRigidTransform(commonSubsetPrev, commonSubsetCurr, false);
+    cv::Mat temp = cv::estimateRigidTransform(commonSubsetPrev, commonSubsetCurr, false);
 
+    if (temp.cols == transform.cols && temp.rows == transform.rows)
+    {
+        transform = temp;
+    }
     //std::cout << transform << std::endl;
 }
 

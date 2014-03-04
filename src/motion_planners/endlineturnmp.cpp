@@ -3,11 +3,13 @@
 namespace nav {
 
 EndLineTurnMP::EndLineTurnMP(const cv::FileStorage &fs)
-    : k1_(1), k2_(10), k3_(),
-    kMaxV(fs["globalMP"]["maxV"]),
-    epsilon_(fs["Uturn"]["epsilon"]),
-    beta_(fs["Uturn"]["beta"]),
-    gamma_(fs["Uturn"]["gamma"])
+    : k1_(fs["Uturn"]["k1"]),
+      k2_(fs["Uturn"]["k2"]),
+      k3_(fs["Uturn"]["k3"]),
+      kMaxV(fs["globalMP"]["maxV"]),
+      epsilon_(fs["Uturn"]["epsilon"]),
+      beta_(fs["Uturn"]["beta"]),
+      gamma_(fs["Uturn"]["gamma"])
 {
 }
 
