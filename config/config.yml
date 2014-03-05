@@ -11,7 +11,7 @@
 ##---------------------------------------------------------------------------##
 logparser:
     # Frame per second of the log playback
-    waitkey: 100
+    waitkey: 10
 
     # If empty the sw uses real sensors
     #
@@ -40,13 +40,15 @@ logparser:
     # 02281618_ls_sick.csv
     # -- Caso 7 - rotazione 28 febbraio
     # 03031520_ls_sick.csv
-    file: "03031520_ls_sick.csv"
+    # -- Caso 8 - rotazione a destra
+    # 02141035_ls_sick_dx.csv
+    file: "02141035_ls_sick_dx.csv"
 
     # Here goes the operation, it can be
     # 001L
     # 001R
     # ...
-    operation: "003L"
+    operation: "003R"
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
 ##---------------------------------------------------------------------------##
