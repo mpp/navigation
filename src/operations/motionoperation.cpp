@@ -45,7 +45,7 @@ void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard
         if (line_->getPolesList().size() > min_line_size_)
         {
             useLastLine = true;
-            GUI_->drawLastLine(line_);
+            if (GUI_) { GUI_->drawLastLine(line_); }
         }
     }
 
@@ -56,7 +56,7 @@ void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard
 
         if (line_)
         {
-            GUI_->drawLine(*polesVector,line_);
+            if (GUI_) { GUI_->drawLine(*polesVector,line_); }
             // Check the head pole distance
             int headPoleIndex = line_->getPolesList().front();
             head_pole_center_ = (*polesVector)[headPoleIndex]->getCentroid();
@@ -81,7 +81,7 @@ Control LineFollowerMO::computeOperationControl()
         ekf_.setupControlMatrix(last_control_.linear,last_control_.angular,control);
         ekf_.estimate(control, measurement, state_);
 
-        GUI_->drawState(state_);
+        if (GUI_) { GUI_->drawState(state_); }
 
         // Compute the error
         float errorX = desired_x_ - state_.dy;
@@ -116,6 +116,7 @@ TurnWithCompassMO::TurnWithCompassMO(const FileStorage &fs,
       k_(1.5f),
       line_follower_(false),
       end_epsilon_(fs["Uturn"]["endEpsilon"]),
+      end_gamma_(fs["Uturn"]["endGamma"]),
       r_(std::numeric_limits<float>::max()),
       theta_(0.0f),
       sigma_(0.0f),
@@ -150,6 +151,7 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
     steered_angle_ = currentBearing - start_bearing_;
 
     bool updateTarget = false;
+    vineyard::Pole::Ptr nearest;
     if (head_pole_ID_ == -1)
     {
         ego_.computeRigidTransform(polesVector, transform_);
@@ -167,20 +169,20 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
         target_direction_.x = transform_(0,0) * dx + transform_(0,1) * dy + transform_(0,2);
         target_direction_.y = transform_(1,0) * dx + transform_(1,1) * dy + transform_(1,2);
 
+        float minDistancePH = std::numeric_limits<float>::max();
         for (vineyard::Pole_Ptr p : (*polesVector))
         {
             // distance pole-headPole
             float distancePH = cv::norm(cv::Point2f(p->getCentroid().x - head_pole_.x, p->getCentroid().y - head_pole_.y));
+            float supposedHeadPoleDistance = cv::norm(p->getCentroid());
 
-            if (distancePH < head_pole_threshold_)
+            if (distancePH < head_pole_threshold_ && supposedHeadPoleDistance < minDistancePH)
             {
-
+                nearest = p;
                 head_pole_ = p->getCentroid();
                 head_pole_ID_ = p->ID();
 
                 updateTarget = true;
-
-                break;
             }
         }
     }
@@ -191,6 +193,7 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
         {
             if (p->ID() == head_pole_ID_)
             {
+                nearest = p;
                 head_pole_ = p->getCentroid();
                 found = true;
                 break;
@@ -222,9 +225,7 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
     // Update the direction if I can see a line
     if (line_follower_)
     {
-        vineyard::LineParams lineParams;
-        vineyard::Pole::Ptr nearest;
-        pe_.findNearestPole(*polesVector, false, nearest);
+        //pe_.findNearestPole(*polesVector, false, nearest);
 
         if (nearest)
         {
@@ -232,8 +233,8 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
 
             if (line_)
             {
-                GUI_->drawLine(*polesVector,line_);
-                lineParams = line_->getLineParameters();
+                if (GUI_) { GUI_->drawLine(*polesVector,line_); }
+                vineyard::LineParams lineParams = line_->getLineParameters();
 
                 target_point_ = head_pole_ - k_ * cv::Point2f(lineParams.vy, -lineParams.vx);
                 target_direction_ = target_point_ + cv::Point2f(lineParams.vx, lineParams.vy);
@@ -241,8 +242,8 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
         }
     }
 
-    GUI_->drawHeadPole(head_pole_);
-    GUI_->drawTarget(target_point_, target_direction_);
+    if (GUI_) { GUI_->drawHeadPole(head_pole_); }
+    if (GUI_) { GUI_->drawTarget(target_point_, target_direction_); }
 }
 
 Control TurnWithCompassMO::computeOperationControl()
@@ -270,7 +271,11 @@ Control TurnWithCompassMO::computeOperationControl()
 bool TurnWithCompassMO::checkOperationEnd() const
 {
     // controllo fine operazione
-    return r_ <= end_epsilon_;
+    float difference = std::abs(theta_ - sigma_);
+    difference = difference >= M_PI ? difference - 2 * M_PI : difference;
+    difference = difference < -M_PI ? difference + 2 * M_PI : difference;
+
+    return r_ <= end_epsilon_ || difference <= end_gamma_;
 }
 
 }   // namespace nav

@@ -57,7 +57,7 @@ public:
      */
     explicit LineFollowerMO(const cv::FileStorage &fs,
                             const bool onRight,
-                            const std::shared_ptr<gui> &gui);
+                            const std::shared_ptr<gui> &gui = nullptr);
 
     /*!
      * \brief updateParameters update the internal parameters of the class with new data
@@ -127,7 +127,7 @@ public:
      */
     explicit TurnWithCompassMO(const cv::FileStorage &fs,
                                               const bool onRight,
-                                              const std::shared_ptr<gui> &gui);
+                                              const std::shared_ptr<gui> &gui = nullptr);
 
     void initialize(const std::shared_ptr< std::vector< vineyard::Pole::Ptr > > &polesVector,
                     const float currentBearing,
@@ -187,7 +187,8 @@ private:
         line_follower_;
 
     float
-        end_epsilon_;
+        end_epsilon_,
+        end_gamma_;
 
     float
         r_,

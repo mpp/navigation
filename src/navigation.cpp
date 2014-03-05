@@ -86,19 +86,19 @@ int main(int argc, char **argv)
 
     std::shared_ptr<nav::MotionOperation> mo;
     bool initialized = false;
-    if (operation.compare("L001") == 0)
+    if (operation.compare("001L") == 0)
     {
         mo = std::make_shared<nav::LineFollowerMO>(fs, false, GUI);
     }
-    else if (operation.compare("R001") == 0)
+    else if (operation.compare("001R") == 0)
     {
         mo = std::make_shared<nav::LineFollowerMO>(fs, true, GUI);
     }
-    else if (operation.compare("L003") == 0)
+    else if (operation.compare("003L") == 0)
     {
         mo = std::make_shared<nav::TurnWithCompassMO>(fs, false, GUI);
     }
-    else if (operation.compare("R003") == 0)
+    else if (operation.compare("003R") == 0)
     {
         mo = std::make_shared<nav::TurnWithCompassMO>(fs, true, GUI);
     }
@@ -144,7 +144,7 @@ int main(int argc, char **argv)
         GUI->drawPoints(ptVector);
         GUI->drawPoles(*polesVector);
 
-        if ((operation.compare("L001") == 0 || operation.compare("R001") == 0) && f.frameID >= 400)
+        if ((operation.compare("001L") == 0 || operation.compare("001R") == 0) && f.frameID >= 400)
         {
             std::shared_ptr<nav::LineFollowerMO> lfmo = std::static_pointer_cast<nav::LineFollowerMO>(mo);
 
@@ -160,7 +160,7 @@ int main(int argc, char **argv)
                 return 0;
             }
         }
-        if ((operation.compare("L003") == 0 || operation.compare("R003") == 0))
+        if ((operation.compare("003L") == 0 || operation.compare("003R") == 0))
         {
             std::shared_ptr<nav::TurnWithCompassMO> twcmo = std::static_pointer_cast<nav::TurnWithCompassMO>(mo);
 

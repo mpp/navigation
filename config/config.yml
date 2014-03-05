@@ -22,7 +22,7 @@ logparser:
     # /home/mpp/DODICH/Registrazioni/
     # -- Laboratorio
     # /home/dodich/DODICH/Registrazioni/
-    path: /home/dodich/DODICH/Registrazioni/
+    path: /home/mpp/DODICH/Registrazioni/
 
     # Opzioni
     #
@@ -38,13 +38,15 @@ logparser:
     # 02180842_ls_sick.csv
     # -- Caso 6 - nuova rotazione
     # 02281618_ls_sick.csv
-    file: "02281618_ls_sick.csv"
+    # -- Caso 7 - rotazione 28 febbraio
+    # 03031520_ls_sick.csv
+    file: "03031520_ls_sick.csv"
 
     # Here goes the operation, it can be
-    # L001
-    # R001
+    # 001L
+    # 001R
     # ...
-    operation: "L003"
+    operation: "003L"
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
 ##---------------------------------------------------------------------------##
@@ -75,7 +77,7 @@ poleExtractor:
     maxClusterSize: 100 
 
     # the maximum distance between 2 poles candidates to be considered the same pole, for tracking purposes
-    maximumPolesDistance: 0.2 
+    maximumPolesDistance: 0.25 
 
     # for the FLANN Hierarchical clustering (deprecated)
     branchingFactor: 10 
@@ -126,8 +128,9 @@ Uturn:
     epsilon: 0.2
     beta: 0.4
     gamma: 2
-    headPoleThreshold: 1.5
-    endEpsilon: 1.0
+    headPoleThreshold: 2.5
+    endEpsilon: 0.5
+    endGamma: 0.15
 
 ##---------------------------------------------------------------------------##
 ## GUI parameters
