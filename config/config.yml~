@@ -11,7 +11,7 @@
 ##---------------------------------------------------------------------------##
 logparser:
     # Frame per second of the log playback
-    waitkey: 100
+    waitkey: 0
 
     # If empty the sw uses real sensors
     #
@@ -42,7 +42,9 @@ logparser:
     # 03031520_ls_sick.csv
     # -- Caso 8 - rotazione a destra
     # 02141035_ls_sick_dx.csv
-    file: "02141035_ls_sick_dx.csv"
+    # -- Caso 8 - rotazione a destra marzo
+    # 03051425_ls_sick.csv
+    file: "03051425_ls_sick.csv"
 
     # Here goes the operation, it can be
     # 001L
@@ -54,16 +56,16 @@ logparser:
 ##---------------------------------------------------------------------------##
 laserscanfilter:
     # minimum distance threshold (mt)
-    minDistance: 1.1 
+    minDistance: 0.2 
 
     # minimum distance threshold (mt)
     maxDistance: 7.5 
 
     # minimum angle of scan (deg) - 0° is in front of the scanner
-    minAngle: -2.35619449 
+    minAngle: -2.15619449 
 
     # maximum angle of scan (deg) - 0° is in front of the scanner
-    maxAngle: 2.35619449 
+    maxAngle: 2.15619449 
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the poles extractor class
@@ -130,7 +132,7 @@ Uturn:
     epsilon: 0.2
     beta: 0.4
     gamma: 2
-    headPoleThreshold: 2.5
+    headPoleThreshold: 2.0
     endEpsilon: 0.5
     endGamma: 0.15
 

@@ -144,7 +144,7 @@ int main(int argc, char **argv)
         GUI->drawPoints(ptVector);
         GUI->drawPoles(*polesVector);
 
-        if ((operation.compare("001L") == 0 || operation.compare("001R") == 0) && f.frameID >= 400)
+        if ((operation.compare("001L") == 0 || operation.compare("001R") == 0))
         {
             std::shared_ptr<nav::LineFollowerMO> lfmo = std::static_pointer_cast<nav::LineFollowerMO>(mo);
 
@@ -160,7 +160,7 @@ int main(int argc, char **argv)
                 return 0;
             }
         }
-        if ((operation.compare("003L") == 0 || operation.compare("003R") == 0) && f.frameID >= 5900)
+        if ((operation.compare("003L") == 0 || operation.compare("003R") == 0))
         {
             std::shared_ptr<nav::TurnWithCompassMO> twcmo = std::static_pointer_cast<nav::TurnWithCompassMO>(mo);
 

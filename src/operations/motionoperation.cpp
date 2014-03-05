@@ -125,6 +125,8 @@ TurnWithCompassMO::TurnWithCompassMO(const FileStorage &fs,
       on_right_(onRight)
 {
     GUI_ = gui;
+    transform_(0,0) = 1.0f;transform_(0,1) = 0.0f;transform_(0,2) = 0.0f;
+    transform_(1,0) = 0.0f;transform_(1,1) = 1.0f;transform_(1,2) = 0.0f;
 }
 
 void TurnWithCompassMO::initialize(const std::shared_ptr<std::vector<vineyard::Pole::Ptr> > &polesVector,
@@ -141,14 +143,17 @@ void TurnWithCompassMO::initialize(const std::shared_ptr<std::vector<vineyard::P
         if (!on_right_)
         {
             target_point_ = head_pole_ + cv::Point2f(0,-k_);
-            target_direction_ = target_point_ + cv::Point2f(-1,0);
+            target_direction_ = target_point_ + cv::Point2f(-1,1);
         }
         else
         {
             target_point_ = head_pole_ + cv::Point2f(0,k_);
-            target_direction_ = target_point_ + cv::Point2f(1,0);
+            target_direction_ = target_point_ + cv::Point2f(-1,1);
         }
         start_bearing_ = currentBearing;
+
+        if (GUI_) { GUI_->drawHeadPole(head_pole_); }
+        if (GUI_) { GUI_->drawTarget(target_point_, target_direction_); }
     }
 }
 
@@ -162,7 +167,10 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
     vineyard::Pole::Ptr nearest;
     if (head_pole_ID_ == -1)
     {
-        ego_.computeRigidTransform(polesVector, transform_);
+        if (polesVector->size() > 4)
+        {
+            ego_.computeRigidTransform(polesVector, transform_);
+        }
 
         float hx = head_pole_.x,
               hy = head_pole_.y;
@@ -289,18 +297,30 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
 Control TurnWithCompassMO::computeOperationControl()
 {
     // Compute the linear and angular velocities
-    float targetDirectionAngle = std::atan2(-(target_direction_.y-target_point_.y), target_direction_.x-target_point_.x);
-    float targetAngle = std::atan2(-1 * target_point_.y, target_point_.x);
-
-    targetDirectionAngle = targetDirectionAngle >= M_PI ? targetDirectionAngle - 2 * M_PI : targetDirectionAngle;
-    targetDirectionAngle = targetDirectionAngle < -M_PI ? targetDirectionAngle + 2 * M_PI : targetDirectionAngle;
-    targetAngle = targetAngle >= M_PI ? targetAngle - 2 * M_PI : targetAngle;
-    targetAngle = targetAngle < -M_PI ? targetAngle + 2 * M_PI : targetAngle;
+    float targetDirectionAngle;
+    float targetAngle;
+    if (on_right_)
+    {
+        targetDirectionAngle = std::atan2(target_direction_.y-target_point_.y, -(target_direction_.x-target_point_.x));
+        targetAngle = std::atan2(target_point_.y, target_point_.x);
+    }
+    else
+    {
+        targetDirectionAngle = std::atan2(-(target_direction_.y-target_point_.y), target_direction_.x-target_point_.x);
+        targetAngle = std::atan2(-1 * target_point_.y, target_point_.x);
+    }
+    targetDirectionAngle = targetDirectionAngle > M_PI ? targetDirectionAngle - 2 * M_PI : targetDirectionAngle;
+    targetDirectionAngle = targetDirectionAngle <= -M_PI ? targetDirectionAngle + 2 * M_PI : targetDirectionAngle;
+    targetAngle = targetAngle > M_PI ? targetAngle - 2 * M_PI : targetAngle;
+    targetAngle = targetAngle <= -M_PI ? targetAngle + 2 * M_PI : targetAngle;
 
 
     r_ = cv::norm(target_point_);
     theta_ = targetDirectionAngle - targetAngle;
     sigma_ = targetAngle;
+
+    theta_ = theta_ > M_PI ? theta_ - 2 * M_PI : theta_;
+    theta_ = theta_ <= -M_PI ? theta_ + 2 * M_PI : theta_;
 
     float linear = u_turn_mp_.computeLinearVelocity(r_,theta_,sigma_);
     float angular = u_turn_mp_.computeAngularVelocity(linear,r_,theta_,sigma_);
@@ -312,8 +332,10 @@ bool TurnWithCompassMO::checkOperationEnd() const
 {
     // controllo fine operazione
     float difference = std::abs(theta_ - sigma_);
-    difference = difference >= M_PI ? difference - 2 * M_PI : difference;
-    difference = difference < -M_PI ? difference + 2 * M_PI : difference;
+    difference = difference >= 2*M_PI ? difference - 2 * M_PI : difference;
+    difference = difference < 0 ? difference + 2 * M_PI : difference;
+
+    difference = std::abs(difference);
 
     return r_ <= end_epsilon_ || difference <= end_gamma_;
 }
