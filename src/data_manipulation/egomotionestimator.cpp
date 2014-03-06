@@ -71,6 +71,11 @@ void EgoMotionEstimator::computeRigidTransform(const std::shared_ptr<std::vector
         }
     }
 
+    if (commonSubsetCurr.size() <= 0 || commonSubsetPrev.size() <= 0)
+    {
+        return;
+    }
+
     // Take only the k nearest points
     int k = 10;
     if (commonSubsetPrev.size() > k)

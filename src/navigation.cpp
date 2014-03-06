@@ -17,7 +17,7 @@
 //#define EGOMOTION_ESTIMATION_
 
 void help();
-void checkValueAndEnqueue(deque<float> &queue, const float value);
+float runningAverage(deque<float> &queue, const float value);
 
 //////
 /// RANDOM NUMBER GENERATOR
@@ -83,6 +83,11 @@ int main(int argc, char **argv)
 
     std::string operation;
     fs["logparser"]["operation"] >> operation;
+
+    std::deque<float> leftVel, rightVel;
+    float maxV;
+    fs["globalMP"]["maxV"] >> maxV;
+
 
     std::shared_ptr<nav::MotionOperation> mo;
     bool initialized = false;
@@ -188,6 +193,25 @@ int main(int argc, char **argv)
 
                 control = twcmo->computeOperationControl();
 
+                float robotWidth = 0.6;
+                float wheelRadius = 0.35;
+
+                float lv = (control.linear + robotWidth * control.angular) / wheelRadius;
+                float rv = (control.linear - robotWidth * control.angular) / wheelRadius;
+
+                lv = lv > 0.05 ? lv : 0.05;
+                rv = rv > 0.05 ? rv : 0.05;
+
+                float maxWheelVelocityValue = (maxV + robotWidth * maxV * M_PI / 4) / wheelRadius;
+
+                lv = lv / maxWheelVelocityValue;
+                rv = rv / maxWheelVelocityValue;
+
+                float leftAveraged = runningAverage(leftVel, lv);
+                float rightAveraged = runningAverage(rightVel, rv);
+
+                std::cout << "(l,r) = (" << leftAveraged << ", " << rightAveraged << ")" << "(lv,rv) = (" << lv << ", " << rv << ")" << std::endl;
+
                 if (twcmo->checkOperationEnd())
                 {
                     cv::waitKey();
@@ -198,74 +222,39 @@ int main(int argc, char **argv)
 
         c = GUI->show();
     }
-
-    /**
-     * TODO
-
-        linearVelocity = UTurnMP.computeLinearVelocity(r,theta,sigma);
-        angularVelocity = UTurnMP.computeAngularVelocity(linearVelocity,r,theta,sigma);
-
-        float robotWidth = 0.6;
-        float wheelRadius = 0.35;
-
-        float lv = (linearVelocity + robotWidth * angularVelocity) / wheelRadius;
-        float rv = (linearVelocity - robotWidth * angularVelocity) / wheelRadius;
-
-        lv = lv > 0.05 ? lv : 0.05;
-        rv = rv > 0.05 ? rv : 0.05;
-
-        float maxWheelVelocityValue = (maxV + robotWidth * maxV * M_PI / 4) / wheelRadius;
-
-        lv = lv / maxWheelVelocityValue;
-        rv = rv / maxWheelVelocityValue;
-
-        checkValueAndEnqueue(leftVel, lv);
-        checkValueAndEnqueue(rightVel, rv);
-        */
-
 }
 
-void checkValueAndEnqueue(deque<float> &queue, const float value)
+float runningAverage(deque<float> &queue, const float value)
 {
     // buffer size
-    int k = 5;
+    int k = 16;
     int size = queue.size();
     if (size == 0)
     {
         queue.push_back(value);
-        return;
+        return value;
+    }
+    queue.push_back(value);
+
+    if (queue.size() >= k)
+    {
+        queue.pop_front();
     }
 
+    size = queue.size();
     // check if the value is in range with the others
-    float min = std::numeric_limits<float>::max(),
-          max = -std::numeric_limits<float>::max(),
-          average = 0.0f;
+    float average = 0.0f;
+    float totalWeight = 0.0f;
+    int counter = 1;
     for (float v : queue)
     {
-        average = average + v;
-        if (v < min)
-        {
-            min = v;
-        }
-        if (v > max)
-        {
-            max = v;
-        }
+        average = average + v * (float)counter / size;
+        totalWeight = totalWeight + (float)counter / size;
+        counter++;
     }
-    average = average / size;
+    average = average / totalWeight;
 
-    float epsilon = 0.15f;
-    float variance = std::abs(value - average);
-
-    if (variance <= epsilon)
-    {
-        queue.push_back(value);
-
-        if (queue.size() >= k)
-        {
-            queue.pop_front();
-        }
-    }
+    return average;
 }
 
 void help()

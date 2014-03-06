@@ -269,6 +269,10 @@ void gui::drawTarget(const cv::Point2f &targetPoint,
                radius_, red_, thickness_);
 
     cv::line(image_, (targetPoint * factor_) + center_, (targetDirection * factor_) + center_, red_, 2);
+
+    float mag = cv::norm(targetPoint);
+    cv::Point2f tar = targetPoint * (1/mag);
+    cv::line(image_, (-1 * max_radius_ * tar * factor_) + center_, (max_radius_ * tar * factor_) + center_, yellow_, 1);
 }
 
 }

@@ -44,7 +44,24 @@ logparser:
     # 02141035_ls_sick_dx.csv
     # -- Caso 8 - rotazione a destra marzo
     # 03051425_ls_sick.csv
-    file: "03051425_ls_sick.csv"
+    # -- Casi 9 - rotazione destra 5 marzo
+    # 03051653 -> K = 6 stretta
+    # 03051657 -> K = 6 stretta
+    # 03051700 -> K = 6 si e' bloccato dopo 3/5 gradi senza continuare la manovra
+    # 03051701 -> K = 6 si e' bloccato dopo circa 20/30 gradi senza continuare la manovra
+    # -- Casi 10 - test rotazione destra 6 marzo
+    # 03061053 -> k = 4.2, partenza più distante, errore opencv
+    # 03061047 -> k = 4.5, partenza da ~60°, si è fermato dopo ~90°
+    # 03061044 -> k = 4.5, si ferma subito
+    # 03061042 -> come sopra
+    # 03061034 -> k = 5, partenza ritardata, ruota interna bloccata
+    # 03061025 -> k = 4, largo
+    # 03061024 -> k = 5.5, stretto
+    # -- Casi 11
+    # 03061457
+    #03061556
+    file: "03061556_ls_sick.csv"
+
 
     # Here goes the operation, it can be
     # 001L
@@ -56,16 +73,16 @@ logparser:
 ##---------------------------------------------------------------------------##
 laserscanfilter:
     # minimum distance threshold (mt)
-    minDistance: 0.2 
+    minDistance: 0.3 
 
     # minimum distance threshold (mt)
-    maxDistance: 7.5 
+    maxDistance: 7.0 
 
     # minimum angle of scan (deg) - 0° is in front of the scanner
-    minAngle: -2.15619449 
+    minAngle: -2.20
 
     # maximum angle of scan (deg) - 0° is in front of the scanner
-    maxAngle: 2.15619449 
+    maxAngle: 2.20 
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the poles extractor class
@@ -127,7 +144,7 @@ lineFollower:
 # Following the indication of: http://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 Uturn:
     k1: 1
-    k2: 10
+    k2: 4.2
     k3:  1
     epsilon: 0.2
     beta: 0.4

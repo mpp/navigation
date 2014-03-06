@@ -224,20 +224,20 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
 
         /// TODO the magic number must be justified!! It is good only for M_PI rotation.
         /// Instead of this, check if the angle of the line found is above M_PI/2...
-        if (steered_angle_ >= M_PI/5)
-        {
+        //if (steered_angle_ >= M_PI/5)
+        //{
             line_follower_ = true;
-        }
+        //}
     }
 
     if (updateTarget)
     {
         if (on_right_)
         {
-            target_point_.x = k_ * std::cos(M_PI/2 - steered_angle_) + head_pole_.x;
-            target_point_.y = k_ * std::sin(M_PI/2 - steered_angle_) + head_pole_.y;
-            target_direction_.x = std::cos(M_PI - steered_angle_) + target_point_.x;
-            target_direction_.y = std::sin(M_PI - steered_angle_) + target_point_.y;
+            target_point_.x = k_ * std::cos(-M_PI/2 - steered_angle_) + head_pole_.x;
+            target_point_.y = -1 * k_ * std::sin(-M_PI/2 - steered_angle_) + head_pole_.y;
+            target_direction_.x = std::cos(-M_PI - steered_angle_) + target_point_.x;
+            target_direction_.y = -1 * std::sin(-M_PI - steered_angle_) + target_point_.y;
         }
         else
         {
@@ -259,32 +259,51 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
 
             if (line_)
             {
-                // Update the head pole with the nearest pole of the line
-                float minPoleDistance = cv::norm(head_pole_);
-
-                for (vineyard::PoleIndex idx : line_->getPolesList())
-                {
-                    cv::Point2f current = (*polesVector)[idx]->getCentroid();
-                    float distance = cv::norm(current);
-                    if (distance < minPoleDistance)
-                    {
-                        head_pole_ = current;
-                        minPoleDistance = distance;
-                    }
-                }
-
-                if (GUI_) { GUI_->drawLine(*polesVector,line_); }
                 vineyard::LineParams lineParams = line_->getLineParameters();
-
-                if (on_right_)
+                // check if the line is robust
+                int
+                        firstIDX = line_->getPolesList().back(),
+                        lastIDX = line_->getPolesList().front();
+                cv::Point2f
+                        first = (*polesVector)[firstIDX]->getCentroid(),
+                        last = (*polesVector)[lastIDX]->getCentroid();
+                if (cv::norm(first) > cv::norm(last))
                 {
-                    target_point_ = head_pole_ + k_ * cv::Point2f(lineParams.vy, -lineParams.vx);
-                    target_direction_ = target_point_ + cv::Point2f(lineParams.vx, lineParams.vy);
+                    cv::Point2f temp = first;
+                    first = last;
+                    last = temp;
                 }
-                else
+
+                float lineAngle = std::atan2(last.y - first.y, last.x - first.x);
+                if (std::abs(lineAngle) <= M_PI / 2)
                 {
-                    target_point_ = head_pole_ - k_ * cv::Point2f(lineParams.vy, -lineParams.vx);
-                    target_direction_ = target_point_ + cv::Point2f(lineParams.vx, lineParams.vy);
+                    // Update the head pole with the nearest pole of the line
+                    float minPoleDistance = cv::norm(head_pole_);
+
+                    for (vineyard::PoleIndex idx : line_->getPolesList())
+                    {
+                        cv::Point2f current = (*polesVector)[idx]->getCentroid();
+                        float distance = cv::norm(current);
+                        if (distance < minPoleDistance)
+                        {
+                            head_pole_ = current;
+                            minPoleDistance = distance;
+                        }
+                    }
+
+                    if (GUI_) { GUI_->drawLine(*polesVector,line_); }
+
+
+                    if (on_right_)
+                    {
+                        target_point_ = head_pole_ + k_ * cv::Point2f(lineParams.vy, -lineParams.vx);
+                        target_direction_ = target_point_ + cv::Point2f(lineParams.vx, lineParams.vy);
+                    }
+                    else
+                    {
+                        target_point_ = head_pole_ - k_ * cv::Point2f(lineParams.vy, -lineParams.vx);
+                        target_direction_ = target_point_ + cv::Point2f(lineParams.vx, lineParams.vy);
+                    }
                 }
             }
         }
@@ -299,16 +318,10 @@ Control TurnWithCompassMO::computeOperationControl()
     // Compute the linear and angular velocities
     float targetDirectionAngle;
     float targetAngle;
-    if (on_right_)
-    {
-        targetDirectionAngle = std::atan2(target_direction_.y-target_point_.y, -(target_direction_.x-target_point_.x));
-        targetAngle = std::atan2(target_point_.y, target_point_.x);
-    }
-    else
-    {
-        targetDirectionAngle = std::atan2(-(target_direction_.y-target_point_.y), target_direction_.x-target_point_.x);
-        targetAngle = std::atan2(-1 * target_point_.y, target_point_.x);
-    }
+
+    targetDirectionAngle = std::atan2(-(target_direction_.y-target_point_.y), target_direction_.x-target_point_.x);
+    targetAngle = std::atan2(-1 * target_point_.y, target_point_.x);
+
     targetDirectionAngle = targetDirectionAngle > M_PI ? targetDirectionAngle - 2 * M_PI : targetDirectionAngle;
     targetDirectionAngle = targetDirectionAngle <= -M_PI ? targetDirectionAngle + 2 * M_PI : targetDirectionAngle;
     targetAngle = targetAngle > M_PI ? targetAngle - 2 * M_PI : targetAngle;
@@ -317,7 +330,7 @@ Control TurnWithCompassMO::computeOperationControl()
 
     r_ = cv::norm(target_point_);
     theta_ = targetDirectionAngle - targetAngle;
-    sigma_ = targetAngle;
+    sigma_ = 0 - targetAngle;
 
     theta_ = theta_ > M_PI ? theta_ - 2 * M_PI : theta_;
     theta_ = theta_ <= -M_PI ? theta_ + 2 * M_PI : theta_;
