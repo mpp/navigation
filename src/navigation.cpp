@@ -17,7 +17,7 @@
 //#define EGOMOTION_ESTIMATION_
 
 void help();
-float runningAverage(deque<float> &queue, const float value);
+float runningAverage(std::deque<float> &queue, const float value);
 
 //////
 /// RANDOM NUMBER GENERATOR
@@ -149,6 +149,12 @@ int main(int argc, char **argv)
         GUI->drawPoints(ptVector);
         GUI->drawPoles(*polesVector);
 
+        if (f.oper_t.compare("003R") != 0 && f.oper_t.compare("003L") != 0 &&
+            f.oper_t.compare("001R") != 0 && f.oper_t.compare("001L") != 0 )
+        {
+            continue;
+        }
+
         if ((operation.compare("001L") == 0 || operation.compare("001R") == 0))
         {
             std::shared_ptr<nav::LineFollowerMO> lfmo = std::static_pointer_cast<nav::LineFollowerMO>(mo);
@@ -224,7 +230,7 @@ int main(int argc, char **argv)
     }
 }
 
-float runningAverage(deque<float> &queue, const float value)
+float runningAverage(std::deque<float> &queue, const float value)
 {
     // buffer size
     int k = 16;

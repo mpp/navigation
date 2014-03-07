@@ -42,7 +42,7 @@ LineExtractor::LineExtractor(const cv::FileStorage &fs)
 }
 
 float LineExtractor::distanceLinePole(const LineParams &lineParam,
-                                      const Point2f &poleCenter)
+                                      const cv::Point2f &poleCenter)
 {
     float k1,k2,x,y,dx,dy;
     k1 = (poleCenter.x - lineParam.x0) / lineParam.vx;

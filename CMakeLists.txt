@@ -23,7 +23,7 @@ add_executable(
     src/sensors_drivers/logparser.cpp
 #    src/sensors_drivers/phidgetdevice.cpp
     src/utils/gui.cpp
-    src/utils/ransac.cpp
+#    src/utils/ransac.cpp
     src/data_types/pole.cpp
     src/data_types/line.cpp
     src/data_manipulation/poleextractor.cpp

@@ -35,7 +35,6 @@
 #include <memory>
 
 #include "../data_types/line.h"
-#include "../utils/ransac.h"
 
 namespace vineyard
 {

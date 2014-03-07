@@ -61,7 +61,7 @@ void EgoMotionEstimator::computeRigidTransform(const std::shared_ptr<std::vector
             prevIT++;
             currIT++;
         }
-        if (prevIT->id < currIT->id)
+        else if (prevIT->id < currIT->id)
         {
             prevIT++;
         }

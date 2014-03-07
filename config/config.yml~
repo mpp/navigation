@@ -61,7 +61,13 @@ logparser:
     # 03061457
     # 03061556
     # 03061723_ls_sick
-    file: "03061723_ls_sick.csv"
+    # -- Casi 12 7 marzo
+    # 03071340
+    # 03071346
+    # 03071335_ls_sick
+    # 03071442 610
+    # 03071556_610
+    file: "03071556_ls_sick.csv"
 
 
     # Here goes the operation, it can be
@@ -145,14 +151,14 @@ lineFollower:
 # Following the indication of: http://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 Uturn:
     k1: 1
-    k2: 4.2
+    k2: 3.5
     k3:  1
     epsilon: 0.2
     beta: 0.4
     gamma: 2
-    headPoleThreshold: 2.0
-    endEpsilon: 0.5
-    endGamma: 0.15
+    headPoleThreshold: 2.5
+    endEpsilon: 1.0
+    endGamma: 0.2
 
 ##---------------------------------------------------------------------------##
 ## GUI parameters

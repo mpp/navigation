@@ -103,7 +103,7 @@ bool LineFollowerMO::checkOperationEnd() const
 ///////////////////////////////////////////////////////////////////////
 /// Turn with compass Motion Operation
 ///////////////////////////////////////////////////////////////////////
-TurnWithCompassMO::TurnWithCompassMO(const FileStorage &fs,
+TurnWithCompassMO::TurnWithCompassMO(const cv::FileStorage &fs,
                                                                    const bool onRight,
                                                                    const std::shared_ptr<gui> &gui)
     : ego_(EgoMotionEstimator(4)),
@@ -131,7 +131,7 @@ TurnWithCompassMO::TurnWithCompassMO(const FileStorage &fs,
 
 void TurnWithCompassMO::initialize(const std::shared_ptr<std::vector<vineyard::Pole::Ptr> > &polesVector,
                                                   const float currentBearing,
-                                                  const Point2f &headPole)
+                                                  const cv::Point2f &headPole)
 {
     if (!ego_initialized_)
     {
@@ -185,19 +185,19 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
         target_direction_.x = transform_(0,0) * dx + transform_(0,1) * dy + transform_(0,2);
         target_direction_.y = transform_(1,0) * dx + transform_(1,1) * dy + transform_(1,2);
 
-        float minDistancePH = std::numeric_limits<float>::max();
+        float minDistanceOrigin = std::numeric_limits<float>::max();
         for (vineyard::Pole_Ptr p : (*polesVector))
         {
             // distance pole-headPole
             float distancePH = cv::norm(cv::Point2f(p->getCentroid().x - head_pole_.x, p->getCentroid().y - head_pole_.y));
             float supposedHeadPoleDistance = cv::norm(p->getCentroid());
 
-            if (distancePH < head_pole_threshold_ && supposedHeadPoleDistance < minDistancePH)
+            if (distancePH < head_pole_threshold_ && supposedHeadPoleDistance < minDistanceOrigin)
             {
                 nearest = p;
                 head_pole_ = p->getCentroid();
                 head_pole_ID_ = p->ID();
-
+                minDistanceOrigin = supposedHeadPoleDistance;
                 updateTarget = true;
             }
         }
@@ -218,6 +218,24 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
         if (!found)
         {
             head_pole_ID_ = -1;
+        }
+        else
+        {
+            float minDistanceOrigin = std::numeric_limits<float>::max();
+            for (vineyard::Pole_Ptr p : (*polesVector))
+            {
+                // distance pole-headPole
+                float distancePH = cv::norm(cv::Point2f(p->getCentroid().x - head_pole_.x, p->getCentroid().y - head_pole_.y));
+                float supposedHeadPoleDistance = cv::norm(p->getCentroid());
+
+                if (distancePH < head_pole_threshold_ && supposedHeadPoleDistance < minDistanceOrigin)
+                {
+                    nearest = p;
+                    head_pole_ = p->getCentroid();
+                    head_pole_ID_ = p->ID();
+                    minDistanceOrigin = supposedHeadPoleDistance;
+                }
+            }
         }
 
         updateTarget = true;
@@ -349,6 +367,8 @@ bool TurnWithCompassMO::checkOperationEnd() const
     difference = difference < 0 ? difference + 2 * M_PI : difference;
 
     difference = std::abs(difference);
+
+    //std::cout << "r_ " << r_ << " - difference " << difference << std::endl;
 
     return r_ <= end_epsilon_ || difference <= end_gamma_;
 }
