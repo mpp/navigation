@@ -31,7 +31,7 @@
 #ifndef POLE_H
 #define POLE_H
 
-#include <stack>
+#include <deque>
 #include <memory>
 
 #include <opencv2/opencv.hpp>
@@ -171,7 +171,7 @@ private:
 
     std::vector<cv::Point2f> kf_history_;   //!< estimation history
 
-    static std::stack<int> available_ids_;
+    static std::deque<int> available_ids_;
 
 };
 

@@ -59,7 +59,9 @@ logparser:
     # 03061024 -> k = 5.5, stretto
     # -- Casi 11
     # 03061457
-    file: "03061457_ls_sick.csv"
+    # 03061556
+    # 03061723_ls_sick
+    file: "03061723_ls_sick.csv"
 
 
     # Here goes the operation, it can be
@@ -75,7 +77,7 @@ laserscanfilter:
     minDistance: 0.3 
 
     # minimum distance threshold (mt)
-    maxDistance: 7.0 
+    maxDistance: 6.0 
 
     # minimum angle of scan (deg) - 0° is in front of the scanner
     minAngle: -2.20
@@ -88,13 +90,13 @@ laserscanfilter:
 ##---------------------------------------------------------------------------##
 poleExtractor:
     # the maximum distance between two points of the same pole
-    clusterTolerance: 0.12 
+    clusterTolerance: 0.25 
 
     # the minimum number of point to define a pole
     minClusterSize: 2 
 
     # the maximum number of point that can rely to a pole
-    maxClusterSize: 100 
+    maxClusterSize: 30 
 
     # the maximum distance between 2 poles candidates to be considered the same pole, for tracking purposes
     maximumPolesDistance: 0.25 

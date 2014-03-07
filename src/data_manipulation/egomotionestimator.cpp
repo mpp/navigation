@@ -71,13 +71,16 @@ void EgoMotionEstimator::computeRigidTransform(const std::shared_ptr<std::vector
         }
     }
 
+    // Swap the vectors
+    previous_poles_vector_.swap(currentPolesVector);
+
     if (commonSubsetCurr.size() <= 0 || commonSubsetPrev.size() <= 0)
     {
         return;
     }
 
     // Take only the k nearest points
-    int k = 10;
+    int k = 5;
     if (commonSubsetPrev.size() > k)
     {
         std::sort(commonSubsetPrev.begin(), commonSubsetPrev.end(), pointASCDistanceSort);
@@ -86,9 +89,6 @@ void EgoMotionEstimator::computeRigidTransform(const std::shared_ptr<std::vector
         commonSubsetPrev.erase(commonSubsetPrev.begin()+k,commonSubsetPrev.end());
         commonSubsetCurr.erase(commonSubsetCurr.begin()+k,commonSubsetCurr.end());
     }
-
-    // Swap the vectors
-    previous_poles_vector_.swap(currentPolesVector);
 
     // Pass the common subset to the rigid transform estimator
     cv::Mat temp = cv::estimateRigidTransform(commonSubsetPrev, commonSubsetCurr, false);

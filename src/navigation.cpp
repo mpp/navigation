@@ -181,7 +181,7 @@ int main(int argc, char **argv)
                 {
                     twcmo->initialize(polesVector,
                                       f.bearing,
-                                      cv::Point2f(-2.5f, 2.0f));
+                                      cv::Point2f(-2.5f, 1.5f));
                 }
                 initialized = true;
             }

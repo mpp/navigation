@@ -34,7 +34,7 @@
 namespace vineyard
 {
 
-std::stack<int> Pole::available_ids_;
+std::deque<int> Pole::available_ids_;
 
 Pole::Pole(const std::shared_ptr< const std::vector<cv::Point2f> > &pointsVector)
 {
@@ -98,14 +98,14 @@ Pole::~Pole()
 {
     if (id_ != -1)
     {
-        available_ids_.push(id_);
+        available_ids_.push_back(id_);
     }
 }
 
 void Pole::requestID()
 {
-    id_ = available_ids_.top();
-    available_ids_.pop();
+    id_ = available_ids_.front();
+    available_ids_.pop_front();
 }
 
 cv::Point2f Pole::getCentroid() const
@@ -119,7 +119,7 @@ void Pole::initializeAvailableIDs()
     {
         for (int i = 999; i >= 0; i--)
         {
-            available_ids_.push(i);
+            available_ids_.push_front(i);
         }
     }
 }

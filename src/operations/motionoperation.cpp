@@ -143,12 +143,12 @@ void TurnWithCompassMO::initialize(const std::shared_ptr<std::vector<vineyard::P
         if (!on_right_)
         {
             target_point_ = head_pole_ + cv::Point2f(0,-k_);
-            target_direction_ = target_point_ + cv::Point2f(-1,1);
+            target_direction_ = target_point_ + cv::Point2f(-1,0);
         }
         else
         {
             target_point_ = head_pole_ + cv::Point2f(0,k_);
-            target_direction_ = target_point_ + cv::Point2f(-1,1);
+            target_direction_ = target_point_ + cv::Point2f(-1,0);
         }
         start_bearing_ = currentBearing;
 
