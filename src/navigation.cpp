@@ -199,25 +199,10 @@ int main(int argc, char **argv)
 
                 control = twcmo->computeOperationControl();
 
-                float robotWidth = 0.6;
-                float wheelRadius = 0.35;
-
-                float lv = (control.linear + robotWidth * control.angular) / wheelRadius;
-                float rv = (control.linear - robotWidth * control.angular) / wheelRadius;
-
-                lv = lv > 0.05 ? lv : 0.05;
-                rv = rv > 0.05 ? rv : 0.05;
-
-                float maxWheelVelocityValue = (maxV + robotWidth * maxV * M_PI / 4) / wheelRadius;
-
-                lv = lv / maxWheelVelocityValue;
-                rv = rv / maxWheelVelocityValue;
-
-                float leftAveraged = runningAverage(leftVel, lv);
-                float rightAveraged = runningAverage(rightVel, rv);
-
-                std::cout << "(l,r) = (" << leftAveraged << ", " << rightAveraged << ")" << "(lv,rv) = (" << lv << ", " << rv << ")" << std::endl;
-
+                /** LOG */
+                float r, theta, sigma;
+                twcmo->getLogStatus(r, theta, sigma);
+                /**     */
                 if (twcmo->checkOperationEnd())
                 {
                     cv::waitKey();
@@ -225,6 +210,25 @@ int main(int argc, char **argv)
                 }
             }
         }
+
+        float robotWidth = 0.6;
+        float wheelRadius = 0.35;
+
+        float lv = (control.linear + robotWidth * control.angular) / wheelRadius;
+        float rv = (control.linear - robotWidth * control.angular) / wheelRadius;
+
+        //lv = lv > 0.05 ? lv : 0.05;
+        //rv = rv > 0.05 ? rv : 0.05;
+
+        float maxWheelVelocityValue = (maxV + robotWidth * maxV * M_PI / 4) / wheelRadius;
+
+        lv = lv / maxWheelVelocityValue;
+        rv = rv / maxWheelVelocityValue;
+
+        //float leftAveraged = runningAverage(leftVel, lv);
+        //float rightAveraged = runningAverage(rightVel, rv);
+
+        std::cout << "(lv,rv) = (" << lv << ", " << rv << ")" << std::endl;
 
         c = GUI->show();
     }

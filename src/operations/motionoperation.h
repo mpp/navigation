@@ -146,6 +146,8 @@ public:
 
     bool checkOperationEnd() const;
 
+    inline void getLogStatus(float &r, float &theta, float &sigma) const { r = r_; theta = theta_; sigma = sigma_; }
+
 private:
 
 private:

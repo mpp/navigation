@@ -142,13 +142,13 @@ void TurnWithCompassMO::initialize(const std::shared_ptr<std::vector<vineyard::P
         head_pole_ = headPole;
         if (!on_right_)
         {
-            target_point_ = head_pole_ + cv::Point2f(0,-k_);
-            target_direction_ = target_point_ + cv::Point2f(-1,0);
+            target_point_ = head_pole_ + cv::Point2f(-k_,0);
+            target_direction_ = target_point_ + cv::Point2f(0,-1);
         }
         else
         {
-            target_point_ = head_pole_ + cv::Point2f(0,k_);
-            target_direction_ = target_point_ + cv::Point2f(-1,0);
+            target_point_ = head_pole_ + cv::Point2f(k_,0);
+            target_direction_ = target_point_ + cv::Point2f(0,1);
         }
         start_bearing_ = currentBearing;
 
@@ -252,17 +252,17 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
     {
         if (on_right_)
         {
-            target_point_.x = k_ * std::cos(-M_PI/2 - steered_angle_) + head_pole_.x;
-            target_point_.y = -1 * k_ * std::sin(-M_PI/2 - steered_angle_) + head_pole_.y;
-            target_direction_.x = std::cos(-M_PI - steered_angle_) + target_point_.x;
-            target_direction_.y = -1 * std::sin(-M_PI - steered_angle_) + target_point_.y;
+            target_point_.x = -1 * k_ * std::cos(-M_PI - steered_angle_) + head_pole_.x;
+            target_point_.y = k_ * std::sin(-M_PI - steered_angle_) + head_pole_.y;
+            target_direction_.x = std::cos(-M_PI/2 - steered_angle_) + target_point_.x;
+            target_direction_.y = -1 * std::sin(-M_PI/2 - steered_angle_) + target_point_.y;
         }
         else
         {
-            target_point_.x = k_ * std::cos(M_PI/2 - steered_angle_) + head_pole_.x;
-            target_point_.y = -1 * k_ * std::sin(M_PI/2 - steered_angle_) + head_pole_.y;
-            target_direction_.x = std::cos(M_PI - steered_angle_) + target_point_.x;
-            target_direction_.y = -1 * std::sin(M_PI - steered_angle_) + target_point_.y;
+            target_point_.x = -1 * k_ * std::cos(M_PI - steered_angle_) + head_pole_.x;
+            target_point_.y = k_ * std::sin(M_PI - steered_angle_) + head_pole_.y;
+            target_direction_.x = std::cos(M_PI/2 - steered_angle_) + target_point_.x;
+            target_direction_.y = -1 * std::sin(M_PI/2 - steered_angle_) + target_point_.y;
         }
     }
 

@@ -67,7 +67,21 @@ logparser:
     # 03071335_ls_sick
     # 03071442 610
     # 03071556_610
-    file: "03071556_ls_sick.csv"
+    # 03071547
+    # -- Caso 13 8 marzo
+    # 03081003_ls_sick    
+    # -- Casi 14 9 marzo
+    # 03091143_ls_sick
+    # 03091147_ls_sick
+    # -- Casi 15 10 marzo
+    # 03101104_ls_sick
+    # -- Casi 16 10 marzo pm
+    # 03101354_ls_sick
+    # 03101407_ls_sick
+    # 03101406_ls_sick
+    # 03101354_ls_sick
+    # 03101350_ls_sick
+    file: "03091143_ls_sick.csv"
 
 
     # Here goes the operation, it can be
@@ -122,7 +136,7 @@ lineExtractor:
     maxDistanceFromLastLine: 0.6
     reps: 0.0001 # Sufficient accuracy for the radius (distance between the coordinate origin and the line).
     aeps: 0.0001 # Sufficient accuracy for the angle. 0.01 would be a good default value for reps and aeps.
-    minLineSize: 4 # Minimum number of poles for a line
+    minLineSize: 3 # Minimum number of poles for a line
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the navigation planners
