@@ -42,19 +42,25 @@ namespace vineyard {
 typedef struct LineParams_
 {
     float
-        vx,             // (vx,vy) is a vector parallel to the line
+        vx,             //!< (vx,vy) is a vector parallel to the line
         vy,
-        x0,             // (x0,y0) is a point on the line
+        x0,             //!< (x0,y0) is a point on the line
         y0;
 
+//    float               //!< Polar coordinates of the line:
+//        r,              //!< absolute distance of the line from the origin
+//        theta;          //!< angle (-M_PI, M_PI] of the line
+
     int
-        head_pole_ID;   // The ID of the head pole of the line
+        head_pole_ID;   //!< The ID of the head pole of the line
 
     float
-        head_pole_x,    // Position of the head pole
+        head_pole_x,    //!< Position of the head pole
         head_pole_y;
 
 } LineParams;
+
+typedef std::shared_ptr<LineParams> LineParams_Ptr;
 
 class Line
 {

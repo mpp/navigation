@@ -81,7 +81,9 @@ logparser:
     # 03101406_ls_sick
     # 03101354_ls_sick
     # 03101350_ls_sick
-    file: "03091143_ls_sick.csv"
+    # 03101556_ls_sick 910
+    # 03101104_ls_sick
+    file: "03101112_ls_sick.csv"
 
 
     # Here goes the operation, it can be
@@ -97,7 +99,7 @@ laserscanfilter:
     minDistance: 0.3 
 
     # minimum distance threshold (mt)
-    maxDistance: 6.0 
+    maxDistance: 12.0 
 
     # minimum angle of scan (deg) - 0° is in front of the scanner
     minAngle: -2.20
@@ -132,11 +134,12 @@ poleExtractor:
 ##---------------------------------------------------------------------------##
 lineExtractor:
     # the maximum distance (mt) between two poles that are assigned to the same line
-    maxPoleDistance: 1.8 
+    maxPoleDistance: 3.5 
     maxDistanceFromLastLine: 0.6
     reps: 0.0001 # Sufficient accuracy for the radius (distance between the coordinate origin and the line).
     aeps: 0.0001 # Sufficient accuracy for the angle. 0.01 would be a good default value for reps and aeps.
-    minLineSize: 3 # Minimum number of poles for a line
+    minLineSize: 4 # !!!!MUST BE >= 4!!! Minimum number of poles for a line, fitLine does not work with values < 4
+    epsilon: 0.6
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the navigation planners
@@ -165,7 +168,7 @@ lineFollower:
 # Following the indication of: http://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 Uturn:
     k1: 1
-    k2: 3.5
+    k2: 3
     k3:  1
     epsilon: 0.2
     beta: 0.4

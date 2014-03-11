@@ -119,7 +119,7 @@ void Line::computeLineExtremes(cv::Point2f &a, cv::Point2f &b) const
     dx = std::abs(polePt.x - x);
     dy = std::abs(polePt.y - y);
 
-    // project the point in x and in y on the line, take the nearer
+    // project the point in x and in y on the line, take the nearest
     if (dx < dy)
     {
         b.x = x;

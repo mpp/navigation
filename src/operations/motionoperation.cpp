@@ -273,7 +273,18 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
 
         if (nearest)
         {
-            le_.extractLineFromNearestPole(polesVector, nearest, line_, (line_?true:false));
+            if (!line_)
+            {
+                // Here use the line bearing in place of 0.0f and 1.0f
+                vineyard::LineParams fakeParams = {0.0f, 1.0f,
+                                                   nearest->getCentroid().x, nearest->getCentroid().y,
+                                                   nearest->ID(),
+                                                   nearest->getCentroid().x, nearest->getCentroid().y};
+                line_ = std::make_shared<vineyard::Line>(polesVector, fakeParams);
+            }
+            std::cout << nearest->ID() << std::endl;
+            le_.extractLineFromNearestPole(polesVector, nearest, line_, true);
+            //le_.extractLineFromNearestPole(polesVector, nearest, line_, (line_?true:false));
 
             if (line_)
             {

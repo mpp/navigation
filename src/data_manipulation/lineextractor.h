@@ -35,6 +35,7 @@
 #include <memory>
 
 #include "../data_types/line.h"
+#include "../utils/angles.h"
 
 namespace vineyard
 {
@@ -82,6 +83,9 @@ private:
     double
         reps_,                       //!< Sufficient accuracy for the radius (distance between the coordinate origin and the line).
         aeps_;                       //!< Sufficient accuracy for the angle. 0.01 would be a good default value for reps and aeps.
+
+    float
+        epsilon_;
 
 };
 
