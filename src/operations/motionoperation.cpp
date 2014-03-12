@@ -25,7 +25,8 @@ LineFollowerMO::LineFollowerMO(const cv::FileStorage &fs,
 
 void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard::Pole::Ptr> > &polesVector,
                                       const Control &lastControl,
-                                      const float currentBearing)
+                                      const float currentBearing,
+                                      const float vineyardBearing)
 {
     current_bearing_ = currentBearing;
 
@@ -52,7 +53,24 @@ void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard
     // Extract the line and update the head-pole distance
     if (nearest_)
     {
-        le_.extractLineFromNearestPole(polesVector, nearest_, line_, useLastLine);
+        //float angoloFilare = 96*M_PI/180;
+        float angolo = currentBearing - vineyardBearing;
+        if (!line_)
+        {
+            // Here use the line bearing in place of 0.0f and 1.0f
+            angolo = nav::normalizeAngle_PI(angolo);
+
+            vineyard::LineParams fakeParams = {std::cos(angolo), std::sin(angolo),
+                                               nearest_->getCentroid().x, nearest_->getCentroid().y,
+                                               nearest_->ID(),
+                                               nearest_->getCentroid().x, nearest_->getCentroid().y};
+            line_ = std::make_shared<vineyard::Line>(polesVector, fakeParams);
+            std::cout << nearest_->ID() << " - " << angolo << " - " << std::cos(angolo) << " - " << std::sin(angolo) << std::endl;
+
+            if (GUI_) { GUI_->drawLastLine(line_,false); }
+        }
+        //le_.extractLineFromNearestPole(polesVector, nearest_, line_, useLastLine);
+        le_.extractLineFromNearestPole(polesVector, nearest_, line_, true);
 
         if (line_)
         {
@@ -81,6 +99,7 @@ Control LineFollowerMO::computeOperationControl()
         ekf_.setupControlMatrix(last_control_.linear,last_control_.angular,control);
         ekf_.estimate(control, measurement, state_);
 
+        std::cout << measurement << std::endl;
         if (GUI_) { GUI_->drawState(state_); }
 
         // Compute the error
@@ -97,6 +116,7 @@ Control LineFollowerMO::computeOperationControl()
 
 bool LineFollowerMO::checkOperationEnd() const
 {
+    std::cout << head_pole_distance_ << " - " << min_head_pole_distance_ << std::endl;
     return (head_pole_distance_ < min_head_pole_distance_ && head_pole_center_.x < 0);
 }
 
@@ -159,7 +179,8 @@ void TurnWithCompassMO::initialize(const std::shared_ptr<std::vector<vineyard::P
 
 void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<vineyard::Pole::Ptr> > &polesVector,
                                                         const Control &lastControl,
-                                                        const float currentBearing)
+                                                        const float currentBearing,
+                                                        const float vineyardBearing)
 {
     steered_angle_ = currentBearing - start_bearing_;
 
@@ -276,11 +297,16 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
             if (!line_)
             {
                 // Here use the line bearing in place of 0.0f and 1.0f
-                vineyard::LineParams fakeParams = {0.0f, 1.0f,
+                //float angoloFilare = 96*M_PI/180;
+                float angolo = currentBearing - vineyardBearing;
+                angolo = nav::normalizeAngle_PI(angolo);
+
+                vineyard::LineParams fakeParams = {std::cos(angolo), std::sin(angolo),
                                                    nearest->getCentroid().x, nearest->getCentroid().y,
                                                    nearest->ID(),
                                                    nearest->getCentroid().x, nearest->getCentroid().y};
                 line_ = std::make_shared<vineyard::Line>(polesVector, fakeParams);
+                if (GUI_) { GUI_->drawLastLine(line_,false); }
             }
             std::cout << nearest->ID() << std::endl;
             le_.extractLineFromNearestPole(polesVector, nearest, line_, true);

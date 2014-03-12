@@ -36,7 +36,7 @@ public:
     void drawLine(const std::vector< vineyard::Pole::Ptr > &polesVector,
                   const vineyard::Line::Ptr &line);
 
-    void drawLastLine(const vineyard::Line::Ptr &line);
+    void drawLastLine(const vineyard::Line::Ptr &line, bool safe = true);
 
     void drawState(const nav::SystemState &state);
 
@@ -83,6 +83,7 @@ private:
     cv::Scalar black_;
     cv::Scalar green_;
     cv::Scalar lightGreen_;
+    cv::Scalar lightRed_;
     cv::Scalar lightGray_;
     cv::Scalar blue_;
     cv::Scalar yellow_;

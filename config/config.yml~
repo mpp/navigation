@@ -22,7 +22,7 @@ logparser:
     # /home/mpp/DODICH/Registrazioni/
     # -- Laboratorio
     # /home/dodich/DODICH/Registrazioni/
-    path: /home/mpp/DODICH/Registrazioni/
+    path: /home/dodich/DODICH/Registrazioni/
 
     # Opzioni
     #
@@ -83,14 +83,19 @@ logparser:
     # 03101350_ls_sick
     # 03101556_ls_sick 910
     # 03101104_ls_sick
-    file: "03101112_ls_sick.csv"
+    # -- Casi 17 12 marzo mattina
+    # 03120840_ls_sick test su vigneto largo, inseguimento filare a destra
+    # -- Casi 18 12 marzo pomeriggio
+    # 03121400_ls_sick
+    # 03121410_ls_sick
+    file: "03121410_ls_sick.csv"
 
 
     # Here goes the operation, it can be
     # 001L
     # 001R
     # ...
-    operation: "003R"
+    operation: "001R"
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
 ##---------------------------------------------------------------------------##
@@ -135,7 +140,7 @@ poleExtractor:
 lineExtractor:
     # the maximum distance (mt) between two poles that are assigned to the same line
     maxPoleDistance: 3.5 
-    maxDistanceFromLastLine: 0.6
+    maxDistanceFromLastLine: 1.0
     reps: 0.0001 # Sufficient accuracy for the radius (distance between the coordinate origin and the line).
     aeps: 0.0001 # Sufficient accuracy for the angle. 0.01 would be a good default value for reps and aeps.
     minLineSize: 4 # !!!!MUST BE >= 4!!! Minimum number of poles for a line, fitLine does not work with values < 4
@@ -188,7 +193,7 @@ gui:
 
     center: [ 615, 350 ]
 
-    poleIDOffset: [ 0.0, -7.0 ]
+    poleIDOffset: [ -20.0, -7.0 ]
     poleRadius: 6
     lineThickness: 3
 
@@ -204,6 +209,7 @@ gui:
         blue: [ 255,50,50,0 ]
         green: [ 50,200,50,0 ]
         lightGreen: [ 150,255,150,0 ]
+        lightRed: [ 150,150,255,0 ]
         yellow: [ 50,255,255,0 ]   
 
 ## Here can go other parameters

@@ -66,7 +66,8 @@ public:
      */
     void updateParameters(const std::shared_ptr< std::vector< vineyard::Pole::Ptr > > &polesVector,
                           const Control &lastControl,
-                          const float currentBearing);
+                          const float currentBearing,
+                          const float vineyardBearing);
 
     Control computeOperationControl();
 
@@ -140,7 +141,8 @@ public:
      */
     void updateParameters(const std::shared_ptr< std::vector< vineyard::Pole::Ptr > > &polesVector,
                           const Control &lastControl,
-                          const float currentBearing);
+                          const float currentBearing,
+                          const float vineyardBearing);
 
     Control computeOperationControl();
 

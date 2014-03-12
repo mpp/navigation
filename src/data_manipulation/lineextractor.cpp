@@ -189,6 +189,8 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
                 float diff2 = currentCenter.y - (*polesVector)[i]->getCentroid().y;
                 float currentSDistance = diff1*diff1 + diff2*diff2;
 
+                int id = (*polesVector)[i]->ID();
+
                 if (currentSDistance < minSDistance && currentSDistance < maximum_pole_distance_*maximum_pole_distance_)
                 {
                     // If I already have a line I use it as a reference to accept or refuse poles
@@ -237,7 +239,12 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
 
     if (temp.getPolesList().size() < min_line_size_)
     {
-        line.reset();
+        lineParam.head_pole_ID = currentNearestNeighbor->ID();
+        lineParam.head_pole_x = currentNearestNeighbor->getCentroid().x;
+        lineParam.head_pole_y = currentNearestNeighbor->getCentroid().y;
+        temp.setLineParameters(lineParam);
+        line = std::make_shared<Line>(temp);
+        //line.reset();
         return;
     }
     // Fit the line and set the parameters in the line object

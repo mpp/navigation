@@ -161,7 +161,8 @@ int main(int argc, char **argv)
 
             lfmo->updateParameters(polesVector,
                                    control,
-                                   f.bearing);
+                                   f.bearing,
+                                   96*M_PI/180);
 
             control = lfmo->computeOperationControl();
 
@@ -195,7 +196,8 @@ int main(int argc, char **argv)
             {
                 twcmo->updateParameters(polesVector,
                                        control,
-                                       f.bearing);
+                                       f.bearing,
+                                       96*M_PI/180);
 
                 control = twcmo->computeOperationControl();
 

@@ -52,6 +52,11 @@ void EKFStateEstimator::setupMeasurementMatrix(const vineyard::LineParams &lineP
 
     float theta = std::atan2(lineParams.vy, lineParams.vx);
 
+    if (std::isnan(d))
+    {
+        d = 0;
+    }
+
     measurement = cv::Mat::zeros(3,1,CV_32F);
     measurement.at<float>(0) = d;
     measurement.at<float>(1) = theta;

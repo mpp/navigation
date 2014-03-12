@@ -42,6 +42,7 @@ gui::gui(const cv::FileStorage &fs, const std::string winName, const int waitTim
     green_      = read(fs["gui"]["colors"]["green"]);
     lightGreen_  = read(fs["gui"]["colors"]["lightGreen"]);
     lightGray_  = read(fs["gui"]["colors"]["lightGray"]);
+    lightRed_  = read(fs["gui"]["colors"]["lightRed"]);
     blue_       = read(fs["gui"]["colors"]["blue"]);
     yellow_     = read(fs["gui"]["colors"]["yellow"]);
 
@@ -222,11 +223,11 @@ void gui::drawLine(const std::vector<vineyard::Pole::Ptr> &polesVector,
 }
 
 
-void gui::drawLastLine(const vineyard::Line::Ptr &line)
+void gui::drawLastLine(const vineyard::Line::Ptr &line, bool safe)
 {
     cv::Point2f pta,ptb;
     line->computeLineExtremes2(pta,ptb);
-    cv::line(image_, pta*factor_+center_, ptb*factor_+center_, lightGreen_, factor_*line_tollerance_);
+    cv::line(image_, pta*factor_+center_, ptb*factor_+center_, (safe?lightGreen_:lightRed_), factor_*line_tollerance_);
 }
 
 void gui::drawState(const SystemState &state)
