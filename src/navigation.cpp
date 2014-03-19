@@ -150,7 +150,7 @@ int main(int argc, char **argv)
         GUI->drawPoles(*polesVector);
 
         if (f.oper_t.compare("003R") != 0 && f.oper_t.compare("003L") != 0 &&
-            f.oper_t.compare("001R") != 0 && f.oper_t.compare("001L") != 0)
+            f.oper_t.compare("001R") != 0 && f.oper_t.compare("001L") != 0 || f.frameID <= 3400)
         {
             continue;
         }
@@ -174,7 +174,7 @@ int main(int argc, char **argv)
                 return 0;
             }
         }
-        if ((operation.compare("003L") == 0 || operation.compare("003R") == 0) /*&& f.frameID > 2400*/)
+        if ((operation.compare("003L") == 0 || operation.compare("003R") == 0))
         {
             std::shared_ptr<nav::TurnWithCompassMO> twcmo = std::static_pointer_cast<nav::TurnWithCompassMO>(mo);
 
@@ -184,13 +184,13 @@ int main(int argc, char **argv)
                 {
                     twcmo->initialize(polesVector,
                                       f.bearing,
-                                      cv::Point2f(-2.5f, -2.0f));
+                                      cv::Point2f(-0.5f, -2.5f));
                 }
                 else
                 {
                     twcmo->initialize(polesVector,
                                       f.bearing,
-                                      cv::Point2f(-2.5f, 1.5f));
+                                      cv::Point2f(-0.5f, 2.5f));
                 }
                 initialized = true;
             }

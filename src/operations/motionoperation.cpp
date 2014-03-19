@@ -151,7 +151,8 @@ TurnWithCompassMO::TurnWithCompassMO(const cv::FileStorage &fs,
 
 void TurnWithCompassMO::initialize(const std::shared_ptr<std::vector<vineyard::Pole::Ptr> > &polesVector,
                                                   const float currentBearing,
-                                                  const cv::Point2f &headPole)
+                                                  const cv::Point2f &headPole,
+                                                  bool fixedStart)
 {
     if (!ego_initialized_)
     {
@@ -171,7 +172,15 @@ void TurnWithCompassMO::initialize(const std::shared_ptr<std::vector<vineyard::P
             target_direction_ = target_point_ + cv::Point2f(0,1);
         }
         start_bearing_ = currentBearing;
-        fixed_start_maneuvre_ = true;
+
+        if (fixedStart)
+        {
+            fixed_start_maneuvre_ = true;
+        }
+        else
+        {
+            fixed_start_maneuvre_ = false;
+        }
 
         if (GUI_) { GUI_->drawHeadPole(head_pole_); }
         if (GUI_) { GUI_->drawTarget(target_point_, target_direction_); }
@@ -187,7 +196,7 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
     steered_angle_ = normalizeAngle_PI(steered_angle_);
 
     //std::cout << steered_angle_ << std::endl;
-    if (std::abs(steered_angle_) < M_PI / 2)
+    if (fixed_start_maneuvre_ && std::abs(steered_angle_) < M_PI / 2)
     {
         // do nothing, the output velocities are fixed
     }

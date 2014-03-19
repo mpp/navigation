@@ -132,7 +132,8 @@ public:
 
     void initialize(const std::shared_ptr< std::vector< vineyard::Pole::Ptr > > &polesVector,
                     const float currentBearing,
-                    const cv::Point2f &headPole);
+                    const cv::Point2f &headPole,
+                    bool fixedStart = false);
 
     /*!
      * \brief updateParameters update the internal parameters of the class with new data

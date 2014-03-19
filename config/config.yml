@@ -11,7 +11,7 @@
 ##---------------------------------------------------------------------------##
 logparser:
     # Frame per second of the log playback
-    waitkey: 33
+    waitkey: 300
 
     # If empty the sw uses real sensors
     #
@@ -99,14 +99,16 @@ logparser:
     # 03181542_ls_sick
     # 03190810_ls_sick
     # 03181843_ls_sick_no_fine
-    file: "03061025_ls_sick.csv"
+    # ---
+    # 03191403_ls_sick
+    file: "03191403_ls_sick.csv"
 
 
     # Here goes the operation, it can be
     # 001L
     # 001R
     # ...
-    operation: "003R"
+    operation: "001L"
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
 ##---------------------------------------------------------------------------##
@@ -184,7 +186,7 @@ lineFollower:
 # Following the indication of: http://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 Uturn:
     k1: 0.2
-    k2: 5
+    k2: 1
     k3:  0.5
     beta: 0.4
     lambda: 2
