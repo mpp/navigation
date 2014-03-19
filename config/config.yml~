@@ -99,14 +99,14 @@ logparser:
     # 03181542_ls_sick
     # 03190810_ls_sick
     # 03181843_ls_sick_no_fine
-    file: "03181542_ls_sick.csv"
+    file: "03160843_ls_sick.csv"
 
 
     # Here goes the operation, it can be
     # 001L
     # 001R
     # ...
-    operation: "001R"
+    operation: "003L"
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
 ##---------------------------------------------------------------------------##
@@ -151,7 +151,7 @@ poleExtractor:
 lineExtractor:
     # the maximum distance (mt) between two poles that are assigned to the same line
     maxPoleDistance: 3.5 
-    maxDistanceFromLastLine: 1.0
+    maxDistanceFromLastLine: 2.0
     reps: 0.0001 # Sufficient accuracy for the radius (distance between the coordinate origin and the line).
     aeps: 0.0001 # Sufficient accuracy for the angle. 0.01 would be a good default value for reps and aeps.
     minLineSize: 4 # !!!!MUST BE >= 4!!! Minimum number of poles for a line, fitLine does not work with values < 4

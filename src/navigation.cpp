@@ -164,6 +164,8 @@ int main(int argc, char **argv)
                                    f.bearing,
                                    96*M_PI/180);
 
+            //std::cout << "bearing " << f.bearing << std::endl;
+
             control = lfmo->computeOperationControl();
 
             if (lfmo->checkOperationEnd())
@@ -172,7 +174,7 @@ int main(int argc, char **argv)
                 return 0;
             }
         }
-        if ((operation.compare("003L") == 0 || operation.compare("003R") == 0) && f.frameID > 2400)
+        if ((operation.compare("003L") == 0 || operation.compare("003R") == 0) /*&& f.frameID > 2400*/)
         {
             std::shared_ptr<nav::TurnWithCompassMO> twcmo = std::static_pointer_cast<nav::TurnWithCompassMO>(mo);
 

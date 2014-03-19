@@ -210,6 +210,9 @@ private:
 
     bool
         on_right_;
+
+    bool
+        fixed_start_maneuvre_;
 };
 
 } //namespace nav
