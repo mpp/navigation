@@ -11,7 +11,7 @@
 ##---------------------------------------------------------------------------##
 logparser:
     # Frame per second of the log playback
-    waitkey: 100
+    waitkey: 33
 
     # If empty the sw uses real sensors
     #
@@ -22,7 +22,7 @@ logparser:
     # /home/mpp/DODICH/Registrazioni/
     # -- Laboratorio
     # /home/dodich/DODICH/Registrazioni/
-    path: /home/dodich/DODICH/Registrazioni/
+    path: /home/mpp/DODICH/Registrazioni/
 
     # Opzioni
     #
@@ -88,14 +88,25 @@ logparser:
     # -- Casi 18 12 marzo pomeriggio
     # 03121400_ls_sick
     # 03121410_ls_sick
-    file: "03121410_ls_sick.csv"
+    # -- Casi 19 16 marzo mattina Giorgio
+    # 03160849_ls_sick dove non ha seguito il filare partendo da fermo. Il dodich era leggermente non allineato.
+    # 03160843_ls_sick dove la manovra a sinistra e' andata bene anche se troppo stretta e influenzata dai rumori del filare.
+    # -- Casi 29 16 marzo sera Giorgio
+    # 03161815_ls_sick
+    # 03161810_ls_sick
+    # 03161759_ls_sick
+    # ---
+    # 03181542_ls_sick
+    # 03190810_ls_sick
+    # 03181843_ls_sick_no_fine
+    file: "03181542_ls_sick.csv"
 
 
     # Here goes the operation, it can be
     # 001L
     # 001R
     # ...
-    operation: "001R"
+    operation: "003R"
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
 ##---------------------------------------------------------------------------##
@@ -158,7 +169,7 @@ globalMP:
 
 # Following the indication of: http://www.inaut.unsj.edu.ar/Files/Ca1277_03.pdf 
 lineFollower: 
-    desiredDistance: 2.0 # desired distance from the line
+    desiredDistance: 1.7 # desired distance from the line
     desiredTheta: 0.0 # desired angle divergence from the line
 
     ## !!BEWARE!! that changes in maxV and maxOmega involve changes in theese variables
@@ -168,16 +179,15 @@ lineFollower:
     k2: 0.5 
     limitMultiplier: 4
 
-    minHeadPoleDistance: 1.5 # When the head pole is nearer than this threshold the robot have reched the end of the line
+    minHeadPoleDistance: 3.0 # When the head pole is nearer than this threshold the robot have reched the end of the line
     
 # Following the indication of: http://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 Uturn:
-    k1: 1
-    k2: 3
-    k3:  1
-    epsilon: 0.2
+    k1: 0.2
+    k2: 5
+    k3:  0.5
     beta: 0.4
-    gamma: 2
+    lambda: 2
     headPoleThreshold: 2.5
     endEpsilon: 1.0
     endGamma: 0.2

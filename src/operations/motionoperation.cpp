@@ -65,7 +65,7 @@ void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard
                                                nearest_->ID(),
                                                nearest_->getCentroid().x, nearest_->getCentroid().y};
             line_ = std::make_shared<vineyard::Line>(polesVector, fakeParams);
-            std::cout << nearest_->ID() << " - " << angolo << " - " << std::cos(angolo) << " - " << std::sin(angolo) << std::endl;
+            //std::cout << nearest_->ID() << " - " << angolo << " - " << std::cos(angolo) << " - " << std::sin(angolo) << std::endl;
 
             if (GUI_) { GUI_->drawLastLine(line_,false); }
         }
@@ -99,7 +99,7 @@ Control LineFollowerMO::computeOperationControl()
         ekf_.setupControlMatrix(last_control_.linear,last_control_.angular,control);
         ekf_.estimate(control, measurement, state_);
 
-        std::cout << measurement << std::endl;
+        //std::cout << measurement << std::endl;
         if (GUI_) { GUI_->drawState(state_); }
 
         // Compute the error
@@ -308,7 +308,7 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
                 line_ = std::make_shared<vineyard::Line>(polesVector, fakeParams);
                 if (GUI_) { GUI_->drawLastLine(line_,false); }
             }
-            std::cout << nearest->ID() << std::endl;
+            //std::cout << nearest->ID() << std::endl;
             le_.extractLineFromNearestPole(polesVector, nearest, line_, true);
             //le_.extractLineFromNearestPole(polesVector, nearest, line_, (line_?true:false));
 

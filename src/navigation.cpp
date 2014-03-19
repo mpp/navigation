@@ -150,7 +150,7 @@ int main(int argc, char **argv)
         GUI->drawPoles(*polesVector);
 
         if (f.oper_t.compare("003R") != 0 && f.oper_t.compare("003L") != 0 &&
-            f.oper_t.compare("001R") != 0 && f.oper_t.compare("001L") != 0 )
+            f.oper_t.compare("001R") != 0 && f.oper_t.compare("001L") != 0)
         {
             continue;
         }
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
                 return 0;
             }
         }
-        if ((operation.compare("003L") == 0 || operation.compare("003R") == 0))
+        if ((operation.compare("003L") == 0 || operation.compare("003R") == 0) && f.frameID > 2400)
         {
             std::shared_ptr<nav::TurnWithCompassMO> twcmo = std::static_pointer_cast<nav::TurnWithCompassMO>(mo);
 
@@ -230,8 +230,8 @@ int main(int argc, char **argv)
         //float leftAveraged = runningAverage(leftVel, lv);
         //float rightAveraged = runningAverage(rightVel, rv);
 
-        std::cout << "(lv,rv) = (" << lv << ", " << rv << ")" << std::endl;
-
+        //std::cout << "(lv,rv) = (" << lv << ", " << rv << ")" << std::endl;
+        std::cout << lv << ";" << rv << std::endl;
         c = GUI->show();
     }
 }

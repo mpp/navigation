@@ -42,7 +42,7 @@ private:
 
     float               // see formula 15 of the paper
         beta_,
-        gamma_;
+        lambda_;
 
     float
         epsilon_,

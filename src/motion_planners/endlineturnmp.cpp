@@ -7,9 +7,9 @@ EndLineTurnMP::EndLineTurnMP(const cv::FileStorage &fs)
       k2_(fs["Uturn"]["k2"]),
       k3_(fs["Uturn"]["k3"]),
       kMaxV(fs["globalMP"]["maxV"]),
-      epsilon_(fs["Uturn"]["epsilon"]),
+      epsilon_(fs["Uturn"]["endEpsilon"]),
       beta_(fs["Uturn"]["beta"]),
-      gamma_(fs["Uturn"]["gamma"])
+      lambda_(fs["Uturn"]["lambda"])
 {
 }
 
@@ -31,7 +31,7 @@ float EndLineTurnMP::computeLinearVelocity(const float r,
     }
     else
     {
-        v = kMaxV / (1 + beta_ * std::pow(std::abs(curvature_), gamma_));
+        v = kMaxV / (1 + beta_ * std::pow(std::abs(curvature_), lambda_));
     }
 
     return v;
