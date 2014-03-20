@@ -150,7 +150,7 @@ int main(int argc, char **argv)
         GUI->drawPoles(*polesVector);
 
         if (f.oper_t.compare("003R") != 0 && f.oper_t.compare("003L") != 0 &&
-            f.oper_t.compare("001R") != 0 && f.oper_t.compare("001L") != 0 || f.frameID <= 3900)
+            f.oper_t.compare("001R") != 0 && f.oper_t.compare("001L") != 0 || f.frameID <= 2200)
         {
             continue;
         }
@@ -162,7 +162,7 @@ int main(int argc, char **argv)
             lfmo->updateParameters(polesVector,
                                    control,
                                    f.bearing,
-                                   120*M_PI/180);
+                                   90*M_PI/180);
 
             //std::cout << "bearing " << f.bearing << std::endl;
 
@@ -182,10 +182,10 @@ int main(int argc, char **argv)
         {
             std::shared_ptr<nav::TurnWithCompassMO> twcmo = std::static_pointer_cast<nav::TurnWithCompassMO>(mo);
 
-            cv::Point2f initialPolePosition(-0.38,-2.03);
+            cv::Point2f initialPolePosition(-0.58,1.29);
             float forwardDistance = 4.5f;
             float fixedTurnAngle = M_PI/2;
-            float fixedTurnRadius = 1.0f;
+            float fixedTurnRadius = 2.9f;
             float lineAngle = 0.1f;
             if (!initialized)
             {

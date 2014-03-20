@@ -104,14 +104,14 @@ logparser:
     # -- Casi 21 20 marzo mattina
     # 03200736_ls_sick
     # 03200729_ls_sick
-    file: "03191403_ls_sick.csv"
+    file: "03200729_ls_sick.csv"
 
 
     # Here goes the operation, it can be
     # 001L
     # 001R
     # ...
-    operation: "001L"
+    operation: "003R"
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
 ##---------------------------------------------------------------------------##
@@ -193,7 +193,7 @@ Uturn:
     k3:  0.5
     beta: 0.4
     lambda: 2
-    headPoleThreshold: 2.5
+    headPoleThreshold: 1.0
     endEpsilon: 1.0
     endGamma: 0.2
 
