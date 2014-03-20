@@ -150,7 +150,7 @@ int main(int argc, char **argv)
         GUI->drawPoles(*polesVector);
 
         if (f.oper_t.compare("003R") != 0 && f.oper_t.compare("003L") != 0 &&
-            f.oper_t.compare("001R") != 0 && f.oper_t.compare("001L") != 0 || f.frameID <= 3400)
+            f.oper_t.compare("001R") != 0 && f.oper_t.compare("001L") != 0 || f.frameID <= 3900)
         {
             continue;
         }
@@ -162,7 +162,7 @@ int main(int argc, char **argv)
             lfmo->updateParameters(polesVector,
                                    control,
                                    f.bearing,
-                                   96*M_PI/180);
+                                   120*M_PI/180);
 
             //std::cout << "bearing " << f.bearing << std::endl;
 
@@ -170,6 +170,10 @@ int main(int argc, char **argv)
 
             if (lfmo->checkOperationEnd())
             {
+                float exitLineAngle;
+                cv::Point2f headPole;
+                lfmo->getFinalStatus(exitLineAngle, headPole);
+
                 cv::waitKey();
                 return 0;
             }
@@ -178,20 +182,20 @@ int main(int argc, char **argv)
         {
             std::shared_ptr<nav::TurnWithCompassMO> twcmo = std::static_pointer_cast<nav::TurnWithCompassMO>(mo);
 
+            cv::Point2f initialPolePosition(-0.38,-2.03);
+            float forwardDistance = 4.5f;
+            float fixedTurnAngle = M_PI/2;
+            float fixedTurnRadius = 1.0f;
+            float lineAngle = 0.1f;
             if (!initialized)
             {
-                if (operation.compare("003L") == 0)
-                {
-                    twcmo->initialize(polesVector,
-                                      f.bearing,
-                                      cv::Point2f(-0.5f, -2.5f));
-                }
-                else
-                {
-                    twcmo->initialize(polesVector,
-                                      f.bearing,
-                                      cv::Point2f(-0.5f, 2.5f));
-                }
+                twcmo->initialize(polesVector,
+                                  f.bearing,
+                                  initialPolePosition,
+                                  lineAngle,
+                                  forwardDistance,
+                                  fixedTurnAngle,
+                                  fixedTurnRadius);
                 initialized = true;
             }
             else
@@ -205,7 +209,8 @@ int main(int argc, char **argv)
 
                 /** LOG */
                 float r, theta, sigma;
-                twcmo->getLogStatus(r, theta, sigma);
+                cv::Point2f targetPoint, headPole;
+                twcmo->getLogStatus(r, theta, sigma, targetPoint, headPole);
                 /**     */
                 if (twcmo->checkOperationEnd())
                 {

@@ -72,7 +72,7 @@ void gui::refresh()
 char gui::show()
 {
     cv::imshow(win_name_, image_);
-    return cv::waitKey(wait_time_);
+    return cv::waitKey(/*wait_time_*/);
 }
 
 void gui::drawHUD(const int frameNumber)

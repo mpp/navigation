@@ -73,6 +73,11 @@ public:
 
     bool checkOperationEnd() const;
 
+    void getFinalStatus(float &exitLineAngle,
+                        cv::Point2f &headPole) const
+            { exitLineAngle = std::atan2(line_->getLineParameters().vy, line_->getLineParameters().vx);
+              headPole = head_pole_center_;}
+
 private:
 
 private:
@@ -132,7 +137,11 @@ public:
 
     void initialize(const std::shared_ptr< std::vector< vineyard::Pole::Ptr > > &polesVector,
                     const float currentBearing,
-                    const cv::Point2f &headPole,
+                    cv::Point2f initialPole,
+                    float exitLineAngle,
+                    float forwardDistance,
+                    float fixedTurnAngle,
+                    float fixedTurnRadius,
                     bool fixedStart = false);
 
     /*!
@@ -149,9 +158,21 @@ public:
 
     bool checkOperationEnd() const;
 
-    inline void getLogStatus(float &r, float &theta, float &sigma) const { r = r_; theta = theta_; sigma = sigma_; }
+    inline void getLogStatus(float &r,
+                             float &theta,
+                             float &sigma,
+                             cv::Point2f &targetPoint,
+                             cv::Point2f &headPole) const
+        { r = r_; theta = theta_; sigma = sigma_;
+          targetPoint = target_point_; headPole = head_pole_;}
 
 private:
+
+    void computeHeadPole(cv::Point2f initialPole,
+                         float forwardDistance,
+                         float fixedTurnAngle,
+                         float fixedTurnRadius,
+                         float exitLineAngle);
 
 private:
 

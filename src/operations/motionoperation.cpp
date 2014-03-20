@@ -149,10 +149,33 @@ TurnWithCompassMO::TurnWithCompassMO(const cv::FileStorage &fs,
     transform_(1,0) = 0.0f;transform_(1,1) = 1.0f;transform_(1,2) = 0.0f;
 }
 
+void TurnWithCompassMO::computeHeadPole(cv::Point2f initialPole,
+                                        float forwardDistance,
+                                        float fixedTurnAngle,
+                                        float fixedTurnRadius,
+                                        float exitLineAngle)
+{
+    cv::Point2f t; // transform from robot nose at final position to initial position
+    t.y = std::sin(exitLineAngle) * forwardDistance + fixedTurnRadius * (1 - std::cos(fixedTurnAngle));
+    float a = std::cos(exitLineAngle) * forwardDistance;
+    float b = fixedTurnRadius * -1.0 * std::sin(fixedTurnAngle);
+    t.x = -1 * (a + b);
+
+    if (!on_right_)
+    {
+        t.y = -1 * t.y;
+    }
+    head_pole_ = (initialPole - cv::Point2f(-1.5,0)) + t;
+}
+
 void TurnWithCompassMO::initialize(const std::shared_ptr<std::vector<vineyard::Pole::Ptr> > &polesVector,
-                                                  const float currentBearing,
-                                                  const cv::Point2f &headPole,
-                                                  bool fixedStart)
+                                   const float currentBearing,
+                                   cv::Point2f initialPole,
+                                   float exitLineAngle,
+                                   float forwardDistance,
+                                   float fixedTurnAngle,
+                                   float fixedTurnRadius,
+                                   bool fixedStart)
 {
     if (!ego_initialized_)
     {
@@ -160,15 +183,17 @@ void TurnWithCompassMO::initialize(const std::shared_ptr<std::vector<vineyard::P
         ego_initialized_ = true;
 
         // set manually the head pole, for testing purposes
-        head_pole_ = headPole;
+        //head_pole_ = initialPole;
+        computeHeadPole(initialPole, forwardDistance, fixedTurnAngle, fixedTurnRadius, exitLineAngle);
+
         if (!on_right_)
         {
-            target_point_ = head_pole_ + cv::Point2f(-k_,0);
+            target_point_ = head_pole_ + cv::Point2f(k_,0);
             target_direction_ = target_point_ + cv::Point2f(0,-1);
         }
         else
         {
-            target_point_ = head_pole_ + cv::Point2f(k_,0);
+            target_point_ = head_pole_ + cv::Point2f(-k_,0);
             target_direction_ = target_point_ + cv::Point2f(0,1);
         }
         start_bearing_ = currentBearing;
