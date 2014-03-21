@@ -134,6 +134,8 @@ public:
     static inline bool idSort(const Pole::ConstPtr a, const Pole::ConstPtr b) { return idSort(*a, *b); }
     static inline bool idSort(const Pole a, const Pole b) { return a.id_ > b.id_; }
 
+    std::vector<cv::Point2f> getPoints() const;
+
 // Private methods
 private:
 

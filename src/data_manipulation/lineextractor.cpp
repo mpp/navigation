@@ -158,7 +158,11 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
             indices.remove(currentNearestNeighborIndex);
 
             // push the pole's center in the vector of line's points
-            linePoints.push_back(currentCenter);
+            //linePoints.push_back(currentCenter);
+            for (cv::Point2f p : (*polesVector)[currentNearestNeighborIndex]->getPoints())
+            {
+                linePoints.push_back(p);
+            }
 
             // push the pole in the temporary container
             temp.insert_head(currentNearestNeighborIndex);
@@ -224,7 +228,11 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
             indices.remove(currentNearestNeighborIndex);
 
             // push the pole's center in the vector of line's points
-            linePoints.push_back(currentCenter);
+            //linePoints.push_back(currentCenter);
+            for (cv::Point2f p : (*polesVector)[currentNearestNeighborIndex]->getPoints())
+            {
+                linePoints.push_back(p);
+            }
 
             // push the pole in the temporary container
             temp.insert_head(currentNearestNeighborIndex);
@@ -249,7 +257,7 @@ void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std:
     }
     // Fit the line and set the parameters in the line object
     cv::Vec4f lineParamVec;
-    cv::fitLine(linePoints, lineParamVec, CV_DIST_HUBER, 0, reps_, aeps_);
+    cv::fitLine(linePoints, lineParamVec, CV_DIST_L1, 0, reps_, aeps_);
 
     lineParam.head_pole_ID = currentNearestNeighbor->ID();
     lineParam.head_pole_x = currentNearestNeighbor->getCentroid().x;

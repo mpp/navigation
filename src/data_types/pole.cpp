@@ -204,4 +204,9 @@ void Pole::computeCentroid()
     }
 }
 
+std::vector<cv::Point2f> Pole::getPoints() const
+{
+    return *points_vector_;
+}
+
 } // namespace vineyard
