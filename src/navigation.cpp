@@ -149,8 +149,8 @@ int main(int argc, char **argv)
         GUI->drawPoints(ptVector);
         GUI->drawPoles(*polesVector);
 
-        if (f.oper_t.compare("003R") != 0 && f.oper_t.compare("003L") != 0 &&
-            f.oper_t.compare("001R") != 0 && f.oper_t.compare("001L") != 0 || f.frameID <= 2200)
+        if (/*f.oper_t.compare("003R") != 0 && */f.oper_t.compare("003L") != 0/* &&
+            f.oper_t.compare("001R") != 0 && f.oper_t.compare("001L") != 0 || f.frameID <= 3000*/)
         {
             continue;
         }
@@ -162,7 +162,7 @@ int main(int argc, char **argv)
             lfmo->updateParameters(polesVector,
                                    control,
                                    f.bearing,
-                                   90*M_PI/180);
+                                   293*M_PI/180);
 
             //std::cout << "bearing " << f.bearing << std::endl;
 
@@ -192,7 +192,6 @@ int main(int argc, char **argv)
             float fixedTurnAngle = M_PI/2;  // da setup
             float fixedTurnRadius = 1.45f;   // da setup
             //
-
             if (!initialized)
             {
                 twcmo->initialize(polesVector,
@@ -209,7 +208,7 @@ int main(int argc, char **argv)
                 twcmo->updateParameters(polesVector,
                                        control,
                                        f.bearing,
-                                       96*M_PI/180);
+                                       293*M_PI/180);
 
                 control = twcmo->computeOperationControl();
 

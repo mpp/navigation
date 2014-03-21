@@ -395,11 +395,21 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
 
                         if (on_right_)
                         {
+                            if (lineParams.vy <= 0)
+                            {
+                                lineParams.vx = -1 * lineParams.vx;
+                                lineParams.vy = -1 * lineParams.vy;
+                            }
                             target_point_ = head_pole_ + k_ * cv::Point2f(lineParams.vy, -lineParams.vx);
                             target_direction_ = target_point_ + cv::Point2f(lineParams.vx, lineParams.vy);
                         }
                         else
                         {
+                            if (lineParams.vy >= 0)
+                            {
+                                lineParams.vx = -1 * lineParams.vx;
+                                lineParams.vy = -1 * lineParams.vy;
+                            }
                             target_point_ = head_pole_ - k_ * cv::Point2f(lineParams.vy, -lineParams.vx);
                             target_direction_ = target_point_ + cv::Point2f(lineParams.vx, lineParams.vy);
                         }
