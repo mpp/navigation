@@ -170,9 +170,12 @@ int main(int argc, char **argv)
 
             if (lfmo->checkOperationEnd())
             {
-                float exitLineAngle;
-                cv::Point2f headPole;
-                lfmo->getFinalStatus(exitLineAngle, headPole);
+                // messi qui solo per test -> devono essere variabili globali
+                float lineAngle;
+                cv::Point2f initialPolePosition;
+                //
+
+                lfmo->getFinalStatus(lineAngle, initialPolePosition);
 
                 cv::waitKey();
                 return 0;
@@ -182,11 +185,14 @@ int main(int argc, char **argv)
         {
             std::shared_ptr<nav::TurnWithCompassMO> twcmo = std::static_pointer_cast<nav::TurnWithCompassMO>(mo);
 
-            cv::Point2f initialPolePosition(-0.58,1.29);
-            float forwardDistance = 4.5f;
-            float fixedTurnAngle = M_PI/2;
-            float fixedTurnRadius = 2.9f;
-            float lineAngle = 0.1f;
+            // messi qui solo per test -> devono essere variabili globali
+            cv::Point2f initialPolePosition(-0.58,1.29);    // da linefollower
+            float lineAngle = 0.1f;                         // da linefollower
+            float forwardDistance = 4.5f;   // da setup
+            float fixedTurnAngle = M_PI/2;  // da setup
+            float fixedTurnRadius = 1.45f;   // da setup
+            //
+
             if (!initialized)
             {
                 twcmo->initialize(polesVector,
