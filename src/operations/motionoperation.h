@@ -162,9 +162,11 @@ public:
                              float &theta,
                              float &sigma,
                              cv::Point2f &targetPoint,
-                             cv::Point2f &headPole) const
-        { r = r_; theta = theta_; sigma = sigma_;
-          targetPoint = target_point_; headPole = head_pole_;}
+                             cv::Point2f &headPole,
+                             float &currentLineAngle) const
+        {   r = r_; theta = theta_; sigma = sigma_;
+            targetPoint = target_point_; headPole = head_pole_;
+            if (line_) currentLineAngle = atan2(line_->getLineParameters().vy, line_->getLineParameters().vx);  }
 
 private:
 

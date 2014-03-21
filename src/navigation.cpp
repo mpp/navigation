@@ -149,7 +149,7 @@ int main(int argc, char **argv)
         GUI->drawPoints(ptVector);
         GUI->drawPoles(*polesVector);
 
-        if (/*f.oper_t.compare("003R") != 0 && */f.oper_t.compare("001L") != 0/* &&
+        if (/*f.oper_t.compare("003R") != 0 && */f.oper_t.compare("003L") != 0/* &&
             f.oper_t.compare("001R") != 0 && f.oper_t.compare("001L") != 0 || f.frameID <= 3000*/)
         {
             continue;
@@ -215,7 +215,9 @@ int main(int argc, char **argv)
                 /** LOG */
                 float r, theta, sigma;
                 cv::Point2f targetPoint, headPole;
-                twcmo->getLogStatus(r, theta, sigma, targetPoint, headPole);
+                float currentLineAngle;
+                twcmo->getLogStatus(r, theta, sigma, targetPoint, headPole, currentLineAngle);
+                std::cout << currentLineAngle << std::endl;
                 /**     */
                 if (twcmo->checkOperationEnd())
                 {
