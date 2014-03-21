@@ -149,7 +149,7 @@ int main(int argc, char **argv)
         GUI->drawPoints(ptVector);
         GUI->drawPoles(*polesVector);
 
-        if (/*f.oper_t.compare("003R") != 0 && */f.oper_t.compare("003L") != 0/* &&
+        if (/*f.oper_t.compare("003R") != 0 && */f.oper_t.compare(operation) != 0/* &&
             f.oper_t.compare("001R") != 0 && f.oper_t.compare("001L") != 0 || f.frameID <= 3000*/)
         {
             continue;
@@ -168,7 +168,7 @@ int main(int argc, char **argv)
 
             control = lfmo->computeOperationControl();
 
-            if (lfmo->checkOperationEnd())
+            if (lfmo->checkOperationEnd() || f.frameID>= 7148)
             {
                 // messi qui solo per test -> devono essere variabili globali
                 float lineAngle;
@@ -186,8 +186,8 @@ int main(int argc, char **argv)
             std::shared_ptr<nav::TurnWithCompassMO> twcmo = std::static_pointer_cast<nav::TurnWithCompassMO>(mo);
 
             // messi qui solo per test -> devono essere variabili globali
-            cv::Point2f initialPolePosition(-0.465,-1.675);    // da linefollower
-            float lineAngle = 0.05f;                         // da linefollower
+            cv::Point2f initialPolePosition(-0.2,1.64);    // da linefollower
+            float lineAngle = 0.044f;                         // da linefollower
             float forwardDistance = 4.5f;   // da setup
             float fixedTurnAngle = M_PI/2;  // da setup
             float fixedTurnRadius = 1.45f;   // da setup
