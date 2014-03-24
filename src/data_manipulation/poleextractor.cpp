@@ -104,6 +104,7 @@ void PoleExtractor::elaborateCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr &so
             polesVector->push_back(p);
             actual_poles_vector_->push_back(p);
         }
+//        clearNoise();
         return;
     }
 
@@ -181,12 +182,41 @@ void PoleExtractor::elaborateCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr &so
         }
     }
 
+//    clearNoise();
+
     // Copy all the poles to the output array
     for (auto i : *actual_poles_vector_)
     {
         polesVector->push_back(i);
     }
 }
+
+//void PoleExtractor::clearNoise()
+//{
+//    std::vector<Pole::Ptr> noNoiseVector;
+//    for (Pole::Ptr curr : (*actual_poles_vector_))
+//    {
+//        int count = 0;
+//        for (Pole::Ptr p : (*actual_poles_vector_))
+//        {
+//            float distance = cv::norm(curr->getCentroid() - p->getCentroid());
+//            if (distance <= 1.0f)
+//            {
+//                count++;
+//            }
+//        }
+//        std::cout << count << std::endl;
+//        if (count <= 3)
+//        {
+//            noNoiseVector.push_back(curr);
+//        }
+//    }
+//    actual_poles_vector_->clear();
+//    for (auto i : noNoiseVector)
+//    {
+//        actual_poles_vector_->push_back(i);
+//    }
+//}
 
 void PoleExtractor::findNearestPole(const std::vector<Pole::Ptr> &polesVector,
                                     const bool onRight,

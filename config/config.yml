@@ -147,10 +147,10 @@ poleExtractor:
     clusterTolerance: 0.25 
 
     # the minimum number of point to define a pole
-    minClusterSize: 2 
+    minClusterSize: 2
 
     # the maximum number of point that can rely to a pole
-    maxClusterSize: 30 
+    maxClusterSize: 30
 
     # the maximum distance between 2 poles candidates to be considered the same pole, for tracking purposes
     maximumPolesDistance: 0.25

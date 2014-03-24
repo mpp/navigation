@@ -85,7 +85,7 @@ void parseFile(const cv::FileStorage &fs,
                 minDistance = fs["laserscanfilter"]["minDistance"],
                 maxDistance = fs["laserscanfilter"]["maxDistance"];
 
-        /*if (i > 540/2) // vedi solo parte destra
+        /*if (i < 540/2) // vedi solo parte destra
         {
             continue;
         }

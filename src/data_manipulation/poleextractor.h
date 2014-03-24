@@ -105,6 +105,7 @@ private:
                            const std::shared_ptr< const std::vector<pcl::PointIndices> > &clusterIndices,
                            std::shared_ptr<std::vector<std::shared_ptr<Pole> > > &polesVector) const;
 
+    void clearNoise();
 // Private data
 private:
 

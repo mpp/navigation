@@ -236,6 +236,7 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
             {
                 ego_.computeRigidTransform(polesVector, transform_);
             }
+            std::cout << transform_ << std::endl;
 
             float hx = head_pole_.x,
                   hy = head_pole_.y;
@@ -450,6 +451,10 @@ Control TurnWithCompassMO::computeOperationControl()
         sigma_ = 0 - targetAngle;
 
         theta_ = normalizeAngle_PI(theta_);
+
+        std::cout << "punti: " << target_direction_ << " " << target_point_ << std::endl;
+        std::cout << "angoli: " << targetDirectionAngle << " " << targetAngle << std::endl;
+        std::cout << "r-t-s: " << r_ << " " << theta_ << " " << sigma_ << std::endl;
 
         linear = u_turn_mp_.computeLinearVelocity(r_,theta_,sigma_);
         angular = u_turn_mp_.computeAngularVelocity(linear,r_,theta_,sigma_);

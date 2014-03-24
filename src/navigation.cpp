@@ -21,6 +21,11 @@
 void help();
 float runningAverage(std::deque<float> &queue, const float value);
 
+bool endsWith(const std::string& s, const std::string& suffix)
+{
+    return s.rfind(suffix) == (s.size()-suffix.size());
+}
+
 //////
 /// RANDOM NUMBER GENERATOR
 const double DBL_EPS_COMP = 1 - DBL_EPSILON; // DBL_EPSILON is defined in <limits.h>.
@@ -114,7 +119,33 @@ int main(int argc, char **argv)
 
     std::vector<nav::Frame> framesVector;
 
-    nav::parseFile(fs, framesVector);
+    std::string logName,logPath;
+    fs["logparser"]["file"] >> logName;
+    fs["logparser"]["path"] >> logPath;
+    if (endsWith(logName, ".csv"))
+    {
+        nav::parseFile(fs, framesVector);
+    }
+    else
+    {
+        // caso yml del frame finale dell'operazione che ha dato errore
+        cv::FileStorage errorFrameLog(logPath+logName, cv::FileStorage::READ);
+        nav::Frame errorFrame;
+        errorFrameLog["bearing"] >> errorFrame.bearing;
+        errorFrameLog["frameID"] >> errorFrame.frameID;
+        errorFrameLog["epoch"] >> errorFrame.epoch;
+        errorFrameLog["oper_t"] >> errorFrame.oper_t;
+
+        std::vector<cv::Point2f> ptVec;
+        errorFrameLog["points"] >> ptVec;
+
+        for (cv::Point2f pt : ptVec)
+        {
+            errorFrame.points.push_back({pt, cv::norm(pt), std::atan2(pt.y, pt.x)});
+        }
+
+        framesVector.push_back(errorFrame);
+    }
 
     vineyard::PoleExtractor pe(fs);
     std::shared_ptr< std::vector< vineyard::Pole::Ptr > > polesVector;
@@ -170,27 +201,45 @@ int main(int argc, char **argv)
 
             control = lfmo->computeOperationControl();
 
-            // messi qui solo per test -> devono essere variabili globali
-            float lineAngle;
-            cv::Point2f initialPolePosition;
-            lfmo->getFinalStatus(lineAngle, initialPolePosition);
-
-            /**LOG*/std::ofstream logStream("operation_log.csv", std::ios::app);
-            /**LOG*/logStream << f.epoch << ";" << f.frameID << ";" << f.oper_t << ";"
-            /**LOG*/          << lineAngle << ";" << initialPolePosition.x << ";" << initialPolePosition.y;
 
             if (lfmo->checkOperationEnd())
             {
-                /**LOG*/logStream << ";yes" << std::endl;
-                /**LOG*/logStream.close();
+
+                // messi qui solo per test -> devono essere variabili globali
+                float lineAngle;
+                cv::Point2f initialPolePosition;
+                lfmo->getFinalStatus(lineAngle, initialPolePosition);
+
+                /**LOG*/
+                // usa i tuoi dati, quelli globali, dove io uso quelli del frame
+                cv::FileStorage log("operation_log.yml", cv::FileStorage::WRITE);
+                log << "epoch" << f.epoch;
+                log << "frameID" << f.frameID;
+                log << "oper_t" << f.oper_t;
+                log << "bearing" << f.bearing;
+                log << "lineAngle" << lineAngle;
+                log << "headPole" << initialPolePosition;
+                log << "points" << "[";
+                for (vineyard::Pole::ConstPtr pole : (*polesVector))
+                {
+                    for (cv::Point2f pt : pole->getPoints())
+                    {
+                        log << pt;
+                    }
+                }
+                log << "]";
+
+                log.release();
+                /**LOG*/
+
                 cv::waitKey();
                 return 0;
             }
-            /**LOG*/else
-            /**LOG*/{
-            /**LOG*/    logStream << ";no" << std::endl;
-            /**LOG*/    logStream.close();
-            /**LOG*/}
+//            /**LOG*/else
+//            /**LOG*/{
+//            /**LOG*/    logStream << ";no" << std::endl;
+//            /**LOG*/    logStream.close();
+//            /**LOG*/}
         }
         if ((operation.compare("003L") == 0 || operation.compare("003R") == 0))
         {
