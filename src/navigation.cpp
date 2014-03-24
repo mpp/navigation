@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <chrono>
 
 #include <opencv2/opencv.hpp>
 
@@ -168,25 +170,34 @@ int main(int argc, char **argv)
 
             control = lfmo->computeOperationControl();
 
-            if (lfmo->checkOperationEnd() || f.frameID>= 7148)
+            // messi qui solo per test -> devono essere variabili globali
+            float lineAngle;
+            cv::Point2f initialPolePosition;
+            lfmo->getFinalStatus(lineAngle, initialPolePosition);
+
+            /**LOG*/std::ofstream logStream("operation_log.csv", std::ios::app);
+            /**LOG*/logStream << f.epoch << ";" << f.frameID << ";" << f.oper_t << ";"
+            /**LOG*/          << lineAngle << ";" << initialPolePosition.x << ";" << initialPolePosition.y;
+
+            if (lfmo->checkOperationEnd())
             {
-                // messi qui solo per test -> devono essere variabili globali
-                float lineAngle;
-                cv::Point2f initialPolePosition;
-                //
-
-                lfmo->getFinalStatus(lineAngle, initialPolePosition);
-
+                /**LOG*/logStream << ";yes" << std::endl;
+                /**LOG*/logStream.close();
                 cv::waitKey();
                 return 0;
             }
+            /**LOG*/else
+            /**LOG*/{
+            /**LOG*/    logStream << ";no" << std::endl;
+            /**LOG*/    logStream.close();
+            /**LOG*/}
         }
         if ((operation.compare("003L") == 0 || operation.compare("003R") == 0))
         {
             std::shared_ptr<nav::TurnWithCompassMO> twcmo = std::static_pointer_cast<nav::TurnWithCompassMO>(mo);
 
             // messi qui solo per test -> devono essere variabili globali
-            cv::Point2f initialPolePosition(-0.2,1.64);    // da linefollower
+            cv::Point2f initialPolePosition(-0.3,-1.62);    // da linefollower
             float lineAngle = 0.044f;                         // da linefollower
             float forwardDistance = 4.5f;   // da setup
             float fixedTurnAngle = M_PI/2;  // da setup
@@ -208,22 +219,34 @@ int main(int argc, char **argv)
                 twcmo->updateParameters(polesVector,
                                        control,
                                        f.bearing,
-                                       293*M_PI/180);
+                                       260*M_PI/180);
 
                 control = twcmo->computeOperationControl();
 
-                /** LOG */
+                // messi qui solo per test -> devono essere variabili globali
                 float r, theta, sigma;
                 cv::Point2f targetPoint, headPole;
-                float currentLineAngle;
+                float currentLineAngle = 0.0f;
                 twcmo->getLogStatus(r, theta, sigma, targetPoint, headPole, currentLineAngle);
-                std::cout << currentLineAngle << std::endl;
+
+                /**LOG*/std::ofstream logStream("operation_log.csv", std::ios::app);
+                /**LOG*/logStream << f.epoch << ";" << f.frameID << ";" << f.oper_t << ";"
+                /**LOG*/          << r << ";" << theta << ";" << sigma << ";" << currentLineAngle << ";"
+                /**LOG*/          << targetPoint.x << ";" << targetPoint.y << ";" << headPole.x << ";" << headPole.y;
+
                 /**     */
                 if (twcmo->checkOperationEnd())
                 {
+                    /**LOG*/logStream << ";yes" << std::endl;
+                    /**LOG*/logStream.close();
                     cv::waitKey();
                     return 0;
                 }
+                /**LOG*/else
+                /**LOG*/{
+                /**LOG*/    logStream << ";no" << std::endl;
+                /**LOG*/    logStream.close();
+                /**LOG*/}
             }
         }
 

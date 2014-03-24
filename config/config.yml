@@ -22,7 +22,7 @@ logparser:
     # /home/mpp/DODICH/Registrazioni/
     # -- Laboratorio
     # /home/dodich/DODICH/Registrazioni/
-    path: /home/dodich/DODICH/Registrazioni/
+    path: /home/mpp/DODICH/Registrazioni/
 
     # Opzioni
     #
@@ -111,14 +111,17 @@ logparser:
     # 03210722_ls_sick
     # 03211038_ls_sick
     # 03211051_ls_sick
-    file: "03210722_ls_sick.csv"
+    # 03211518_ls_sick
+    # -- Casi 24 23 marzo
+    # 03220942_001R_sbalzo sbalzo per buca
+    file: "03220936_ls_sick.csv"
 
 
     # Here goes the operation, it can be
     # 001L
     # 001R
     # ...
-    operation: "003R"
+    operation: "003L"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
@@ -128,7 +131,7 @@ laserscanfilter:
     minDistance: 0.3 
 
     # minimum distance threshold (mt)
-    maxDistance: 11.0
+    maxDistance: 8.0
 
     # minimum angle of scan (deg) - 0° is in front of the scanner
     minAngle: -2.20
@@ -150,7 +153,7 @@ poleExtractor:
     maxClusterSize: 30 
 
     # the maximum distance between 2 poles candidates to be considered the same pole, for tracking purposes
-    maximumPolesDistance: 0.8
+    maximumPolesDistance: 0.25
 
     # for the FLANN Hierarchical clustering (deprecated)
     branchingFactor: 10 
@@ -163,10 +166,10 @@ poleExtractor:
 ##---------------------------------------------------------------------------##
 lineExtractor:
     # the maximum distance (mt) between two poles that are assigned to the same line
-    maxPoleDistance: 3.8
+    maxPoleDistance: 3.5
     maxDistanceFromLastLine: 1.5
-    reps: 0.1 # Sufficient accuracy for the radius (distance between the coordinate origin and the line).
-    aeps: 0.1 # Sufficient accuracy for the angle. 0.01 would be a good default value for reps and aeps.
+    reps: 0.0001 # Sufficient accuracy for the radius (distance between the coordinate origin and the line).
+    aeps: 0.0001 # Sufficient accuracy for the angle. 0.01 would be a good default value for reps and aeps.
     minLineSize: 4 # !!!!MUST BE >= 4!!! Minimum number of poles for a line, fitLine does not work with values < 4
     epsilon: 0.6
 
@@ -182,7 +185,7 @@ globalMP:
 
 # Following the indication of: http://www.inaut.unsj.edu.ar/Files/Ca1277_03.pdf 
 lineFollower: 
-    desiredDistance: 1.7 # desired distance from the line
+    desiredDistance: 1.5 # desired distance from the line
     desiredTheta: 0.0 # desired angle divergence from the line
 
     ## !!BEWARE!! that changes in maxV and maxOmega involve changes in theese variables
@@ -196,7 +199,7 @@ lineFollower:
     
 # Following the indication of: http://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 Uturn:
-    k1: 0.2
+    k1: 0.3
     k2: 1
     k3:  0.5
     beta: 0.4
