@@ -114,10 +114,22 @@ Control LineFollowerMO::computeOperationControl()
     return {linear, angular};
 }
 
-bool LineFollowerMO::checkOperationEnd() const
+float LineFollowerMO::checkOperationEnd() const
 {
-    //std::cout << head_pole_distance_ << " - " << min_head_pole_distance_ << std::endl;
-    return (/*head_pole_distance_ < min_head_pole_distance_ &&*/ head_pole_center_.x < 0);
+    float end = 0.0f;
+    float s = 2.0f;
+
+    if (head_pole_center_.x < end)
+    {
+        return 1.0f;
+    }
+
+    if (head_pole_center_.x > s)
+    {
+        return 0.0f;
+    }
+
+    return (head_pole_center_.x - end) / (s - end);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -463,7 +475,7 @@ Control TurnWithCompassMO::computeOperationControl()
     return {linear, angular};
 }
 
-bool TurnWithCompassMO::checkOperationEnd() const
+float TurnWithCompassMO::checkOperationEnd() const
 {
     if (fixed_start_maneuvre_)
     {
@@ -478,7 +490,246 @@ bool TurnWithCompassMO::checkOperationEnd() const
 
     //std::cout << "r_ " << r_ << " - difference " << difference << std::endl;
 
-    return r_ <= end_epsilon_ || difference <= end_gamma_;
+    //return r_ <= end_epsilon_ || difference <= end_gamma_;
+
+
+    float rValue = 0.0f;
+    float s_r = 4.0f;
+
+    if (r_ < end_epsilon_)
+    {
+        rValue = 1.0f;
+    }
+    else if (r_ > s_r)
+    {
+        rValue = 0.0f;
+    }
+    else
+    {
+        rValue = (r_ - end) / (s_r - end);
+    }
+
+    float gammaValue = 0.0f;
+    float s_gamma = M_PI/2;
+
+    if (difference <= end_gamma_)
+    {
+        gammaValue = 1.0f;
+    }
+    else if (difference > s_gamma)
+    {
+        gammaValue = 0.0f;
+    }
+    else
+    {
+        gammaValue = (difference - end) / (s_gamma - end);
+    }
+
+    return gammaValue * rValue;
+}
+
+
+///////////////////////////////////////////////////////////////////////
+/// Special Target Motion Operation
+///////////////////////////////////////////////////////////////////////
+SpecialTargetMO::SpecialTargetMO(const cv::FileStorage &fs,
+                                 const std::string &operationType,
+                                 const std::shared_ptr<gui> &gui)
+    : operation_type_(operationType),
+      target_mp_(EndLineTurnMP(fs)),
+      max_v_(fs["globalMP"]["maxV"]),
+      end_epsilon_(fs["Uturn"]["endEpsilon"]),
+      end_gamma_(fs["Uturn"]["endGamma"]),
+      r_(std::numeric_limits<float>::max()),
+      theta_(0.0f),
+      sigma_(0.0f),
+      fixed_pole_threshold_(fs["Uturn"]["headPoleThreshold"])
+{
+    steered_angle_ = 0.0f;
+    GUI_ = gui;
+    fixed_pole_ = cv::Point2f(0,0);
+    target_point_ = cv::Point2f(0,0);
+    target_pole_vec_ = cv::Vec2f(0,0);
+    target_bearing_ = 0.0f;
+    steered_angle_ = 0.0f;
+    start_bearing_ = 0.0f;
+    fixed_pole_ID_ = -1;
+}
+
+void SpecialTargetMO::initialize(const float currentBearing,
+                                 const cv::Point2f &fixedPolePosition,
+                                 const float targetBearing,
+                                 const cv::Vec2f targetPoleVector)
+{
+
+    start_bearing_ = currentBearing;
+
+    fixed_pole_ = fixedPolePosition;
+    target_bearing_ = normalizeAngle_PI(targetBearing);
+    target_pole_vec_ = targetPoleVector;
+
+    // target vec è un vettore che contiene le coordinate polari del punto target rispetto al punto fisso
+    target_point_ = fixed_pole_ + cv::Point2f(target_pole_vec_.val[0] * std::cos(target_pole_vec_.val[1]),
+                                              target_pole_vec_.val[0] * std::sin(target_pole_vec_.val[1]));
+
+    if (GUI_) { GUI_->drawHeadPole(fixed_pole_); }
+    if (GUI_) { GUI_->drawTarget(target_point_, target_point_ + cv::Point2f(std::cos(target_bearing_),
+                                                                            std::sin(target_bearing_))); }
+}
+
+void SpecialTargetMO::updateParameters(const std::shared_ptr<std::vector<vineyard::Pole::Ptr> > &polesVector,
+                                       const float currentBearing)
+{
+    steered_angle_ = currentBearing - start_bearing_;
+    steered_angle_ = normalizeAngle_PI(steered_angle_);
+
+    //std::cout << steered_angle_ << std::endl;
+    bool updateTarget = false;
+    vineyard::Pole::Ptr nearest;
+    if (fixed_pole_ID_ == -1)
+    {
+        float minDistanceOrigin = std::numeric_limits<float>::max();
+        for (vineyard::Pole_Ptr p : (*polesVector))
+        {
+            // distance pole-headPole
+            float distancePH = cv::norm(cv::Point2f(p->getCentroid().x - fixed_pole_.x,
+                                                    p->getCentroid().y - fixed_pole_.y));
+            float supposedHeadPoleDistance = cv::norm(p->getCentroid());
+
+            if (distancePH < fixed_pole_threshold_ && supposedHeadPoleDistance < minDistanceOrigin)
+            {
+                nearest = p;
+                fixed_pole_ = p->getCentroid();
+                fixed_pole_ID_ = p->ID();
+                minDistanceOrigin = supposedHeadPoleDistance;
+                updateTarget = true;
+            }
+        }
+    }
+    else
+    {
+        bool found = false;
+        for (vineyard::Pole_Ptr p : (*polesVector))
+        {
+            if (p->ID() == fixed_pole_ID_)
+            {
+                nearest = p;
+                fixed_pole_ = p->getCentroid();
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+        {
+            fixed_pole_ID_ = -1;
+        }
+        else
+        {
+            float minDistanceOrigin = std::numeric_limits<float>::max();
+            for (vineyard::Pole_Ptr p : (*polesVector))
+            {
+                // distance pole-headPole
+                float distancePH = cv::norm(cv::Point2f(p->getCentroid().x - fixed_pole_.x,
+                                                        p->getCentroid().y - fixed_pole_.y));
+                float supposedHeadPoleDistance = cv::norm(p->getCentroid());
+
+                if (distancePH < fixed_pole_threshold_ &&
+                        supposedHeadPoleDistance < minDistanceOrigin)
+                {
+                    nearest = p;
+                    fixed_pole_ = p->getCentroid();
+                    fixed_pole_ID_ = p->ID();
+                    minDistanceOrigin = supposedHeadPoleDistance;
+                }
+            }
+        }
+
+        updateTarget = true;
+    }
+
+    if (updateTarget)
+    {
+        // TODO
+    }
+
+    if (GUI_) { GUI_->drawHeadPole(fixed_pole_); }
+    if (GUI_) { GUI_->drawTarget(target_point_, target_point_ + cv::Point2f(std::cos(target_bearing_),
+                                                                            std::sin(target_bearing_))); }
+}
+
+Control SpecialTargetMO::computeOperationControl()
+{
+    // Compute the linear and angular velocities
+    float linear;
+    float angular;
+    float targetDirectionAngle;
+    float targetAngle;
+
+    targetDirectionAngle = target_bearing_;
+    targetAngle = std::atan2(-1 * target_point_.y, target_point_.x);
+
+    targetDirectionAngle = normalizeAngle_PI(targetDirectionAngle);
+    targetAngle = normalizeAngle_PI(targetAngle);
+
+    r_ = cv::norm(target_point_);
+    theta_ = targetDirectionAngle - targetAngle;
+    sigma_ = 0 - targetAngle;
+
+    theta_ = normalizeAngle_PI(theta_);
+
+    linear = target_mp_.computeLinearVelocity(r_,theta_,sigma_);
+    angular = target_mp_.computeAngularVelocity(linear,r_,theta_,sigma_);
+
+    return {linear, angular};
+}
+
+float SpecialTargetMO::checkOperationEnd() const
+{
+    // controllo fine operazione
+    float difference = std::abs(theta_ - sigma_);
+    difference = difference >= 2*M_PI ? difference - 2 * M_PI : difference;
+    difference = difference < 0 ? difference + 2 * M_PI : difference;
+
+    difference = std::abs(difference);
+
+    //std::cout << "r_ " << r_ << " - difference " << difference << std::endl;
+
+    //return r_ <= end_epsilon_ || difference <= end_gamma_;
+
+
+    float rValue = 0.0f;
+    float s_r = 4.0f;
+
+    if (r_ < end_epsilon_)
+    {
+        rValue = 1.0f;
+    }
+    else if (r_ > s_r)
+    {
+        rValue = 0.0f;
+    }
+    else
+    {
+        rValue = (r_ - end) / (s_r - end);
+    }
+
+    float gammaValue = 0.0f;
+    float s_gamma = M_PI/2;
+
+    if (difference <= end_gamma_)
+    {
+        gammaValue = 1.0f;
+    }
+    else if (difference > s_gamma)
+    {
+        gammaValue = 0.0f;
+    }
+    else
+    {
+        gammaValue = (difference - end) / (s_gamma - end);
+    }
+
+    return gammaValue * rValue;
 }
 
 }   // namespace nav

@@ -35,9 +35,9 @@ public:
 
     /*!
      * \brief checkOperationEnd check if the operation reach its objective
-     * \return true/false
+     * \return percentage (in [0,1]) of the operation progress
      */
-    virtual bool checkOperationEnd() const = 0;
+    virtual float checkOperationEnd() const = 0;
 
 protected:
 
@@ -71,7 +71,7 @@ public:
 
     Control computeOperationControl();
 
-    bool checkOperationEnd() const;
+    float checkOperationEnd() const;
 
     void getFinalStatus(float &exitLineAngle,
                         cv::Point2f &headPole) const
@@ -156,7 +156,7 @@ public:
 
     Control computeOperationControl();
 
-    bool checkOperationEnd() const;
+    float checkOperationEnd() const;
 
     inline void getLogStatus(float &r,
                              float &theta,
@@ -254,16 +254,19 @@ public:
      * \param operationType la stringa della manovra
      */
     explicit SpecialTargetMO(const cv::FileStorage &fs,
-                             const std::string &operationType);
+                             const std::string &operationType,
+                             const std::shared_ptr<gui> &gui = nullptr);
 
 
     /*!
      * \brief initialize
+     * \param currentBearing bearing attuale del robot
      * \param fixedPolePosition posizione stimata del palo di riferimento
      * \param targetBearing direzione del target
      * \param targetPoleVector posizione relativa del target rispetto al palo di riferimento
      */
-    void initialize(const cv::Point2f &fixedPolePosition,
+    void initialize(const float currentBearing,
+                    const cv::Point2f &fixedPolePosition,
                     const float targetBearing,
                     const cv::Vec2f targetPoleVector);
 
@@ -272,18 +275,21 @@ public:
      * \param polesVector il vettore dei pali
      * \param lastControl il controllo dato al momento precedente
      * \param currentBearing il bearing attuale
-     * \param leftEncoder i metri percorsi dalla ruota sinistra
-     * \param rightEncoder i metri percorsi dalla ruota destra
      */
     void updateParameters(const std::shared_ptr< std::vector< vineyard::Pole::Ptr > > &polesVector,
-                          const Control &lastControl,
-                          const float currentBearing,
-                          const float leftEncoder,
-                          const float rightEncoder);
+                          const float currentBearing);
 
     Control computeOperationControl();
 
-    bool checkOperationEnd() const;
+    float checkOperationEnd() const;
+
+    inline void getLogStatus(float &r,
+                             float &theta,
+                             float &sigma,
+                             cv::Point2f &targetPoint,
+                             cv::Point2f &fixedPole) const
+        {   r = r_; theta = theta_; sigma = sigma_;
+            targetPoint = target_point_; fixedPole = fixed_pole_; }
 
 // private methods
 private:
@@ -299,7 +305,7 @@ private:
 
     cv::Point2f
         fixed_pole_,        // position of the fixed reference pole
-        target_;            // position of the target
+        target_point_;            // position of the target
 
     cv::Vec2f
         target_pole_vec_;   // relative vector between the fixed pole and the target
@@ -313,20 +319,23 @@ private:
         fixed_pole_ID_;     // the ID of the fixed pole, for tracking
 
     float
+        fixed_pole_threshold_;
+
+    float
         max_v_;             // the maximum velocity of the robot
 
     float
-        end_epsilon_,       //
-        end_gamma_;
+        end_epsilon_,       // threshold for end operation
+        end_gamma_;         // threshold for end operation
 
     float
-        r_,
-        theta_,
-        sigma_;
+        r_,                 // distance from target
+        theta_,             // angle target robot-target-direction
+        sigma_;             // angle robot robot-target-direction
 
-    vineyard::PoleExtractor
-        pe_;
 };
+
+
 
 } //namespace nav
 

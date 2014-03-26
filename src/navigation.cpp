@@ -118,6 +118,10 @@ int main(int argc, char **argv)
     {
         mo = std::make_shared<nav::TurnWithCompassMO>(fs, true, GUI);
     }
+    else if (operation.compare("07TL") == 0)
+    {
+        mo = std::make_shared<nav::SpecialTargetMO>(fs, operation, GUI);
+    }
 
     nav::Control control = {0.0f, 0.0f};
 
@@ -208,7 +212,7 @@ int main(int argc, char **argv)
             control = lfmo->computeOperationControl();
 
 
-            if (lfmo->checkOperationEnd())
+            if (lfmo->checkOperationEnd() == 1)
             {
 
                 // messi qui solo per test -> devono essere variabili globali
@@ -290,7 +294,7 @@ int main(int argc, char **argv)
                 /**LOG*/          << targetPoint.x << ";" << targetPoint.y << ";" << headPole.x << ";" << headPole.y;
 
                 /**     */
-                if (twcmo->checkOperationEnd())
+                if (twcmo->checkOperationEnd() == 1)
                 {
                     /**LOG*/logStream << ";yes" << std::endl;
                     /**LOG*/logStream.close();
@@ -302,6 +306,48 @@ int main(int argc, char **argv)
                 /**LOG*/    logStream << ";no" << std::endl;
                 /**LOG*/    logStream.close();
                 /**LOG*/}
+            }
+        }
+        if (operation.compare("07TL"))
+        {
+            std::shared_ptr<nav::SpecialTargetMO> stmo = std::static_pointer_cast<nav::SpecialTargetMO>(mo);
+
+            // messi qui solo per test -> devono essere variabili globali
+            cv::Point2f fixedPolePosition(-0.3,1.62);    // da setup
+
+            /// ATTENTO, il vettore va in coordinate polari:
+            /// il primo valore è la distanza del target dal palo fisso (positiva e in metri),
+            /// il secondo è l'angolo di direzione del target rispetto al palo fisso (tra -PI e + PI in radianti)
+            cv::Vec2f targetPoleVector(1, 0);            // da setup
+
+            /// questa è la direzione voluta del robot al target
+            float targetBearing = M_PI/2;                // da setup
+
+            if (!initialized)
+            {
+                stmo->initialize(f.bearing,
+                                 fixedPolePosition,
+                                 targetBearing,
+                                 targetPoleVector);
+                initialized = true;
+            }
+            else
+            {
+                stmo->updateParameters(polesVector,
+                                       f.bearing);
+
+                control = stmo->computeOperationControl();
+
+                // messi qui solo per test -> devono essere variabili globali
+                float r, theta, sigma;
+                cv::Point2f targetPoint, fixedPole;
+                stmo->getLogStatus(r, theta, sigma, targetPoint, fixedPole);
+
+                if (stmo->checkOperationEnd() == 1)
+                {
+                    cv::waitKey();
+                    return 0;
+                }
             }
         }
 
