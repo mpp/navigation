@@ -106,6 +106,10 @@ int main(int argc, char **argv)
     {
         mo = std::make_shared<nav::LineFollowerMO>(fs, true, GUI);
     }
+    else if (operation.compare("05HL") == 0)
+    {
+        mo = std::make_shared<nav::LineFollowerMO>(fs, false, GUI);
+    }
     else if (operation.compare("003L") == 0)
     {
         mo = std::make_shared<nav::TurnWithCompassMO>(fs, false, GUI);
@@ -188,14 +192,16 @@ int main(int argc, char **argv)
             continue;
         }
 
-        if ((operation.compare("001L") == 0 || operation.compare("001R") == 0))
+        if (operation.compare("001L") == 0 ||
+            operation.compare("001R") == 0 ||
+            operation.compare("05HL") == 0)
         {
             std::shared_ptr<nav::LineFollowerMO> lfmo = std::static_pointer_cast<nav::LineFollowerMO>(mo);
 
             lfmo->updateParameters(polesVector,
                                    control,
                                    f.bearing,
-                                   293*M_PI/180);
+                                   200*M_PI/180);
 
             //std::cout << "bearing " << f.bearing << std::endl;
 
@@ -246,7 +252,7 @@ int main(int argc, char **argv)
             std::shared_ptr<nav::TurnWithCompassMO> twcmo = std::static_pointer_cast<nav::TurnWithCompassMO>(mo);
 
             // messi qui solo per test -> devono essere variabili globali
-            cv::Point2f initialPolePosition(-0.3,-1.62);    // da linefollower
+            cv::Point2f initialPolePosition(-0.3,1.62);    // da linefollower
             float lineAngle = 0.044f;                         // da linefollower
             float forwardDistance = 4.5f;   // da setup
             float fixedTurnAngle = M_PI/2;  // da setup

@@ -239,6 +239,95 @@ private:
         fixed_start_maneuvre_;
 };
 
+
+/*!
+ * \brief The SpecialTargetMO class set a target point and direction
+ */
+class SpecialTargetMO : public MotionOperation
+{
+
+public:
+
+    /*!
+     * \brief SpecialTargetMO
+     * \param fs
+     * \param operationType la stringa della manovra
+     */
+    explicit SpecialTargetMO(const cv::FileStorage &fs,
+                             const std::string &operationType);
+
+
+    /*!
+     * \brief initialize
+     * \param fixedPolePosition posizione stimata del palo di riferimento
+     * \param targetBearing direzione del target
+     * \param targetPoleVector posizione relativa del target rispetto al palo di riferimento
+     */
+    void initialize(const cv::Point2f &fixedPolePosition,
+                    const float targetBearing,
+                    const cv::Vec2f targetPoleVector);
+
+    /*!
+     * \brief updateParameters
+     * \param polesVector il vettore dei pali
+     * \param lastControl il controllo dato al momento precedente
+     * \param currentBearing il bearing attuale
+     * \param leftEncoder i metri percorsi dalla ruota sinistra
+     * \param rightEncoder i metri percorsi dalla ruota destra
+     */
+    void updateParameters(const std::shared_ptr< std::vector< vineyard::Pole::Ptr > > &polesVector,
+                          const Control &lastControl,
+                          const float currentBearing,
+                          const float leftEncoder,
+                          const float rightEncoder);
+
+    Control computeOperationControl();
+
+    bool checkOperationEnd() const;
+
+// private methods
+private:
+
+// private data
+private:
+
+    std::string
+        operation_type_;    // oper_t
+
+    nav::EndLineTurnMP
+        target_mp_;         // motion planner that work with a target and its direction
+
+    cv::Point2f
+        fixed_pole_,        // position of the fixed reference pole
+        target_;            // position of the target
+
+    cv::Vec2f
+        target_pole_vec_;   // relative vector between the fixed pole and the target
+
+    float
+        target_bearing_,    // the direction of the target
+        steered_angle_,     // the steered angle of the robot from the beginning of the maneuvre
+        start_bearing_;     // the initial bearing of the robot
+
+    int
+        fixed_pole_ID_;     // the ID of the fixed pole, for tracking
+
+    float
+        max_v_;             // the maximum velocity of the robot
+
+    float
+        end_epsilon_,       //
+        end_gamma_;
+
+    float
+        r_,
+        theta_,
+        sigma_;
+
+    vineyard::PoleExtractor
+        pe_;
+};
+
 } //namespace nav
 
 #endif // MOTIONOPERATION_H
