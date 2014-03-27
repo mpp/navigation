@@ -117,7 +117,7 @@ Control LineFollowerMO::computeOperationControl()
 float LineFollowerMO::checkOperationEnd() const
 {
     float end = 0.0f;
-    float s = 2.0f;
+    float s = 4.0f;
 
     if (head_pole_center_.x < end)
     {
@@ -129,7 +129,7 @@ float LineFollowerMO::checkOperationEnd() const
         return 0.0f;
     }
 
-    return (head_pole_center_.x - end) / (s - end);
+    return 1 - (head_pole_center_.x - end) / (s - end);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -494,7 +494,7 @@ float TurnWithCompassMO::checkOperationEnd() const
 
 
     float rValue = 0.0f;
-    float s_r = 4.0f;
+    float s_r = 5.0f;
 
     if (r_ < end_epsilon_)
     {
@@ -506,11 +506,11 @@ float TurnWithCompassMO::checkOperationEnd() const
     }
     else
     {
-        rValue = (r_ - end) / (s_r - end);
+        rValue = 1 - (r_ - end_epsilon_) / (s_r - end_epsilon_);
     }
 
     float gammaValue = 0.0f;
-    float s_gamma = M_PI/2;
+    float s_gamma = M_PI;
 
     if (difference <= end_gamma_)
     {
@@ -522,7 +522,7 @@ float TurnWithCompassMO::checkOperationEnd() const
     }
     else
     {
-        gammaValue = (difference - end) / (s_gamma - end);
+        gammaValue = 1 - (difference - end_gamma_) / (s_gamma - end_gamma_);
     }
 
     return gammaValue * rValue;
@@ -565,7 +565,7 @@ void SpecialTargetMO::initialize(const float currentBearing,
     start_bearing_ = currentBearing;
 
     fixed_pole_ = fixedPolePosition;
-    target_bearing_ = normalizeAngle_PI(targetBearing);
+    target_bearing_ = target_start_bearing_ = normalizeAngle_PI(targetBearing);
     target_pole_vec_ = targetPoleVector;
 
     // target vec è un vettore che contiene le coordinate polari del punto target rispetto al punto fisso
@@ -649,7 +649,15 @@ void SpecialTargetMO::updateParameters(const std::shared_ptr<std::vector<vineyar
 
     if (updateTarget)
     {
-        // TODO
+        // update target point
+        // the plus sign is for the inverse orientation of opencv y axis
+        float angle = normalizeAngle_PI(target_pole_vec_[1] + steered_angle_);
+        target_point_ = fixed_pole_ + cv::Point2f(target_pole_vec_.val[0] * std::cos(angle),
+                                                  target_pole_vec_.val[0] * std::sin(angle));
+
+        // update target direction
+        // the plus sign is for the inverse orientation of opencv y axis
+        target_bearing_ = normalizeAngle_PI(target_start_bearing_ + steered_angle_);
     }
 
     if (GUI_) { GUI_->drawHeadPole(fixed_pole_); }
@@ -698,7 +706,7 @@ float SpecialTargetMO::checkOperationEnd() const
 
 
     float rValue = 0.0f;
-    float s_r = 4.0f;
+    float s_r = 5.0f;
 
     if (r_ < end_epsilon_)
     {
@@ -710,11 +718,11 @@ float SpecialTargetMO::checkOperationEnd() const
     }
     else
     {
-        rValue = (r_ - end) / (s_r - end);
+        rValue = 1 - (r_ - end_epsilon_) / (s_r - end_epsilon_);
     }
 
     float gammaValue = 0.0f;
-    float s_gamma = M_PI/2;
+    float s_gamma = M_PI;
 
     if (difference <= end_gamma_)
     {
@@ -726,7 +734,7 @@ float SpecialTargetMO::checkOperationEnd() const
     }
     else
     {
-        gammaValue = (difference - end) / (s_gamma - end);
+        gammaValue = 1 - (difference - end_gamma_) / (s_gamma - end_gamma_);
     }
 
     return gammaValue * rValue;

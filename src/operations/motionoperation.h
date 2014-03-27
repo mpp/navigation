@@ -312,6 +312,7 @@ private:
 
     float
         target_bearing_,    // the direction of the target
+        target_start_bearing_, // the initial bearing of the target
         steered_angle_,     // the steered angle of the robot from the beginning of the maneuvre
         start_bearing_;     // the initial bearing of the robot
 

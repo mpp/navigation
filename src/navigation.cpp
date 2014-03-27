@@ -98,27 +98,27 @@ int main(int argc, char **argv)
 
     std::shared_ptr<nav::MotionOperation> mo;
     bool initialized = false;
-    if (operation.compare("001L") == 0)
+    if (operation.compare("F01L") == 0)
     {
         mo = std::make_shared<nav::LineFollowerMO>(fs, false, GUI);
     }
-    else if (operation.compare("001R") == 0)
+    else if (operation.compare("F01R") == 0)
     {
         mo = std::make_shared<nav::LineFollowerMO>(fs, true, GUI);
     }
-    else if (operation.compare("05HL") == 0)
+    else if (operation.compare("H01L") == 0)
     {
         mo = std::make_shared<nav::LineFollowerMO>(fs, false, GUI);
     }
-    else if (operation.compare("003L") == 0)
+    else if (operation.compare("T01L") == 0)
     {
         mo = std::make_shared<nav::TurnWithCompassMO>(fs, false, GUI);
     }
-    else if (operation.compare("003R") == 0)
+    else if (operation.compare("T01R") == 0)
     {
         mo = std::make_shared<nav::TurnWithCompassMO>(fs, true, GUI);
     }
-    else if (operation.compare("07TL") == 0)
+    else if (operation.compare("P01L") == 0)
     {
         mo = std::make_shared<nav::SpecialTargetMO>(fs, operation, GUI);
     }
@@ -190,68 +190,80 @@ int main(int argc, char **argv)
         GUI->drawPoints(ptVector);
         GUI->drawPoles(*polesVector);
 
-        if (/*f.oper_t.compare("003R") != 0 && */f.oper_t.compare(operation) != 0/* &&
-            f.oper_t.compare("001R") != 0 && f.oper_t.compare("001L") != 0 || f.frameID <= 3000*/)
+        if (/*f.oper_t.compare("T01R") != 0 && */f.oper_t.compare(operation) != 0/* &&
+            f.oper_t.compare("F01R") != 0 && f.oper_t.compare("F01L") != 0 || f.frameID <= 3000*/)
         {
             continue;
         }
 
-        if (operation.compare("001L") == 0 ||
-            operation.compare("001R") == 0 ||
-            operation.compare("05HL") == 0)
+        if (operation.compare("F01L") == 0 ||
+            operation.compare("F01R") == 0 ||
+            operation.compare("H01L") == 0)
         {
             std::shared_ptr<nav::LineFollowerMO> lfmo = std::static_pointer_cast<nav::LineFollowerMO>(mo);
 
             lfmo->updateParameters(polesVector,
                                    control,
                                    f.bearing,
-                                   200*M_PI/180);
+                                   93*M_PI/180);
 
             //std::cout << "bearing " << f.bearing << std::endl;
 
             control = lfmo->computeOperationControl();
 
 
-            if (lfmo->checkOperationEnd() == 1)
+
+            float lineAngle;
+            cv::Point2f initialPolePosition;
+            lfmo->getFinalStatus(lineAngle, initialPolePosition);
+
+            float progress = lfmo->checkOperationEnd();
+            std::cout << "progress: " << progress << " - initialPolePosition: " << initialPolePosition.x << std::endl;
+            if (progress == 1)
             {
-
-                // messi qui solo per test -> devono essere variabili globali
-                float lineAngle;
-                cv::Point2f initialPolePosition;
-                lfmo->getFinalStatus(lineAngle, initialPolePosition);
-
-                /**LOG*/
-                // usa i tuoi dati, quelli globali, dove io uso quelli del frame
-                cv::FileStorage log("operation_log.yml", cv::FileStorage::WRITE);
-                log << "epoch" << f.epoch;
-                log << "frameID" << f.frameID;
-                log << "oper_t" << f.oper_t;
-                log << "bearing" << f.bearing;
-                log << "lineAngle" << lineAngle;
-                log << "headPole" << initialPolePosition;
-                log << "points" << "[";
-                for (vineyard::Pole::ConstPtr pole : (*polesVector))
-                {
-                    for (cv::Point2f pt : pole->getPoints())
-                    {
-                        log << pt;
-                    }
-                }
-                log << "]";
-
-                log.release();
-                /**LOG*/
-
                 cv::waitKey();
                 return 0;
             }
-//            /**LOG*/else
-//            /**LOG*/{
-//            /**LOG*/    logStream << ";no" << std::endl;
-//            /**LOG*/    logStream.close();
-//            /**LOG*/}
+//            if (lfmo->checkOperationEnd() == 1)
+//            {
+
+//                // messi qui solo per test -> devono essere variabili globali
+//                float lineAngle;
+//                cv::Point2f initialPolePosition;
+//                lfmo->getFinalStatus(lineAngle, initialPolePosition);
+
+//                /**LOG*/
+//                // usa i tuoi dati, quelli globali, dove io uso quelli del frame
+//                cv::FileStorage log("operation_log.yml", cv::FileStorage::WRITE);
+//                log << "epoch" << f.epoch;
+//                log << "frameID" << f.frameID;
+//                log << "oper_t" << f.oper_t;
+//                log << "bearing" << f.bearing;
+//                log << "lineAngle" << lineAngle;
+//                log << "headPole" << initialPolePosition;
+//                log << "points" << "[";
+//                for (vineyard::Pole::ConstPtr pole : (*polesVector))
+//                {
+//                    for (cv::Point2f pt : pole->getPoints())
+//                    {
+//                        log << pt;
+//                    }
+//                }
+//                log << "]";
+
+//                log.release();
+//                /**LOG*/
+
+//                cv::waitKey();
+//                return 0;
+//            }
+////            /**LOG*/else
+////            /**LOG*/{
+////            /**LOG*/    logStream << ";no" << std::endl;
+////            /**LOG*/    logStream.close();
+////            /**LOG*/}
         }
-        if ((operation.compare("003L") == 0 || operation.compare("003R") == 0))
+        if ((operation.compare("T01L") == 0 || operation.compare("T01R") == 0))
         {
             std::shared_ptr<nav::TurnWithCompassMO> twcmo = std::static_pointer_cast<nav::TurnWithCompassMO>(mo);
 
@@ -308,17 +320,17 @@ int main(int argc, char **argv)
                 /**LOG*/}
             }
         }
-        if (operation.compare("07TL"))
+        if (operation.compare("P01L") == 0)
         {
             std::shared_ptr<nav::SpecialTargetMO> stmo = std::static_pointer_cast<nav::SpecialTargetMO>(mo);
 
             // messi qui solo per test -> devono essere variabili globali
-            cv::Point2f fixedPolePosition(-0.3,1.62);    // da setup
+            cv::Point2f fixedPolePosition(-0.8f,3.5f);    // da setup
 
             /// ATTENTO, il vettore va in coordinate polari:
             /// il primo valore è la distanza del target dal palo fisso (positiva e in metri),
             /// il secondo è l'angolo di direzione del target rispetto al palo fisso (tra -PI e + PI in radianti)
-            cv::Vec2f targetPoleVector(1, 0);            // da setup
+            cv::Vec2f targetPoleVector(1.5f, 0);            // da setup
 
             /// questa è la direzione voluta del robot al target
             float targetBearing = M_PI/2;                // da setup
@@ -343,11 +355,14 @@ int main(int argc, char **argv)
                 cv::Point2f targetPoint, fixedPole;
                 stmo->getLogStatus(r, theta, sigma, targetPoint, fixedPole);
 
-                if (stmo->checkOperationEnd() == 1)
+                float progress = stmo->checkOperationEnd();
+                std::cout << "progress: " << progress << " - r: " << r << " - diff: " << std::abs(theta - sigma) << std::endl;
+                if (progress == 1)
                 {
                     cv::waitKey();
                     return 0;
                 }
+
             }
         }
 
@@ -365,11 +380,7 @@ int main(int argc, char **argv)
         lv = lv / maxWheelVelocityValue;
         rv = rv / maxWheelVelocityValue;
 
-        //float leftAveraged = runningAverage(leftVel, lv);
-        //float rightAveraged = runningAverage(rightVel, rv);
-
-        //std::cout << "(lv,rv) = (" << lv << ", " << rv << ")" << std::endl;
-        std::cout << lv << ";" << rv << std::endl;
+        std::cout << "(lv,rv) = (" << lv << ", " << rv << ")" << std::endl;
         c = GUI->show();
     }
 }

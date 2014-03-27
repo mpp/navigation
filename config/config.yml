@@ -117,7 +117,9 @@ logparser:
     # -- Casi 25 25 marzo
     # 03250949_ls_sick
     # 02170845_05HL_sick test capezzagna
-    file: "02170845_05HL_sick.csv"
+    # -- Casi speciali di test
+    # test_special_target_operation -> delle operazioni 07TL per debug
+    file: "test_special_target_operation.csv"
 
 
     # Here goes the operation, it can be
@@ -126,8 +128,14 @@ logparser:
     # 003L
     # 003R
     # 05HL
-    # ...
-    operation: "05HL"
+    # ... sostituzioni 27.03.2014 ...
+    # 001R con F01R Forward right side
+    # 001L con F01L Forward left side
+    # 003R con T01R Turn right
+    # 003L con T01L Turn left
+    # 05HL con H01L Header left
+    # 07TL con P01L Point left
+    operation: "F01R"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
