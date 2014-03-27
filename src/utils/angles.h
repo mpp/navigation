@@ -6,6 +6,7 @@
 namespace nav {
 
 float normalizeAngle_PI(float angle);
+float normalizeAngle_2PI(float angle);
 
 }   // namespace nav
 

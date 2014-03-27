@@ -1,45 +1,18 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
-
 #include <opencv2/opencv.hpp>
-
 #include <deque>
 
 #include "sensors_drivers/logparser.h"
-
 #include "data_manipulation/poleextractor.h"
 #include "data_manipulation/lineextractor.h"
-
 #include "operations/motionoperation.h"
-
 #include "utils/gui.h"
 
-//#define LINE_FOLLOWER_
-//#define EGOMOTION_ESTIMATION_
-
 void help();
-float runningAverage(std::deque<float> &queue, const float value);
 
-bool endsWith(const std::string& s, const std::string& suffix)
-{
-    return s.rfind(suffix) == (s.size()-suffix.size());
-}
-
-//////
-/// RANDOM NUMBER GENERATOR
-const double DBL_EPS_COMP = 1 - DBL_EPSILON; // DBL_EPSILON is defined in <limits.h>.
-inline double RandU() {
-    return DBL_EPSILON + ((double) rand()/RAND_MAX);
-}
-inline double RandN2(double mu, double sigma) {
-    return mu + (rand()%2 ? -1.0 : 1.0)*sigma*pow(-log(DBL_EPS_COMP*RandU()), 0.5);
-}
-inline double RandN() {
-    return RandN2(0, 0.1);
-}
-///
-//////
+bool endsWith(const std::string& s, const std::string& suffix);
 
 int main(int argc, char **argv)
 {
@@ -76,7 +49,6 @@ int main(int argc, char **argv)
         exit(-2);
     }
 
-
     int waitkey;
     fs["logparser"]["waitkey"] >> waitkey;
     int minLineSize;
@@ -95,7 +67,7 @@ int main(int argc, char **argv)
     float maxV;
     fs["globalMP"]["maxV"] >> maxV;
 
-
+    /// Setup for the operation
     std::shared_ptr<nav::MotionOperation> mo;
     bool initialized = false;
     if (operation.compare("F01L") == 0)
@@ -127,6 +99,7 @@ int main(int argc, char **argv)
 
     std::vector<nav::Frame> framesVector;
 
+    /// TODO: switch to a YAML format log?
     std::string logName,logPath;
     fs["logparser"]["file"] >> logName;
     fs["logparser"]["path"] >> logPath;
@@ -161,10 +134,10 @@ int main(int argc, char **argv)
     for (nav::Frame f : framesVector)
     {
         GUI->refresh();
-
         GUI->drawHUD(f.frameID);
         GUI->drawCompass(f.bearing);
 
+        /// Setup the point cloud
         pcl::PointCloud<pcl::PointXYZ>::Ptr
                 tempCloud(new pcl::PointCloud<pcl::PointXYZ>());
         for (nav::PT pt : f.points)
@@ -179,6 +152,7 @@ int main(int argc, char **argv)
         tempCloud->width = (int) tempCloud->points.size ();
         tempCloud->height = 1;
 
+        /// Search for poles
         pe.elaborateCloud(tempCloud, polesVector);
 
         std::vector<cv::Point2f> ptVector;
@@ -190,15 +164,16 @@ int main(int argc, char **argv)
         GUI->drawPoints(ptVector);
         GUI->drawPoles(*polesVector);
 
-        if (/*f.oper_t.compare("T01R") != 0 && */f.oper_t.compare(operation) != 0/* &&
-            f.oper_t.compare("F01R") != 0 && f.oper_t.compare("F01L") != 0 || f.frameID <= 3000*/)
+        /// Check the operation frame
+        if (f.oper_t.compare(operation) != 0/* || f.frameID <= 3000*/)
         {
             continue;
         }
 
+        /// Select the right operation to do
         if (operation.compare("F01L") == 0 ||
             operation.compare("F01R") == 0 ||
-            operation.compare("H01L") == 0)
+            operation.compare("H01L") == 0)     // H01L to test the line follower if it works also for the headers follower problem
         {
             std::shared_ptr<nav::LineFollowerMO> lfmo = std::static_pointer_cast<nav::LineFollowerMO>(mo);
 
@@ -207,11 +182,7 @@ int main(int argc, char **argv)
                                    f.bearing,
                                    93*M_PI/180);
 
-            //std::cout << "bearing " << f.bearing << std::endl;
-
             control = lfmo->computeOperationControl();
-
-
 
             float lineAngle;
             cv::Point2f initialPolePosition;
@@ -224,6 +195,8 @@ int main(int argc, char **argv)
                 cv::waitKey();
                 return 0;
             }
+
+            /// TODO: switch to a YAML format log?
 //            if (lfmo->checkOperationEnd() == 1)
 //            {
 
@@ -257,16 +230,12 @@ int main(int argc, char **argv)
 //                cv::waitKey();
 //                return 0;
 //            }
-////            /**LOG*/else
-////            /**LOG*/{
-////            /**LOG*/    logStream << ";no" << std::endl;
-////            /**LOG*/    logStream.close();
-////            /**LOG*/}
         }
         if ((operation.compare("T01L") == 0 || operation.compare("T01R") == 0))
         {
             std::shared_ptr<nav::TurnWithCompassMO> twcmo = std::static_pointer_cast<nav::TurnWithCompassMO>(mo);
 
+            /// Debug - initial status variables
             // messi qui solo per test -> devono essere variabili globali
             cv::Point2f initialPolePosition(-0.3,1.62);    // da linefollower
             float lineAngle = 0.044f;                         // da linefollower
@@ -294,46 +263,46 @@ int main(int argc, char **argv)
 
                 control = twcmo->computeOperationControl();
 
-                // messi qui solo per test -> devono essere variabili globali
-                float r, theta, sigma;
-                cv::Point2f targetPoint, headPole;
-                float currentLineAngle = 0.0f;
-                twcmo->getLogStatus(r, theta, sigma, targetPoint, headPole, currentLineAngle);
 
-                /**LOG*/std::ofstream logStream("operation_log.csv", std::ios::app);
-                /**LOG*/logStream << f.epoch << ";" << f.frameID << ";" << f.oper_t << ";"
-                /**LOG*/          << r << ";" << theta << ";" << sigma << ";" << currentLineAngle << ";"
-                /**LOG*/          << targetPoint.x << ";" << targetPoint.y << ";" << headPole.x << ";" << headPole.y;
-
-                /**     */
                 if (twcmo->checkOperationEnd() == 1)
                 {
+                    /// Get data for log
+                    // messi qui solo per test -> devono essere variabili globali
+                    float r, theta, sigma;
+                    cv::Point2f targetPoint, headPole;
+                    float currentLineAngle = 0.0f;
+                    twcmo->getLogStatus(r, theta, sigma, targetPoint, headPole, currentLineAngle);
+
+                    /**LOG*/std::ofstream logStream("operation_log.csv", std::ios::app);
+                    /**LOG*/logStream << f.epoch << ";" << f.frameID << ";" << f.oper_t << ";"
+                    /**LOG*/          << r << ";" << theta << ";" << sigma << ";" << currentLineAngle << ";"
+                    /**LOG*/          << targetPoint.x << ";" << targetPoint.y << ";" << headPole.x << ";" << headPole.y;
                     /**LOG*/logStream << ";yes" << std::endl;
                     /**LOG*/logStream.close();
+
                     cv::waitKey();
                     return 0;
                 }
-                /**LOG*/else
-                /**LOG*/{
-                /**LOG*/    logStream << ";no" << std::endl;
-                /**LOG*/    logStream.close();
-                /**LOG*/}
             }
         }
         if (operation.compare("P01L") == 0)
         {
             std::shared_ptr<nav::SpecialTargetMO> stmo = std::static_pointer_cast<nav::SpecialTargetMO>(mo);
 
+            /// Debug - initial status variables
             // messi qui solo per test -> devono essere variabili globali
-            cv::Point2f fixedPolePosition(-0.8f,3.5f);    // da setup
+            /// Posizione del palo fisso
+            // punto (x,y)
+            cv::Point2f fixedPolePosition(-0.8f,3.5f);      // da setup
 
             /// ATTENTO, il vettore va in coordinate polari:
-            /// il primo valore è la distanza del target dal palo fisso (positiva e in metri),
-            /// il secondo è l'angolo di direzione del target rispetto al palo fisso (tra -PI e + PI in radianti)
+            // il primo valore è la distanza del target dal palo fisso (positiva e in metri),
+            // il secondo è l'angolo di direzione del target rispetto al palo fisso (tra -PI e + PI in radianti)
             cv::Vec2f targetPoleVector(1.5f, 0);            // da setup
 
             /// questa è la direzione voluta del robot al target
-            float targetBearing = M_PI/2;                // da setup
+            // angolo in radianti
+            float targetBearing = M_PI/2;                   // da setup
 
             if (!initialized)
             {
@@ -350,13 +319,18 @@ int main(int argc, char **argv)
 
                 control = stmo->computeOperationControl();
 
+                /// Get data for log
                 // messi qui solo per test -> devono essere variabili globali
                 float r, theta, sigma;
                 cv::Point2f targetPoint, fixedPole;
                 stmo->getLogStatus(r, theta, sigma, targetPoint, fixedPole);
 
+                /// Check the progress of the current operation
+                // this check is the same for each operation so it can be moved down outside this if tree
+                // currently it is here for debugging purposes
                 float progress = stmo->checkOperationEnd();
                 std::cout << "progress: " << progress << " - r: " << r << " - diff: " << std::abs(theta - sigma) << std::endl;
+
                 if (progress == 1)
                 {
                     cv::waitKey();
@@ -366,14 +340,14 @@ int main(int argc, char **argv)
             }
         }
 
+        /// Robot specific operations
+        /// These operations should be moved in a robot class with a different namespace
+        // Compute the left and right velocities
         float robotWidth = 0.6;
         float wheelRadius = 0.35;
 
         float lv = (control.linear + robotWidth * control.angular) / wheelRadius;
         float rv = (control.linear - robotWidth * control.angular) / wheelRadius;
-
-        //lv = lv > 0.05 ? lv : 0.05;
-        //rv = rv > 0.05 ? rv : 0.05;
 
         float maxWheelVelocityValue = (maxV + robotWidth * maxV * M_PI / 4) / wheelRadius;
 
@@ -381,45 +355,18 @@ int main(int argc, char **argv)
         rv = rv / maxWheelVelocityValue;
 
         std::cout << "(lv,rv) = (" << lv << ", " << rv << ")" << std::endl;
+
         c = GUI->show();
     }
-}
-
-float runningAverage(std::deque<float> &queue, const float value)
-{
-    // buffer size
-    int k = 16;
-    int size = queue.size();
-    if (size == 0)
-    {
-        queue.push_back(value);
-        return value;
-    }
-    queue.push_back(value);
-
-    if (queue.size() >= k)
-    {
-        queue.pop_front();
-    }
-
-    size = queue.size();
-    // check if the value is in range with the others
-    float average = 0.0f;
-    float totalWeight = 0.0f;
-    int counter = 1;
-    for (float v : queue)
-    {
-        average = average + v * (float)counter / size;
-        totalWeight = totalWeight + (float)counter / size;
-        counter++;
-    }
-    average = average / totalWeight;
-
-    return average;
 }
 
 void help()
 {
     std::cout << "Usage: navigation -s <configuration file>" << std::endl;
     exit(-1);
+}
+
+bool endsWith(const std::string& s, const std::string& suffix)
+{
+    return s.rfind(suffix) == (s.size()-suffix.size());
 }
