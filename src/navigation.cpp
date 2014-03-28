@@ -122,7 +122,8 @@ int main(int argc, char **argv)
 
         for (cv::Point2f pt : ptVec)
         {
-            errorFrame.points.push_back({pt, cv::norm(pt), std::atan2(pt.y, pt.x)});
+            float temp = cv::norm(pt);
+            errorFrame.points.push_back({pt, temp, std::atan2(pt.y, pt.x)});
         }
 
         framesVector.push_back(errorFrame);
@@ -237,7 +238,7 @@ int main(int argc, char **argv)
 
             /// Debug - initial status variables
             // messi qui solo per test -> devono essere variabili globali
-            cv::Point2f initialPolePosition(-0.3,1.62);    // da linefollower
+            cv::Point2f initialPolePosition(-0.3,-1.62);    // da linefollower
             float lineAngle = 0.044f;                         // da linefollower
             float forwardDistance = 4.5f;   // da setup
             float fixedTurnAngle = M_PI/2;  // da setup
@@ -264,7 +265,9 @@ int main(int argc, char **argv)
                 control = twcmo->computeOperationControl();
 
 
-                if (twcmo->checkOperationEnd() == 1)
+                float progress = twcmo->checkOperationEnd();
+                std::cout << "progress: " << progress << std::endl;
+                if (progress == 1)
                 {
                     /// Get data for log
                     // messi qui solo per test -> devono essere variabili globali

@@ -27,7 +27,7 @@ float EndLineTurnMP::computeLinearVelocity(const float r,
 
     if (r < epsilon_)
     {
-        v = k3_ * r;
+        v = k3_;
     }
     else
     {
