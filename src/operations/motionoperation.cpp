@@ -580,7 +580,7 @@ void SpecialTargetMO::initialize(const float currentBearing,
 void SpecialTargetMO::updateParameters(const std::shared_ptr<std::vector<vineyard::Pole::Ptr> > &polesVector,
                                        const float currentBearing)
 {
-    steered_angle_ = currentBearing - start_bearing_;
+    steered_angle_ = - currentBearing - start_bearing_;
     steered_angle_ = normalizeAngle_PI(steered_angle_);
 
     //std::cout << steered_angle_ << std::endl;
