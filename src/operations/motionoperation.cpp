@@ -562,10 +562,10 @@ void SpecialTargetMO::initialize(const float currentBearing,
                                  const cv::Vec2f targetPoleVector)
 {
 
-    start_bearing_ = currentBearing;
+    start_bearing_ = -currentBearing;
 
     fixed_pole_ = fixedPolePosition;
-    target_bearing_ = target_start_bearing_ = normalizeAngle_PI(targetBearing);
+    target_bearing_ = target_start_bearing_ = normalizeAngle_PI(targetBearing + currentBearing);
     target_pole_vec_ = targetPoleVector;
 
     // target vec è un vettore che contiene le coordinate polari del punto target rispetto al punto fisso

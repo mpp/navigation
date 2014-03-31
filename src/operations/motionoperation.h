@@ -60,6 +60,12 @@ public:
                             const std::shared_ptr<gui> &gui = nullptr);
 
     /*!
+     * \brief initialize
+     * \param desiredDistanceFromPole
+     */
+    void initialize(const float desiredDistanceFromPole) { desired_x_ = desiredDistanceFromPole; }
+
+    /*!
      * \brief updateParameters update the internal parameters of the class with new data
      * \param polesVector the curretn vector of sensed poles
      * \param lastControl the last control applied to the robot

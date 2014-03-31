@@ -22,7 +22,7 @@ logparser:
     # /home/mpp/DODICH/Registrazioni/
     # -- Laboratorio
     # /home/dodich/DODICH/Registrazioni/
-    path: /home/mpp/DODICH/Registrazioni/
+    path: /home/dodich/DODICH/Registrazioni/
 
     # Opzioni
     #
@@ -121,7 +121,10 @@ logparser:
     # test_special_target_operation -> delle operazioni 07TL per debug
     # -- Casi 26 28 marzo
     # 03281610_ls_sick
-    file: "03281610_ls_sick.csv"
+    # 03281757_ls_sick manovra sinistra con problemi
+    # -- Casi 27 31 marzo
+    # 03310739_P01R_sick
+    file: "03281757_ls_sick.csv"
 
 
     # Here goes the operation, it can be
@@ -137,7 +140,7 @@ logparser:
     # 003L con T01L Turn left
     # 05HL con H01L Header left
     # 07TL con P01L Point left
-    operation: "T01L"
+    operation: "F01R"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
