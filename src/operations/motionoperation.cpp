@@ -187,8 +187,10 @@ void TurnWithCompassMO::initialize(const std::shared_ptr<std::vector<vineyard::P
                                    float forwardDistance,
                                    float fixedTurnAngle,
                                    float fixedTurnRadius,
+                                   float headPoleThreshold,
                                    bool fixedStart)
 {
+    head_pole_threshold_ = headPoleThreshold;
     if (!ego_initialized_)
     {
         ego_.initializePolesVector(polesVector);
@@ -580,7 +582,7 @@ void SpecialTargetMO::initialize(const float currentBearing,
 void SpecialTargetMO::updateParameters(const std::shared_ptr<std::vector<vineyard::Pole::Ptr> > &polesVector,
                                        const float currentBearing)
 {
-    steered_angle_ = - currentBearing - start_bearing_;
+    steered_angle_ = currentBearing - start_bearing_;
     steered_angle_ = normalizeAngle_PI(steered_angle_);
 
     //std::cout << steered_angle_ << std::endl;
@@ -621,11 +623,26 @@ void SpecialTargetMO::updateParameters(const std::shared_ptr<std::vector<vineyar
         }
         if (!found)
         {
-            fixed_pole_ID_ = -1;
+            /*fixed_pole_ID_ = -1;*/
+            float minDistance = std::numeric_limits<float>::max();
+            for (vineyard::Pole_Ptr p : (*polesVector))
+            {
+                // distance pole-headPole
+                float distancePH = cv::norm(cv::Point2f(p->getCentroid().x - fixed_pole_.x,
+                                                        p->getCentroid().y - fixed_pole_.y));
+
+                if (distancePH < fixed_pole_threshold_ && distancePH < minDistance)
+                {
+                    nearest = p;
+                    fixed_pole_ = p->getCentroid();
+                    fixed_pole_ID_ = p->ID();
+                    minDistance = distancePH;
+                }
+            }
         }
         else
         {
-            float minDistanceOrigin = std::numeric_limits<float>::max();
+            /*float minDistanceOrigin = std::numeric_limits<float>::max();
             for (vineyard::Pole_Ptr p : (*polesVector))
             {
                 // distance pole-headPole
@@ -641,7 +658,7 @@ void SpecialTargetMO::updateParameters(const std::shared_ptr<std::vector<vineyar
                     fixed_pole_ID_ = p->ID();
                     minDistanceOrigin = supposedHeadPoleDistance;
                 }
-            }
+            }*/
         }
 
         updateTarget = true;

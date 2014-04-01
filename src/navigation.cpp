@@ -250,6 +250,7 @@ int main(int argc, char **argv)
             float forwardDistance = 4.5f;   // da setup
             float fixedTurnAngle = M_PI/2;  // da setup
             float fixedTurnRadius = 1.45f;   // da setup
+            float headPoleThreshold = 2.0f;   // da setup
             //
             if (!initialized)
             {
@@ -259,7 +260,8 @@ int main(int argc, char **argv)
                                   lineAngle,
                                   forwardDistance,
                                   fixedTurnAngle,
-                                  fixedTurnRadius);
+                                  fixedTurnRadius,
+                                  headPoleThreshold);
                 initialized = true;
             }
             else
@@ -303,7 +305,7 @@ int main(int argc, char **argv)
             // messi qui solo per test -> devono essere variabili globali
             /// Posizione del palo fisso
             // punto (x,y)
-            cv::Point2f fixedPolePosition(7.5f, 2.5f);      // da setup
+            cv::Point2f fixedPolePosition(7.0f, 6.5f);      // da setup
 
             /// ATTENTO, il vettore va in coordinate polari:
             // il primo valore è la distanza del target dal palo fisso (positiva e in metri),
@@ -312,7 +314,7 @@ int main(int argc, char **argv)
 
             /// questa è la direzione voluta del robot al target
             // angolo in radianti
-            float targetBearing = 91*M_PI/180;                   // da setup
+            float targetBearing = (92+180)*M_PI/180;                   // da setup
 
             if (!initialized)
             {

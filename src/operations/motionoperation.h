@@ -148,6 +148,7 @@ public:
                     float forwardDistance,
                     float fixedTurnAngle,
                     float fixedTurnRadius,
+                    float headPoleThreshold,
                     bool fixedStart = false);
 
     /*!
