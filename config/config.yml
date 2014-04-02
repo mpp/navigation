@@ -130,7 +130,7 @@ logparser:
     # 03291616_F01L_si
     # 03301451_F01L_no
     # 02170845_07TL_sick
-    file: "04010839_P01R_sick.csv"
+    file: "03301451_F01L_no.csv"
 
 
     # Here goes the operation, it can be
@@ -146,7 +146,7 @@ logparser:
     # 003L con T01L Turn left
     # 05HL con H01L Header left
     # 07TL con P01L Point left
-    operation: "P01R"
+    operation: "F01L"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter

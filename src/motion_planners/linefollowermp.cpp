@@ -23,7 +23,7 @@ float LineFollowerMP::computeLinearVelocity(const float errorX,
 {
     float k = desired_x_ * kMaxV / kXLimitMultiplier;
 
-    return (kMaxV - k * std::abs(errorX) * std::cos(errorTheta));
+    return (kMaxV - k * std::abs(errorX)) * std::cos(errorTheta);
 }
 
 float LineFollowerMP::computeAngularVelocity(const float v,

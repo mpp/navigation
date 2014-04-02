@@ -21,6 +21,8 @@ LineFollowerMO::LineFollowerMO(const cv::FileStorage &fs,
 {
     GUI_ = gui;
     last_control_ = { 0.0f, 0.0f };
+    end_operation_counter_ = 0;
+    min_number_of_end_frames_ = 5; /// TODO: move it to the config file
 }
 
 void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard::Pole::Ptr> > &polesVector,
@@ -107,6 +109,7 @@ Control LineFollowerMO::computeOperationControl()
         float errorTheta = desired_theta_ - state_.dtheta;
 
         // Compute the velocities
+        std::cout << "(ex, et) = (" << errorX << ", " << errorTheta << ")" << std::endl;
         linear = line_follower_.computeLinearVelocity(errorX, errorTheta);
         angular = line_follower_.computeAngularVelocity(linear, errorX, errorTheta);
     }
@@ -114,15 +117,25 @@ Control LineFollowerMO::computeOperationControl()
     return {linear, angular};
 }
 
-float LineFollowerMO::checkOperationEnd() const
+float LineFollowerMO::checkOperationEnd()
 {
     float end = 0.0f;
     float s = 4.0f;
 
     if (head_pole_center_.x < end)
     {
-        return 1.0f;
+        end_operation_counter_ = end_operation_counter_ + 1;
+        if (end_operation_counter_ >= min_number_of_end_frames_)
+        {
+            return 1.0f;
+        }
+        else
+        {
+            return 0.998f;
+        }
     }
+
+    end_operation_counter_ = 0;
 
     if (head_pole_center_.x > s)
     {
@@ -477,7 +490,7 @@ Control TurnWithCompassMO::computeOperationControl()
     return {linear, angular};
 }
 
-float TurnWithCompassMO::checkOperationEnd() const
+float TurnWithCompassMO::checkOperationEnd()
 {
     if (fixed_start_maneuvre_)
     {
@@ -708,7 +721,7 @@ Control SpecialTargetMO::computeOperationControl()
     return {linear, angular};
 }
 
-float SpecialTargetMO::checkOperationEnd() const
+float SpecialTargetMO::checkOperationEnd()
 {
     // controllo fine operazione
     float difference = std::abs(theta_ - sigma_);

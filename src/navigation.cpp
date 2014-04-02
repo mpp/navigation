@@ -180,7 +180,7 @@ int main(int argc, char **argv)
 
             if (!initialized)
             {
-                float desiredDistanceFromLine = 0.5;
+                float desiredDistanceFromLine = 1.5;
                 lfmo->initialize(desiredDistanceFromLine);
                 initialized = true;
             }
@@ -197,7 +197,7 @@ int main(int argc, char **argv)
             lfmo->getFinalStatus(lineAngle, initialPolePosition);
 
             float progress = lfmo->checkOperationEnd();
-            std::cout << "progress: " << progress << " - initialPolePosition: " << initialPolePosition.x << std::endl;
+            //std::cout << "progress: " << progress << " - initialPolePosition: " << initialPolePosition.x << std::endl;
             if (progress == 1)
             {
                 cv::waitKey();
@@ -366,7 +366,8 @@ int main(int argc, char **argv)
         lv = lv / maxWheelVelocityValue;
         rv = rv / maxWheelVelocityValue;
 
-        std::cout << "(lv,rv) = (" << lv << ", " << rv << ")" << std::endl;
+        std::cout << "(lin, ome) = (" << control.linear << ", " << control.angular << ")" << std::endl;
+        std::cout << "(lv,  rv ) = (" << lv << ", " << rv << ")" << std::endl;
 
         c = GUI->show();
     }

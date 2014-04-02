@@ -37,7 +37,7 @@ public:
      * \brief checkOperationEnd check if the operation reach its objective
      * \return percentage (in [0,1]) of the operation progress
      */
-    virtual float checkOperationEnd() const = 0;
+    virtual float checkOperationEnd() = 0;
 
 protected:
 
@@ -77,7 +77,7 @@ public:
 
     Control computeOperationControl();
 
-    float checkOperationEnd() const;
+    float checkOperationEnd();
 
     void getFinalStatus(float &exitLineAngle,
                         cv::Point2f &headPole) const
@@ -126,6 +126,11 @@ private:
 
     float
         desired_x_, desired_theta_;
+
+    unsigned int
+        end_operation_counter_;
+    unsigned int
+        min_number_of_end_frames_;
 };
 
 class TurnWithCompassMO : public MotionOperation
@@ -163,7 +168,7 @@ public:
 
     Control computeOperationControl();
 
-    float checkOperationEnd() const;
+    float checkOperationEnd();
 
     inline void getLogStatus(float &r,
                              float &theta,
@@ -288,7 +293,7 @@ public:
 
     Control computeOperationControl();
 
-    float checkOperationEnd() const;
+    float checkOperationEnd();
 
     inline void getLogStatus(float &r,
                              float &theta,

@@ -18,16 +18,19 @@ EKFStateEstimator::EKFStateEstimator()
     ekf_process_noise_.at<float>(2,2) = 0.1;
 
     ekf_measurement_noise_ = cv::Mat::zeros(3, 3, CV_32F);
-    ekf_measurement_noise_.at<float>(0,0) = 0.1;
-    ekf_measurement_noise_.at<float>(0,1) = 0.05;
-    ekf_measurement_noise_.at<float>(1,1) = 0.2;
-    ekf_measurement_noise_.at<float>(1,0) = 0.05;
-    ekf_measurement_noise_.at<float>(2,2) = 0.1;
+    ekf_measurement_noise_.at<float>(0,0) = 0.01;
+    ekf_measurement_noise_.at<float>(0,1) = 0.005;
+    ekf_measurement_noise_.at<float>(1,1) = 0.02;
+    ekf_measurement_noise_.at<float>(1,0) = 0.005;
+    ekf_measurement_noise_.at<float>(2,2) = 0.01;
 
     tx_ = 1;
     dt_ = 0.01;
 
     /// TODO: set the initial statePost, how?? [1.50875592; 0.31273764; 1.79768908]
+    ekf_estimator_.statePost.at<float>(1) = 0.0f;
+    ekf_estimator_.statePost.at<float>(0) = 0.0f;
+    ekf_estimator_.statePost.at<float>(2) = 0.0f;
 }
 
 void EKFStateEstimator::setupControlMatrix(const float linearVelocity,
@@ -124,8 +127,8 @@ void EKFStateEstimator::estimate(const cv::Mat &control,
 {
     // 0 - save in a temp matrix the state post and save the control matrix
     ekf_estimator_.statePost.copyTo(ekf_state_post_);
-//    std::cout << "StatePost of the previous estimation: " << std::endl;
-//    std::cout << ekf_state_post_ << std::endl;
+    std::cout << "StatePost of the previous estimation: " << std::endl;
+    std::cout << ekf_state_post_ << std::endl;
 
     control.copyTo(ekf_control_);
 //    std::cout << "Control Matrix: " << std::endl;
