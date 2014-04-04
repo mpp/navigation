@@ -22,7 +22,7 @@ logparser:
     # /home/mpp/DODICH/Registrazioni/
     # -- Laboratorio
     # /home/dodich/DODICH/Registrazioni/
-    path: /home/dodich/DODICH/Registrazioni/
+    path: /home/mpp/DODICH/Registrazioni/
 
     # Opzioni
     #
@@ -130,7 +130,10 @@ logparser:
     # 03291616_F01L_si
     # 03301451_F01L_no
     # 02170845_07TL_sick
-    file: "03301451_F01L_no.csv"
+    # -- Casi 29 2 aprile
+    # 04021238_ls_sick
+    # 04011527_ls_sick Testata
+    file: "03291616_F01L_si.csv"
 
 
     # Here goes the operation, it can be
@@ -211,7 +214,7 @@ globalMP:
 
 # Following the indication of: http://www.inaut.unsj.edu.ar/Files/Ca1277_03.pdf 
 lineFollower: 
-    desiredDistance: 1.5 # desired distance from the line
+    desiredDistance: 2.0 # desired distance from the line
     desiredTheta: 0.0 # desired angle divergence from the line
 
     ## !!BEWARE!! that changes in maxV and maxOmega involve changes in theese variables

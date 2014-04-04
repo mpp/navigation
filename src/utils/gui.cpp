@@ -75,6 +75,12 @@ char gui::show()
     return cv::waitKey(/*wait_time_*/);
 }
 
+char gui::show(const int ms)
+{
+    cv::imshow(win_name_, image_);
+    return cv::waitKey(ms);
+}
+
 void gui::drawHUD(const int frameNumber)
 {
     /// Draw the scan area
@@ -220,6 +226,14 @@ void gui::drawLine(const std::vector<vineyard::Pole::Ptr> &polesVector,
     cv::Point2f pta,ptb;
     line->computeLineExtremes(pta,ptb);
     cv::line(image_, pta*factor_+center_, ptb*factor_+center_, red_, 2);
+    cv::Point2f orto (-(line->getLineParameters().vy), line->getLineParameters().vx);
+    float norm = cv::norm(orto);
+    float distance = 2.0;
+    orto.x = distance * orto.x / norm;
+    orto.y = distance * orto.y / norm;
+    cv::line(image_, (pta+orto)*factor_+center_, (ptb+orto)*factor_+center_, blue_, 1);
+    cv::line(image_, (pta+orto)*factor_+center_, (ptb+orto)*factor_+center_, blue_, 1);
+
 }
 
 
@@ -274,6 +288,21 @@ void gui::drawTarget(const cv::Point2f &targetPoint,
     float mag = cv::norm(targetPoint);
     cv::Point2f tar = targetPoint * (1/mag);
     cv::line(image_, (-1 * max_radius_ * tar * factor_) + center_, (max_radius_ * tar * factor_) + center_, yellow_, 1);
+}
+
+void gui::drawPixelPath(const cv::Point2f &inPt)
+{
+    cv::Point2f pt = inPt * factor_ + center_;
+    if (pt.x >= 0 && pt.x < image_.cols && pt.y >= 0 && pt.y <= image_.rows)
+    {
+        image_.at<cv::Vec3b>(pt)[0] = 50;
+        image_.at<cv::Vec3b>(pt)[1] = 200;
+        image_.at<cv::Vec3b>(pt)[2] = 50;
+    }
+    else
+    {
+        return;
+    }
 }
 
 }

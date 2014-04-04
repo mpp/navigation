@@ -34,6 +34,8 @@ public:
                                  const float theta,
                                  const float sigma);
 
+    float getEndEpsilon() { return epsilon_; }
+
 private:
 
     float               // see formula 14 of the paper

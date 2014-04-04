@@ -86,6 +86,12 @@ public:
 
 private:
 
+    void computeErrorXErrorTheta(float &errorX, float &errorTheta, const Control lastControl,
+                                 const cv::Point2f &currentPosition = cv::Point2f(0.0f,0.0f),
+                                 const float currentBearing = 0.0f);
+
+    void drawPrevPath();
+
 private:
 
     /// TODO: documentation && test
@@ -187,6 +193,12 @@ private:
                          float fixedTurnAngle,
                          float fixedTurnRadius,
                          float exitLineAngle);
+
+    void computeRThetaSigma(float &r, float &theta, float &sigma,
+                            const cv::Point2f &robotPosition = cv::Point2f(0.0f,0.0f),
+                            const float &robotBearing = 0.0f );
+
+    void drawPrevPath();
 
 private:
 
@@ -305,6 +317,11 @@ public:
 
 // private methods
 private:
+
+    void computeRThetaSigma(float &r, float &theta, float &sigma,
+                            const cv::Point2f &robotPosition = cv::Point2f(0.0f,0.0f),
+                            const float &robotBearing = 0.0f );
+    void drawPrevPath();
 
 // private data
 private:

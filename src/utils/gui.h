@@ -15,6 +15,7 @@ public:
     gui(const cv::FileStorage &fs, const std::string winName, const int waitTime);
 
     char show();
+    char show(const int ms);
 
     void refresh();
 
@@ -48,6 +49,9 @@ public:
 
     void drawTarget(const cv::Point2f &targetPoint,
                     const cv::Point2f &targetDirection);
+
+    void drawPixelPath(const cv::Point2f &inPt);
+
 private:
 
     cv::Mat image_;

@@ -81,6 +81,82 @@ void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard
             int headPoleIndex = line_->getPolesList().front();
             head_pole_center_ = (*polesVector)[headPoleIndex]->getCentroid();
             head_pole_distance_ = cv::norm(head_pole_center_);
+
+            if (GUI_) { drawPrevPath(); }
+        }
+    }
+}
+
+void LineFollowerMO::computeErrorXErrorTheta(float &errorX, float &errorTheta,
+                                             const Control lastControl,
+                                             const cv::Point2f &currentPosition,
+                                             const float currentBearing)
+{
+    EKFStateEstimator simEKF = ekf_;
+
+
+    vineyard::LineParams lineParams = line_->getLineParameters();
+
+    lineParams.x0 += currentPosition.x;
+    lineParams.y0 += currentPosition.y;
+    float lineAngle = std::atan2(lineParams.vy, lineParams.vx);
+
+    lineAngle -= currentBearing;
+
+    lineParams.vx = std::cos(lineAngle);
+    lineParams.vy = std::sin(lineAngle);
+
+    // Update the EKF
+    cv::Mat measurement, control;
+
+    simEKF.setupMeasurementMatrix(lineParams, current_bearing_ - currentBearing, measurement);
+    simEKF.setupControlMatrix(lastControl.linear,lastControl.angular,control);
+    simEKF.estimate(control, measurement, state_);
+
+    errorX = desired_x_ - state_.dy;
+    errorTheta = desired_theta_ - state_.dtheta;
+}
+
+void LineFollowerMO::drawPrevPath()
+{
+    // Setup the simulation variables
+    float
+            dt = 0.01f,         // Simulation time step
+            currentTime = 0.0f,
+            maxTime = 5;
+    cv::Point2f
+            currentPosition(0.0f,0.0f);
+    float
+            currentBearing = 0.0f;
+
+    // Start the simulation
+    while (currentTime < maxTime)
+    {
+        currentTime = currentTime + dt;
+
+        float
+            errorX, errorTheta;
+
+        float
+            v = 0.0f,
+            omega = 0.0f;
+
+        computeErrorXErrorTheta(errorX, errorTheta, {v, omega},
+                                currentPosition,
+                                currentBearing);
+
+        v = line_follower_.computeLinearVelocity(errorX, errorTheta);
+        omega = line_follower_.computeAngularVelocity(v, errorX, errorTheta);
+
+        currentPosition.x = currentPosition.x + std::cos(currentBearing) * v * dt;
+        currentPosition.y = currentPosition.y + std::sin(currentBearing) * v * dt;
+        currentBearing = currentBearing + omega * dt;
+
+        if (GUI_) { GUI_->drawPixelPath(currentPosition); /*GUI_->show(1);*/}
+
+        if (v == 0.0f && omega == 0.0f)
+        {
+            return;
         }
     }
 }
@@ -449,7 +525,69 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
 
     if (GUI_) { GUI_->drawHeadPole(head_pole_); }
     if (GUI_) { GUI_->drawTarget(target_point_, target_direction_); }
+    if (GUI_) { drawPrevPath(); }
 }
+
+void TurnWithCompassMO::computeRThetaSigma(float &r, float &theta, float &sigma,
+                                          const cv::Point2f &robotPosition,
+                                          const float &robotBearing)
+ {
+     float targetDirectionAngle;
+     float targetAngle;
+
+     targetDirectionAngle = std::atan2((target_direction_.y - robotPosition.y),
+                                       (target_direction_.x - robotPosition.x));
+     targetAngle = std::atan2((target_point_.y - robotPosition.y),
+                              (target_point_.x - robotPosition.x));
+
+     targetDirectionAngle = normalizeAngle_PI(targetDirectionAngle - robotBearing);
+     targetAngle = normalizeAngle_PI(targetAngle);
+
+     r = cv::norm(target_point_ - robotPosition);
+     theta = targetDirectionAngle - targetAngle;
+     sigma = robotBearing - targetAngle;
+
+     theta = normalizeAngle_PI(theta);
+ }
+
+ void TurnWithCompassMO::drawPrevPath()
+ {
+     // Setup the simulation variables
+     float
+             dt = 0.01f,         // Simulation time step
+             currentTime = 0.0f,
+             maxTime = 5;
+     cv::Point2f
+             currentPosition(0.0f,0.0f);
+     float
+             currentBearing = 0.0f;
+
+     // Start the simulation
+     while (currentTime < maxTime)
+     {
+         currentTime = currentTime + dt;
+         float r,theta,sigma;
+
+         computeRThetaSigma(r, theta, sigma, currentPosition, currentBearing);
+
+         float
+             v = 0.0f,
+             omega = 0.0f;
+         v = u_turn_mp_.computeLinearVelocity(r,theta,sigma);
+         omega = u_turn_mp_.computeAngularVelocity(v, r, theta, sigma);
+
+         currentPosition.x = currentPosition.x + std::cos(currentBearing) * v * dt;
+         currentPosition.y = currentPosition.y + std::sin(currentBearing) * v * dt;
+         currentBearing = currentBearing + omega * dt;
+
+         if (GUI_) { GUI_->drawPixelPath(currentPosition); /*GUI_->show(1);*/}
+
+         if (v == 0.0f && omega == 0.0f || r <= u_turn_mp_.getEndEpsilon())
+         {
+             return;
+         }
+     }
+ }
 
 Control TurnWithCompassMO::computeOperationControl()
 {
@@ -693,6 +831,71 @@ void SpecialTargetMO::updateParameters(const std::shared_ptr<std::vector<vineyar
     if (GUI_) { GUI_->drawHeadPole(fixed_pole_); }
     if (GUI_) { GUI_->drawTarget(target_point_, target_point_ + cv::Point2f(std::cos(target_bearing_),
                                                                             std::sin(target_bearing_))); }
+    if (GUI_) { drawPrevPath(); }
+}
+
+void SpecialTargetMO::computeRThetaSigma(float &r, float &theta, float &sigma,
+                                         const cv::Point2f &robotPosition,
+                                         const float &robotBearing)
+{
+    float targetDirectionAngle;
+    float targetAngle;
+
+    cv::Point2f targetDirectionPoint(std::cos(target_bearing_) + target_point_.x,
+                                     std::sin(target_bearing_) + target_point_.y);
+
+    targetDirectionAngle = std::atan2((targetDirectionPoint.y - robotPosition.y),
+                                      (targetDirectionPoint.x - robotPosition.x));
+    targetAngle = std::atan2((target_point_.y - robotPosition.y),
+                             (target_point_.x - robotPosition.x));
+
+    targetDirectionAngle = normalizeAngle_PI(targetDirectionAngle - robotBearing);
+    targetAngle = normalizeAngle_PI(targetAngle);
+
+    r = cv::norm(target_point_ - robotPosition);
+    theta = targetDirectionAngle - targetAngle;
+    sigma = robotBearing - targetAngle;
+
+    theta = normalizeAngle_PI(theta);
+}
+
+void SpecialTargetMO::drawPrevPath()
+{
+    // Setup the simulation variables
+    float
+            dt = 0.01f,         // Simulation time step
+            currentTime = 0.0f,
+            maxTime = 5;
+    cv::Point2f
+            currentPosition(0.0f,0.0f);
+    float
+            currentBearing = 0.0f;
+
+    // Start the simulation
+    while (currentTime < maxTime)
+    {
+        currentTime = currentTime + dt;
+        float r,theta,sigma;
+
+        computeRThetaSigma(r, theta, sigma, currentPosition, currentBearing);
+
+        float
+            v = 0.0f,
+            omega = 0.0f;
+        v = target_mp_.computeLinearVelocity(r,theta,sigma);
+        omega = target_mp_.computeAngularVelocity(v, r, theta, sigma);
+
+        currentPosition.x = currentPosition.x + std::cos(currentBearing) * v * dt;
+        currentPosition.y = currentPosition.y + std::sin(currentBearing) * v * dt;
+        currentBearing = currentBearing + omega * dt;
+
+        if (GUI_) { GUI_->drawPixelPath(currentPosition); /*GUI_->show(1);*/}
+
+        if (v == 0.0f && omega == 0.0f || r <= target_mp_.getEndEpsilon())
+        {
+            return;
+        }
+    }
 }
 
 Control SpecialTargetMO::computeOperationControl()

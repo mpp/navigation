@@ -165,6 +165,7 @@ int main(int argc, char **argv)
         GUI->drawPoints(ptVector);
         GUI->drawPoles(*polesVector);
 
+        std::cout << operation << " - " << f.oper_t << std::endl;
         /// Check the operation frame
         if (f.oper_t.compare(operation) != 0/* || f.frameID <= 3000*/)
         {
@@ -180,7 +181,7 @@ int main(int argc, char **argv)
 
             if (!initialized)
             {
-                float desiredDistanceFromLine = 1.5;
+                float desiredDistanceFromLine = 2.0;
                 lfmo->initialize(desiredDistanceFromLine);
                 initialized = true;
             }
@@ -305,7 +306,7 @@ int main(int argc, char **argv)
             // messi qui solo per test -> devono essere variabili globali
             /// Posizione del palo fisso
             // punto (x,y)
-            cv::Point2f fixedPolePosition(7.0f, 6.5f);      // da setup
+            cv::Point2f fixedPolePosition(7.0f, -4.0f);      // da setup
 
             /// ATTENTO, il vettore va in coordinate polari:
             // il primo valore è la distanza del target dal palo fisso (positiva e in metri),
@@ -314,7 +315,7 @@ int main(int argc, char **argv)
 
             /// questa è la direzione voluta del robot al target
             // angolo in radianti
-            float targetBearing = (92+180)*M_PI/180;                   // da setup
+            float targetBearing = (92)*M_PI/180;                   // da setup
 
             if (!initialized)
             {
