@@ -90,7 +90,10 @@ int main(int argc, char **argv)
     {
         mo = std::make_shared<nav::TurnWithCompassMO>(fs, true, GUI);
     }
-    else if (operation.compare("P01L") == 0 || operation.compare("P01R") == 0)
+    else if (operation.compare("P01L") == 0
+             || operation.compare("P01R") == 0
+             || operation.compare("P02R") == 0
+             || operation.compare("P03R") == 0)
     {
         mo = std::make_shared<nav::SpecialTargetMO>(fs, operation, GUI);
     }
@@ -298,7 +301,10 @@ int main(int argc, char **argv)
                 }
             }
         }
-        if (operation.compare("P01L") == 0 || operation.compare("P01R") == 0)
+        if (operation.compare("P01L") == 0
+                || operation.compare("P01R") == 0
+                || operation.compare("P02R") == 0
+                || operation.compare("P03R") == 0)
         {
             std::shared_ptr<nav::SpecialTargetMO> stmo = std::static_pointer_cast<nav::SpecialTargetMO>(mo);
 
@@ -306,16 +312,16 @@ int main(int argc, char **argv)
             // messi qui solo per test -> devono essere variabili globali
             /// Posizione del palo fisso
             // punto (x,y)
-            cv::Point2f fixedPolePosition(7.0f, -4.0f);      // da setup
+            cv::Point2f fixedPolePosition(7.0f, 4.5f);      // da setup
 
             /// ATTENTO, il vettore va in coordinate polari:
             // il primo valore è la distanza del target dal palo fisso (positiva e in metri),
             // il secondo è l'angolo di direzione del target rispetto al palo fisso (tra -PI e + PI in radianti)
-            cv::Vec2f targetPoleVector(-1.5f, 0);            // da setup
+            cv::Vec2f targetPoleVector(4.0f, -2.5);            // da setup
 
             /// questa è la direzione voluta del robot al target
             // angolo in radianti
-            float targetBearing = (92)*M_PI/180;                   // da setup
+            float targetBearing = (13)*M_PI/180;                   // da setup
 
             if (!initialized)
             {

@@ -133,7 +133,11 @@ logparser:
     # -- Casi 29 2 aprile
     # 04021238_ls_sick
     # 04011527_ls_sick Testata
-    file: "03291616_F01L_si.csv"
+    # -- Casi 30 7 aprile
+    # 04061003_P02R_sick
+    # 04061010_P03R_sick
+    # 04071124_ls_sick errore inizio manovra P02R
+    file: "04061003_P02R_sick.csv"
 
 
     # Here goes the operation, it can be
@@ -149,7 +153,7 @@ logparser:
     # 003L con T01L Turn left
     # 05HL con H01L Header left
     # 07TL con P01L Point left
-    operation: "F01L"
+    operation: "P02R"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
@@ -162,10 +166,10 @@ laserscanfilter:
     maxDistance: 11.0
 
     # minimum angle of scan (deg) - 0° is in front of the scanner
-    minAngle: -2.20
+    minAngle: -2.10
 
     # maximum angle of scan (deg) - 0° is in front of the scanner
-    maxAngle: 2.20 
+    maxAngle: 2.10
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the poles extractor class
@@ -234,7 +238,7 @@ Uturn:
     beta: 0.4
     lambda: 2
     headPoleThreshold: 2.0
-    endEpsilon: 1.0
+    endEpsilon: 0.8
     endGamma: 0.2
 
 ##---------------------------------------------------------------------------##

@@ -261,6 +261,9 @@ private:
 
     bool
         fixed_start_maneuvre_;
+
+    bool
+        final_correction_;
 };
 
 
@@ -363,6 +366,12 @@ private:
         theta_,             // angle target robot-target-direction
         sigma_;             // angle robot robot-target-direction
 
+    bool
+        final_correction_,
+        set_final_velocity_;
+    float
+        final_last_linear_vel_,
+        final_last_angular_vel_;
 };
 
 

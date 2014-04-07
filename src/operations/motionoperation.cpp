@@ -92,7 +92,7 @@ void LineFollowerMO::computeErrorXErrorTheta(float &errorX, float &errorTheta,
                                              const cv::Point2f &currentPosition,
                                              const float currentBearing)
 {
-    EKFStateEstimator simEKF = ekf_;
+    //EKFStateEstimator simEKF = ekf_;
 
 
     vineyard::LineParams lineParams = line_->getLineParameters();
@@ -107,14 +107,23 @@ void LineFollowerMO::computeErrorXErrorTheta(float &errorX, float &errorTheta,
     lineParams.vy = std::sin(lineAngle);
 
     // Update the EKF
-    cv::Mat measurement, control;
+    //cv::Mat measurement, control;
 
-    simEKF.setupMeasurementMatrix(lineParams, current_bearing_ - currentBearing, measurement);
-    simEKF.setupControlMatrix(lastControl.linear,lastControl.angular,control);
-    simEKF.estimate(control, measurement, state_);
+    //simEKF.setupMeasurementMatrix(lineParams, current_bearing_ - currentBearing, measurement);
+    //simEKF.setupControlMatrix(lastControl.linear,lastControl.angular,control);
+    //simEKF.estimate(control, measurement, state_);
 
-    errorX = desired_x_ - state_.dy;
-    errorTheta = desired_theta_ - state_.dtheta;
+    cv::Point2f
+            a(lineParams.x0, lineParams.y0),
+            b = a + cv::Point2f(lineParams.vx, lineParams.vy);
+
+    float
+            numerator = std::abs((b.x-a.x)*(a.y-currentPosition.y)-(a.x-currentPosition.x)*(b.y-a.y)),
+            divisor = std::sqrt((b.x-a.x)*(b.x-a.x)+(b.y-a.y)*(b.y-a.y)),
+            distance = numerator / divisor;
+
+    errorX = desired_x_ - distance;
+    errorTheta = desired_theta_ + (lineAngle - currentBearing);
 }
 
 void LineFollowerMO::drawPrevPath()
@@ -123,7 +132,7 @@ void LineFollowerMO::drawPrevPath()
     float
             dt = 0.01f,         // Simulation time step
             currentTime = 0.0f,
-            maxTime = 5;
+            maxTime = 25;
     cv::Point2f
             currentPosition(0.0f,0.0f);
     float
@@ -182,7 +191,7 @@ Control LineFollowerMO::computeOperationControl()
 
         // Compute the error
         float errorX = desired_x_ - state_.dy;
-        float errorTheta = desired_theta_ - state_.dtheta;
+        float errorTheta = -1 * (desired_theta_ - state_.dtheta);
 
         // Compute the velocities
         std::cout << "(ex, et) = (" << errorX << ", " << errorTheta << ")" << std::endl;
@@ -248,6 +257,7 @@ TurnWithCompassMO::TurnWithCompassMO(const cv::FileStorage &fs,
     GUI_ = gui;
     transform_(0,0) = 1.0f;transform_(0,1) = 0.0f;transform_(0,2) = 0.0f;
     transform_(1,0) = 0.0f;transform_(1,1) = 1.0f;transform_(1,2) = 0.0f;
+    final_correction_ = false;
 }
 
 void TurnWithCompassMO::computeHeadPole(cv::Point2f initialPole,
@@ -339,7 +349,7 @@ void TurnWithCompassMO::updateParameters(const std::shared_ptr<std::vector<viney
             {
                 ego_.computeRigidTransform(polesVector, transform_);
             }
-            std::cout << transform_ << std::endl;
+            //std::cout << transform_ << std::endl;
 
             float hx = head_pole_.x,
                   hy = head_pole_.y;
@@ -623,6 +633,23 @@ Control TurnWithCompassMO::computeOperationControl()
 
         linear = u_turn_mp_.computeLinearVelocity(r_,theta_,sigma_);
         angular = u_turn_mp_.computeAngularVelocity(linear,r_,theta_,sigma_);
+
+
+        if (r_ < end_epsilon_ || final_correction_)
+        {
+            final_correction_ = true;
+            linear = 0.0f;
+            float diff = normalizeAngle_PI(theta_ - sigma_);
+
+            if (std::abs(diff) > end_gamma_)
+            {
+                angular = diff < 0 ? 1.3 : -1.3;
+            }
+            else
+            {
+                angular = 0;
+            }
+        }
     }
 
     return {linear, angular};
@@ -707,6 +734,9 @@ SpecialTargetMO::SpecialTargetMO(const cv::FileStorage &fs,
     steered_angle_ = 0.0f;
     start_bearing_ = 0.0f;
     fixed_pole_ID_ = -1;
+    final_correction_ = false;
+    final_last_linear_vel_ = std::numeric_limits<float>::max();
+    set_final_velocity_ = true;
 }
 
 void SpecialTargetMO::initialize(const float currentBearing,
@@ -715,10 +745,10 @@ void SpecialTargetMO::initialize(const float currentBearing,
                                  const cv::Vec2f targetPoleVector)
 {
 
-    start_bearing_ = -currentBearing;
+    start_bearing_ = currentBearing;
 
     fixed_pole_ = fixedPolePosition;
-    target_bearing_ = target_start_bearing_ = normalizeAngle_PI(targetBearing + currentBearing);
+    target_bearing_ = target_start_bearing_ = normalizeAngle_PI(currentBearing - targetBearing);
     target_pole_vec_ = targetPoleVector;
 
     // target vec è un vettore che contiene le coordinate polari del punto target rispetto al punto fisso
@@ -793,7 +823,7 @@ void SpecialTargetMO::updateParameters(const std::shared_ptr<std::vector<vineyar
         }
         else
         {
-            /*float minDistanceOrigin = std::numeric_limits<float>::max();
+            float minDistanceOrigin = std::numeric_limits<float>::max();
             for (vineyard::Pole_Ptr p : (*polesVector))
             {
                 // distance pole-headPole
@@ -809,7 +839,7 @@ void SpecialTargetMO::updateParameters(const std::shared_ptr<std::vector<vineyar
                     fixed_pole_ID_ = p->ID();
                     minDistanceOrigin = supposedHeadPoleDistance;
                 }
-            }*/
+            }
         }
 
         updateTarget = true;
@@ -920,6 +950,27 @@ Control SpecialTargetMO::computeOperationControl()
 
     linear = target_mp_.computeLinearVelocity(r_,theta_,sigma_);
     angular = target_mp_.computeAngularVelocity(linear,r_,theta_,sigma_);
+
+    if (linear != 0.0f && (linear-0.01) > final_last_linear_vel_ && !final_correction_)
+    {
+        set_final_velocity_ = false;
+        final_correction_ = true;
+    }
+    else if (set_final_velocity_)
+    {
+        final_last_linear_vel_ = linear;
+        final_last_angular_vel_ = angular;
+    }
+
+    if (r_ < end_epsilon_ || final_correction_)
+    {
+        set_final_velocity_ = false;
+        final_correction_ = true;
+        r_ = end_epsilon_;
+        linear = 0.9 * linear ;
+
+        angular = final_last_angular_vel_;
+    }
 
     return {linear, angular};
 }
