@@ -968,6 +968,8 @@ Control SpecialTargetMO::computeOperationControl()
         final_correction_ = true;
         r_ = end_epsilon_;
         linear = 0.9 * linear ;
+        if (linear < 0.0f)
+            linear = 0.0f;
 
         angular = final_last_angular_vel_;
     }

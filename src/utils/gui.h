@@ -63,6 +63,8 @@ private:
     int factor_; // 1mt = factor pixels
     double font_scale_;
 
+    cv::Point2f offset_;
+
     float min_radius_;
     float max_radius_;
     float min_angle_;
@@ -88,6 +90,7 @@ private:
     cv::Scalar green_;
     cv::Scalar lightGreen_;
     cv::Scalar lightRed_;
+    cv::Scalar gray_;
     cv::Scalar lightGray_;
     cv::Scalar blue_;
     cv::Scalar yellow_;

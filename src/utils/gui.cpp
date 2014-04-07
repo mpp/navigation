@@ -20,6 +20,11 @@ gui::gui(const cv::FileStorage &fs, const std::string winName, const int waitTim
     factor_     = fs["gui"]["wFactor"]; // 1mt = factor pixels
     font_scale_ = fs["gui"]["wFontScale"];
 
+    float offset = fs["laserscanfilter"]["offset"];
+
+    offset_.x = offset * factor_;
+    offset_.y = 0.0f;
+
     min_radius_ = fs["laserscanfilter"]["minDistance"];
     max_radius_ = fs["laserscanfilter"]["maxDistance"];
     min_angle_  = fs["laserscanfilter"]["minAngle"];
@@ -42,6 +47,7 @@ gui::gui(const cv::FileStorage &fs, const std::string winName, const int waitTim
     green_      = read(fs["gui"]["colors"]["green"]);
     lightGreen_  = read(fs["gui"]["colors"]["lightGreen"]);
     lightGray_  = read(fs["gui"]["colors"]["lightGray"]);
+    gray_       = read(fs["gui"]["colors"]["gray"]);
     lightRed_  = read(fs["gui"]["colors"]["lightRed"]);
     blue_       = read(fs["gui"]["colors"]["blue"]);
     yellow_     = read(fs["gui"]["colors"]["yellow"]);
@@ -83,17 +89,49 @@ char gui::show(const int ms)
 
 void gui::drawHUD(const int frameNumber)
 {
+    /// Draw the background grid
+    int nLines = std::ceil(max_radius_ + 1);
+    // Vertical
+    for (int i = -nLines; i <= nLines+1; i++)
+    {
+        cv::Point2f
+                a(i, -nLines),
+                b(i, nLines);
+        cv::line(image_, a*factor_ + center_, b*factor_ + center_, gray_);
+    }
+    // Horizontal
+    for (int j = -nLines; j <= nLines+1; j++)
+    {
+        cv::Point2f
+                a(-nLines, j),
+                b(nLines, j);
+        cv::line(image_, a*factor_ + center_, b*factor_ + center_, gray_);
+    }
+
+    /// Draw the robot
+    // Robot dimension (footprint)
+    float halfWidth = 1.0f;
+    float halfLenght = 1.75f;
+
+    cv::rectangle(image_, cv::Point2f(-halfLenght, -halfWidth)*factor_ + center_,
+                  cv::Point2f(halfLenght, halfWidth)*factor_ + center_, darkGray_);
+    cv::line(image_, cv::Point2f(-halfLenght, -halfWidth)*factor_ + center_,
+                     cv::Point2f(halfLenght, halfWidth)*factor_ + center_, black_);
+    cv::line(image_, cv::Point2f(-halfLenght, halfWidth)*factor_ + center_,
+                     cv::Point2f(halfLenght, -halfWidth)*factor_ + center_, black_);
+
+
     /// Draw the scan area
-    cv::circle(image_, center_, min_radius_ * factor_, black_);
-    cv::circle(image_, center_, max_radius_ * factor_, black_);
+    cv::circle(image_, center_ + offset_, min_radius_ * factor_, black_);
+    cv::circle(image_, center_ + offset_, max_radius_ * factor_, black_);
 
     cv::Point2f pt1(floor(std::cos(max_angle_) * max_radius_ * factor_),
                     floor(std::sin(max_angle_) * max_radius_ * factor_));
     cv::Point2f pt2(floor(std::cos(min_angle_) * max_radius_ * factor_),
                     floor(std::sin(min_angle_) * max_radius_ * factor_));
 
-    cv::line(image_, center_, center_ + pt1, black_);
-    cv::line(image_, center_, center_ + pt2, black_);
+    cv::line(image_, center_ + offset_, center_ + offset_ + pt1, black_);
+    cv::line(image_, center_ + offset_, center_ + offset_ + pt2, black_);
 
     /// Draw the compass area
     cv::rectangle(image_, cv::Point2i(compass_x_, compass_y_),

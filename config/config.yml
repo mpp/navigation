@@ -137,7 +137,8 @@ logparser:
     # 04061003_P02R_sick
     # 04061010_P03R_sick
     # 04071124_ls_sick errore inizio manovra P02R
-    file: "04061003_P02R_sick.csv"
+    # 04071531_ls_sick
+    file: "04010839_P01R_sick.csv"
 
 
     # Here goes the operation, it can be
@@ -153,7 +154,7 @@ logparser:
     # 003L con T01L Turn left
     # 05HL con H01L Header left
     # 07TL con P01L Point left
-    operation: "P02R"
+    operation: "P01R"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
@@ -170,6 +171,9 @@ laserscanfilter:
 
     # maximum angle of scan (deg) - 0° is in front of the scanner
     maxAngle: 2.10
+
+    # offset from the center of the roboot (m)
+    offset: 1.5
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the poles extractor class
@@ -264,6 +268,7 @@ gui:
         black: [ 0,0,0,0 ]
         white: [ 255,255,255,0 ]
         darkGray: [ 80,80,80,0 ]
+        gray: [165,165,165,0]
         lightGray: [ 190,190,190,0 ]
         blue: [ 255,50,50,0 ]
         green: [ 50,200,50,0 ]
