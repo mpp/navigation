@@ -365,6 +365,8 @@ int main(int argc, char **argv)
         float robotWidth = 0.6;
         float wheelRadius = 0.35;
 
+        control.angular = -control.angular;
+
         float lv = (control.linear + robotWidth * control.angular) / wheelRadius;
         float rv = (control.linear - robotWidth * control.angular) / wheelRadius;
 

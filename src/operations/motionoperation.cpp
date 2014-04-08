@@ -97,21 +97,7 @@ void LineFollowerMO::computeErrorXErrorTheta(float &errorX, float &errorTheta,
 
     vineyard::LineParams lineParams = line_->getLineParameters();
 
-    lineParams.x0 += currentPosition.x;
-    lineParams.y0 += currentPosition.y;
     float lineAngle = std::atan2(lineParams.vy, lineParams.vx);
-
-    lineAngle -= currentBearing;
-
-    lineParams.vx = std::cos(lineAngle);
-    lineParams.vy = std::sin(lineAngle);
-
-    // Update the EKF
-    //cv::Mat measurement, control;
-
-    //simEKF.setupMeasurementMatrix(lineParams, current_bearing_ - currentBearing, measurement);
-    //simEKF.setupControlMatrix(lastControl.linear,lastControl.angular,control);
-    //simEKF.estimate(control, measurement, state_);
 
     cv::Point2f
             a(lineParams.x0, lineParams.y0),
@@ -123,7 +109,7 @@ void LineFollowerMO::computeErrorXErrorTheta(float &errorX, float &errorTheta,
             distance = numerator / divisor;
 
     errorX = desired_x_ - distance;
-    errorTheta = desired_theta_ + (lineAngle - currentBearing);
+    errorTheta = desired_theta_ + (currentBearing - lineAngle);
 }
 
 void LineFollowerMO::drawPrevPath()
@@ -191,7 +177,7 @@ Control LineFollowerMO::computeOperationControl()
 
         // Compute the error
         float errorX = desired_x_ - state_.dy;
-        float errorTheta = -1 * (desired_theta_ - state_.dtheta);
+        float errorTheta = /*-1 **/ (desired_theta_ - state_.dtheta);
 
         // Compute the velocities
         std::cout << "(ex, et) = (" << errorX << ", " << errorTheta << ")" << std::endl;

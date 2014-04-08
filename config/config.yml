@@ -22,7 +22,7 @@ logparser:
     # /home/mpp/DODICH/Registrazioni/
     # -- Laboratorio
     # /home/dodich/DODICH/Registrazioni/
-    path: /home/mpp/DODICH/Registrazioni/
+    path: /home/dodich/DODICH/Registrazioni/
 
     # Opzioni
     #
@@ -138,7 +138,9 @@ logparser:
     # 04061010_P03R_sick
     # 04071124_ls_sick errore inizio manovra P02R
     # 04071531_ls_sick
-    file: "04010839_P01R_sick.csv"
+    # -- Casi 31 8 aprile
+    # 04080822_ls_sick
+    file: "04080822_ls_sick.csv"
 
 
     # Here goes the operation, it can be
@@ -154,7 +156,7 @@ logparser:
     # 003L con T01L Turn left
     # 05HL con H01L Header left
     # 07TL con P01L Point left
-    operation: "P01R"
+    operation: "F01R"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
