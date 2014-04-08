@@ -24,6 +24,9 @@ EKFStateEstimator::EKFStateEstimator()
     ekf_measurement_noise_.at<float>(1,0) = 0.005;
     ekf_measurement_noise_.at<float>(2,2) = 0.01;
 
+    ekf_estimator_.processNoiseCov = ekf_process_noise_;
+    ekf_estimator_.measurementNoiseCov = ekf_measurement_noise_;
+
     tx_ = 1;
     dt_ = 0.01;
 
@@ -127,8 +130,8 @@ void EKFStateEstimator::estimate(const cv::Mat &control,
 {
     // 0 - save in a temp matrix the state post and save the control matrix
     ekf_estimator_.statePost.copyTo(ekf_state_post_);
-    std::cout << "StatePost of the previous estimation: " << std::endl;
-    std::cout << ekf_state_post_ << std::endl;
+//    std::cout << "StatePost of the previous estimation: " << std::endl;
+//    std::cout << ekf_state_post_ << std::endl;
 
     control.copyTo(ekf_control_);
 //    std::cout << "Control Matrix: " << std::endl;
