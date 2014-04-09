@@ -860,12 +860,12 @@ void SpecialTargetMO::computeRThetaSigma(float &r, float &theta, float &sigma,
     cv::Point2f targetDirectionPoint(std::cos(target_bearing_) + target_point_.x,
                                      std::sin(target_bearing_) + target_point_.y);
 
-    targetDirectionAngle = std::atan2((targetDirectionPoint.y - robotPosition.y),
-                                      (targetDirectionPoint.x - robotPosition.x));
+    targetDirectionAngle = std::atan2((targetDirectionPoint.y - target_point_.y),
+                                      (targetDirectionPoint.x - target_point_.x));
     targetAngle = std::atan2((target_point_.y - robotPosition.y),
                              (target_point_.x - robotPosition.x));
 
-    targetDirectionAngle = normalizeAngle_PI(targetDirectionAngle - robotBearing);
+    targetDirectionAngle = normalizeAngle_PI(targetDirectionAngle);
     targetAngle = normalizeAngle_PI(targetAngle);
 
     r = cv::norm(target_point_ - robotPosition);
@@ -923,7 +923,7 @@ Control SpecialTargetMO::computeOperationControl()
     float targetAngle;
 
     targetDirectionAngle = target_bearing_;
-    targetAngle = std::atan2(-1 * target_point_.y, target_point_.x);
+    targetAngle = std::atan2(target_point_.y, target_point_.x);
 
     targetDirectionAngle = normalizeAngle_PI(targetDirectionAngle);
     targetAngle = normalizeAngle_PI(targetAngle);

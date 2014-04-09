@@ -312,7 +312,7 @@ int main(int argc, char **argv)
             // messi qui solo per test -> devono essere variabili globali
             /// Posizione del palo fisso
             // punto (x,y)
-            cv::Point2f fixedPolePosition(9.0f, 7.5f);      // da setup
+            cv::Point2f fixedPolePosition(9.0f, -7.5f);      // da setup
 
             /// ATTENTO, il vettore va in coordinate polari:
             // il primo valore è la distanza del target dal palo fisso (positiva e in metri),
@@ -321,7 +321,7 @@ int main(int argc, char **argv)
 
             /// questa è la direzione voluta del robot al target
             // angolo in radianti
-            float targetBearing = (96)*M_PI/180;                   // da setup
+            float targetBearing = (96+180)*M_PI/180;                   // da setup
 
             if (!initialized)
             {

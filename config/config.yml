@@ -141,7 +141,7 @@ logparser:
     # -- Casi 31 8 aprile
     # 04080822_ls_sick
     # 04081920_ls_sick
-    file: "04081920_ls_sick.csv"
+    file: "04010839_P01R_sick.csv"
 
 
     # Here goes the operation, it can be
@@ -157,7 +157,7 @@ logparser:
     # 003L con T01L Turn left
     # 05HL con H01L Header left
     # 07TL con P01L Point left
-    operation: "F01L"
+    operation: "P01R"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
@@ -239,11 +239,11 @@ lineFollower:
     
 # Following the indication of: http://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 Uturn:
-    k1: 0.3
-    k2: 1
+    k1: 5
+    k2: 10
     k3:  0.5
-    beta: 0.4
-    lambda: 2
+    beta: 0.2
+    lambda: 1.5
     headPoleThreshold: 2.0
     endEpsilon: 0.8
     endGamma: 0.2
