@@ -140,7 +140,8 @@ logparser:
     # 04071531_ls_sick
     # -- Casi 31 8 aprile
     # 04080822_ls_sick
-    file: "04080822_ls_sick.csv"
+    # 04081920_ls_sick
+    file: "04081920_ls_sick.csv"
 
 
     # Here goes the operation, it can be
@@ -156,7 +157,7 @@ logparser:
     # 003L con T01L Turn left
     # 05HL con H01L Header left
     # 07TL con P01L Point left
-    operation: "F01R"
+    operation: "F01L"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter

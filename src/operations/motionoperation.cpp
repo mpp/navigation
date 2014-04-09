@@ -108,8 +108,8 @@ void LineFollowerMO::computeErrorXErrorTheta(float &errorX, float &errorTheta,
             divisor = std::sqrt((b.x-a.x)*(b.x-a.x)+(b.y-a.y)*(b.y-a.y)),
             distance = numerator / divisor;
 
-    errorX = desired_x_ - distance;
-    errorTheta = desired_theta_ + (currentBearing - lineAngle);
+    errorX = (desired_x_ - distance);
+    errorTheta = (on_right_?1:-1) * (desired_theta_ + (currentBearing - lineAngle));
 }
 
 void LineFollowerMO::drawPrevPath()
@@ -145,7 +145,7 @@ void LineFollowerMO::drawPrevPath()
 
         currentPosition.x = currentPosition.x + std::cos(currentBearing) * v * dt;
         currentPosition.y = currentPosition.y + std::sin(currentBearing) * v * dt;
-        currentBearing = currentBearing + omega * dt;
+        currentBearing = currentBearing + (on_right_?1:-1) * omega * dt;
 
         if (GUI_) { GUI_->drawPixelPath(currentPosition); /*GUI_->show(1);*/}
 
@@ -177,12 +177,12 @@ Control LineFollowerMO::computeOperationControl()
 
         // Compute the error
         float errorX = desired_x_ - state_.dy;
-        float errorTheta = (desired_theta_ - state_.dtheta);
+        float errorTheta = on_right_?1:-1 * (desired_theta_ - state_.dtheta);
 
         // Compute the velocities
         std::cout << "(ex, et) = (" << errorX << ", " << errorTheta << ")" << std::endl;
         linear = line_follower_.computeLinearVelocity(errorX, errorTheta);
-        angular = line_follower_.computeAngularVelocity(linear, errorX, errorTheta);
+        angular = (on_right_?1:-1) * line_follower_.computeAngularVelocity(linear, errorX, errorTheta);
     }
 
     return {linear, angular};

@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 
             if (!initialized)
             {
-                float desiredDistanceFromLine = 2.0;
+                float desiredDistanceFromLine = 2.3;
                 lfmo->initialize(desiredDistanceFromLine);
                 initialized = true;
             }

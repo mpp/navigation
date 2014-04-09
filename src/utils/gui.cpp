@@ -266,7 +266,7 @@ void gui::drawLine(const std::vector<vineyard::Pole::Ptr> &polesVector,
     cv::line(image_, pta*factor_+center_, ptb*factor_+center_, red_, 2);
     cv::Point2f orto (-(line->getLineParameters().vy), line->getLineParameters().vx);
     float norm = cv::norm(orto);
-    float distance = 2.0;
+    float distance = 2.3;
     orto.x = distance * orto.x / norm;
     orto.y = distance * orto.y / norm;
     cv::line(image_, (pta+orto)*factor_+center_, (ptb+orto)*factor_+center_, blue_, 1);
