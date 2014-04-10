@@ -353,6 +353,8 @@ void gui::drawObstacle(bool isObstacle,
                        float minAngle,
                        float maxAngle)
 {
+
+    cv::circle(image_, cv::Point2i(100,100), 25, yellow_, -1);
     if (!isObstacle)
     {
         cv::circle(image_, cv::Point2i(100,100), 20, green_, -1);
