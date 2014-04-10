@@ -2,6 +2,7 @@
 #define GUI_H
 
 #include <opencv2/opencv.hpp>
+#include <pcl/common/common_headers.h>
 
 #include "../data_types/commontypes.h"
 #include "../data_manipulation/ekfstateestimator.h"
@@ -52,6 +53,13 @@ public:
 
     void drawPixelPath(const cv::Point2f &inPt);
 
+    void drawObstacle(bool isObstacle,
+                      pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
+                      std::shared_ptr< std::vector<pcl::PointIndices> > &clusterIndices,
+                      float minRange,
+                      float maxRange,
+                      float minAngle,
+                      float maxAngle);
 private:
 
     cv::Mat image_;

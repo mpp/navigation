@@ -14,6 +14,16 @@ void help();
 
 bool endsWith(const std::string& s, const std::string& suffix);
 
+bool obstacleDetector(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
+                      pcl::PointCloud<pcl::PointXYZ>::Ptr &filteredCloud,
+                      std::shared_ptr< std::vector<pcl::PointIndices> > &clusterIndices,
+                      float minRange,
+                      float maxRange,
+                      float minAngle,
+                      float maxAngle,
+                      float clusterTolerance,
+                      int minClusterSize);
+
 int main(int argc, char **argv)
 {
     //std::cout << "Hi" << std::endl;
@@ -156,6 +166,27 @@ int main(int argc, char **argv)
         tempCloud->width = (int) tempCloud->points.size ();
         tempCloud->height = 1;
 
+
+        pcl::PointCloud<pcl::PointXYZ>::Ptr
+                filteredCloud(new pcl::PointCloud<pcl::PointXYZ>());
+        std::shared_ptr< std::vector<pcl::PointIndices> > obstacleIndices;
+        float
+                minRange = 0.2f,
+                maxRange = 4.0f,
+                minAngle = -180*M_PI/180,
+                maxAngle = 180*M_PI/180,
+                clusterTolerance = 0.1,
+                minClusterSize = 4;
+        bool isObstacle = obstacleDetector(tempCloud,
+                                           filteredCloud,
+                                           obstacleIndices,
+                                           minRange,
+                                           maxRange,
+                                           minAngle,
+                                           maxAngle,
+                                           clusterTolerance,
+                                           minClusterSize);
+
         /// Search for poles
         pe.elaborateCloud(tempCloud, polesVector);
 
@@ -167,6 +198,7 @@ int main(int argc, char **argv)
 
         GUI->drawPoints(ptVector);
         GUI->drawPoles(*polesVector);
+        GUI->drawObstacle(isObstacle, filteredCloud, obstacleIndices, minRange, maxRange, minAngle, maxAngle);
 
         std::cout << operation << " - " << f.oper_t << std::endl;
         /// Check the operation frame
@@ -312,16 +344,16 @@ int main(int argc, char **argv)
             // messi qui solo per test -> devono essere variabili globali
             /// Posizione del palo fisso
             // punto (x,y)
-            cv::Point2f fixedPolePosition(9.0f, -7.5f);      // da setup
+            cv::Point2f fixedPolePosition(9.5f, 4.5f);      // da setup
 
             /// ATTENTO, il vettore va in coordinate polari:
             // il primo valore è la distanza del target dal palo fisso (positiva e in metri),
             // il secondo è l'angolo di direzione del target rispetto al palo fisso (tra -PI e + PI in radianti)
-            cv::Vec2f targetPoleVector(-2.0f, -0.6);            // da setup
+            cv::Vec2f targetPoleVector(-2.0f, 0.0f);            // da setup
 
             /// questa è la direzione voluta del robot al target
             // angolo in radianti
-            float targetBearing = (96+180)*M_PI/180;                   // da setup
+            float targetBearing = (-6)*M_PI/180;                   // da setup
 
             if (!initialized)
             {
@@ -359,6 +391,11 @@ int main(int argc, char **argv)
             }
         }
 
+        if (isObstacle)
+        {
+            control = {0.0f, 0.0f};
+        }
+
         /// Robot specific operations
         /// These operations should be moved in a robot class with a different namespace
         // Compute the left and right velocities
@@ -389,4 +426,65 @@ void help()
 bool endsWith(const std::string& s, const std::string& suffix)
 {
     return s.rfind(suffix) == (s.size()-suffix.size());
+}
+
+bool obstacleDetector(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
+                      pcl::PointCloud<pcl::PointXYZ>::Ptr &filteredCloud,
+                      std::shared_ptr< std::vector<pcl::PointIndices> > &clusterIndices,
+                      float minRange,
+                      float maxRange,
+                      float minAngle,
+                      float maxAngle,
+                      float clusterTolerance,
+                      int minClusterSize)
+{
+    // Filter the cloud
+    filteredCloud->clear();
+
+    float
+            squaredMinRange = minRange * minRange,
+            squaredMaxRange = maxRange * maxRange;
+    for (pcl::PointXYZ pt : cloud->points)
+    {
+        float squaredRange = pt.x * pt.x + pt.y * pt.y;
+        float angle = std::atan2(pt.y, pt.x);
+
+        if (squaredRange >= squaredMinRange &&
+                squaredRange <= squaredMaxRange
+                &&
+            angle >= minAngle &&
+                angle <= maxAngle)
+        {
+           filteredCloud->push_back(pt);
+        }
+    }
+    filteredCloud->width = (int) filteredCloud->points.size ();
+    filteredCloud->height = 1;
+
+    if (filteredCloud->points.size() <= 0)
+        return false;
+
+    // Search for a cluster
+    std::vector<pcl::PointIndices> vector;
+    clusterIndices = std::make_shared< std::vector<pcl::PointIndices> >(vector);
+
+    // Creating the KdTree object for the search method of the extraction
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr
+            tree (new pcl::search::KdTree<pcl::PointXYZ>);
+
+    tree->setInputCloud (filteredCloud);
+
+    pcl::EuclideanClusterExtraction<pcl::PointXYZ>
+            ec;
+
+    ec.setClusterTolerance (clusterTolerance);
+    ec.setMinClusterSize (minClusterSize);
+    ec.setMaxClusterSize (std::numeric_limits<int>::max());
+    ec.setSearchMethod (tree);
+    ec.setInputCloud (filteredCloud);
+    ec.extract (vector);
+
+    if (clusterIndices->size() >= 0)
+        return true;
+    return false;
 }

@@ -937,28 +937,29 @@ Control SpecialTargetMO::computeOperationControl()
     linear = target_mp_.computeLinearVelocity(r_,theta_,sigma_);
     angular = target_mp_.computeAngularVelocity(linear,r_,theta_,sigma_);
 
-    if (linear != 0.0f && (linear-0.01) > final_last_linear_vel_ && !final_correction_)
+    /// Da provare queste alternative:
+    //float progress = checkOperationEnd();
+    //float progressThreshold = 0.8f;
+    //if (progress >= progressThreshold)
+    //{
+    //    linear = 0.5 * linear;
+    //}
+
+    /// o
+    if (r_ <= end_epsilon_ || final_correction_)
     {
-        set_final_velocity_ = false;
+        //set_final_velocity_ = false;
         final_correction_ = true;
-    }
-    else if (set_final_velocity_)
-    {
-        final_last_linear_vel_ = linear;
-        final_last_angular_vel_ = angular;
+        /// Rallentamento, valutare se serve.
+        linear = 0.5 * linear;
+
+        /// Penso che l'errore provenisse da questa riga:
+        /// invece di lasciare che si corregga da solo imposta una
+        /// velocità angolare fissa che potrebbe essere sbagliata
+        //angular = final_last_angular_vel_;
     }
 
-    if (r_ < end_epsilon_ || final_correction_)
-    {
-        set_final_velocity_ = false;
-        final_correction_ = true;
-        r_ = end_epsilon_;
-        linear = 0.9 * linear ;
-        if (linear < 0.0f)
-            linear = 0.0f;
-
-        angular = final_last_angular_vel_;
-    }
+    if (linear < 0.0f)  linear = 0.0f;
 
     return {linear, angular};
 }

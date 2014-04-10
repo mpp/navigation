@@ -345,4 +345,26 @@ void gui::drawPixelPath(const cv::Point2f &inPt)
     }
 }
 
+void gui::drawObstacle(bool isObstacle,
+                       pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
+                       std::shared_ptr<std::vector<pcl::PointIndices> > &clusterIndices,
+                       float minRange,
+                       float maxRange,
+                       float minAngle,
+                       float maxAngle)
+{
+    if (!isObstacle)
+    {
+        cv::circle(image_, cv::Point2i(100,100), 20, green_, -1);
+        return;
+    }
+
+    cv::circle(image_, cv::Point2i(100,100), 20, red_, -1);
+
+    for (pcl::PointXYZ pt : cloud->points)
+    {
+        cv::circle(image_, cv::Point2f(pt.x,pt.y)*factor_ + center_, 3, red_, -1);
+    }
+}
+
 }

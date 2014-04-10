@@ -22,7 +22,7 @@ logparser:
     # /home/mpp/DODICH/Registrazioni/
     # -- Laboratorio
     # /home/dodich/DODICH/Registrazioni/
-    path: /home/dodich/DODICH/Registrazioni/
+    path: /home/mpp/DODICH/Registrazioni/
 
     # Opzioni
     #
@@ -141,7 +141,11 @@ logparser:
     # -- Casi 31 8 aprile
     # 04080822_ls_sick
     # 04081920_ls_sick
-    file: "04010839_P01R_sick.csv"
+    # -- Casi 32 9 aprile
+    # 04091800_ls_sick
+    # 04100929_ls_sick
+    # 04101412_ls_sick
+    file: "04091800_ls_sick.csv"
 
 
     # Here goes the operation, it can be
@@ -157,7 +161,7 @@ logparser:
     # 003L con T01L Turn left
     # 05HL con H01L Header left
     # 07TL con P01L Point left
-    operation: "P01R"
+    operation: "P02R"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
@@ -240,12 +244,12 @@ lineFollower:
 # Following the indication of: http://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 Uturn:
     k1: 5
-    k2: 10
+    k2: 1
     k3:  0.5
     beta: 0.2
     lambda: 1.5
     headPoleThreshold: 2.0
-    endEpsilon: 0.8
+    endEpsilon: 0.2
     endGamma: 0.2
 
 ##---------------------------------------------------------------------------##
