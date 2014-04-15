@@ -130,6 +130,9 @@ private:
     Control
         last_control_;
 
+    cv::KalmanFilter
+        head_Pole_kf_;
+
     float
         desired_x_, desired_theta_;
 

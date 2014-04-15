@@ -25,9 +25,9 @@ float EndLineTurnMP::computeLinearVelocity(const float r,
 
     float v = 0.0f;
 
-    if (r < epsilon_)
+    if (r < 0.2)//epsilon_)
     {
-        v = k3_;
+        v = 0.01f;//k3_;
     }
     else
     {
@@ -43,6 +43,10 @@ float EndLineTurnMP::computeAngularVelocity(const float v,
                                             const float sigma)
 {
     float omega = curvature_ * v;
+
+    float sign = omega>0 ? 1 : -1;
+
+    omega = std::abs(omega)>1.5f ? sign*1.5f : omega;
 
     return omega;
 }

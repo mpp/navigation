@@ -22,7 +22,7 @@ LineFollowerMO::LineFollowerMO(const cv::FileStorage &fs,
     GUI_ = gui;
     last_control_ = { 0.0f, 0.0f };
     end_operation_counter_ = 0;
-    min_number_of_end_frames_ = 5; /// TODO: move it to the config file
+    min_number_of_end_frames_ = 15; /// TODO: move it to the config file
 }
 
 void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard::Pole::Ptr> > &polesVector,
@@ -79,12 +79,23 @@ void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard
             if (GUI_) { GUI_->drawLine(*polesVector,line_); }
             // Check the head pole distance
             int headPoleIndex = line_->getPolesList().front();
-            head_pole_center_ = (*polesVector)[headPoleIndex]->getCentroid();
+
+            cv::Point2f measuredHeadPoleCenter = (*polesVector)[headPoleIndex]->getCentroid();
+
+            ///
+
+            head_pole_center_ = measuredHeadPoleCenter;
             head_pole_distance_ = cv::norm(head_pole_center_);
 
             if (GUI_) { drawPrevPath(); }
         }
     }
+
+//    // If line update a kalman filter of the head pole
+//    if (line_)
+//    {
+
+//    }
 }
 
 void LineFollowerMO::computeErrorXErrorTheta(float &errorX, float &errorTheta,
@@ -180,9 +191,9 @@ Control LineFollowerMO::computeOperationControl()
         float errorTheta = on_right_?1:-1 * (desired_theta_ - state_.dtheta);
 
         // Compute the velocities
-        std::cout << "(ex, et) = (" << errorX << ", " << errorTheta << ")" << std::endl;
+        //std::cout << "(ex, et) = (" << errorX << ", " << errorTheta << ")" << std::endl;
         linear = line_follower_.computeLinearVelocity(errorX, errorTheta);
-        angular = (on_right_?1:-1) * line_follower_.computeAngularVelocity(linear, errorX, errorTheta);
+        angular = line_follower_.computeAngularVelocity(linear, errorX, errorTheta);
     }
 
     return {linear, angular};
@@ -950,8 +961,14 @@ Control SpecialTargetMO::computeOperationControl()
     {
         //set_final_velocity_ = false;
         final_correction_ = true;
+        r_ = end_epsilon_;
         /// Rallentamento, valutare se serve.
-        linear = 0.5 * linear;
+        linear = 0.0;
+
+        float difference = normalizeAngle_PI(theta_ - sigma_);
+        std::cout << difference << std::endl;
+
+        angular = difference >= 0 ? 1.5 : -1.5;
 
         /// Penso che l'errore provenisse da questa riga:
         /// invece di lasciare che si corregga da solo imposta una
@@ -995,7 +1012,7 @@ float SpecialTargetMO::checkOperationEnd()
     }
 
     float gammaValue = 0.0f;
-    float s_gamma = M_PI;
+    float s_gamma = 2 * M_PI;
 
     if (difference <= end_gamma_)
     {
@@ -1008,6 +1025,11 @@ float SpecialTargetMO::checkOperationEnd()
     else
     {
         gammaValue = 1 - (difference - end_gamma_) / (s_gamma - end_gamma_);
+    }
+
+    if (gammaValue * rValue == 0.0f)
+    {
+        std::cout << "vvv" << std::endl;
     }
 
     return gammaValue * rValue;

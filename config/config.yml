@@ -143,9 +143,15 @@ logparser:
     # 04081920_ls_sick
     # -- Casi 32 9 aprile
     # 04091800_ls_sick
+    # -- Casi 33 10 aprile
     # 04100929_ls_sick
     # 04101412_ls_sick
-    file: "04091800_ls_sick.csv"
+    # 04101843_ls_sick
+    # -- Casi 34 11 aprile
+    # 04111358_ls_sick
+    # 04111609_ls_sick errore zig-zag a fine manovra
+    # 04111550_ls_sick errore fine filare
+    file: "04111358_ls_sick.csv"
 
 
     # Here goes the operation, it can be
@@ -161,7 +167,7 @@ logparser:
     # 003L con T01L Turn left
     # 05HL con H01L Header left
     # 07TL con P01L Point left
-    operation: "P02R"
+    operation: "F01L"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
@@ -180,7 +186,7 @@ laserscanfilter:
     maxAngle: 2.10
 
     # offset from the center of the roboot (m)
-    offset: 1.5
+    offset: 1.75 # senza acqua
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the poles extractor class
@@ -222,10 +228,10 @@ lineExtractor:
 ##---------------------------------------------------------------------------##
 globalMP:
     # maximum linear velocity m/s
-    maxV: 2.0 
+    maxV: 1.5
 
     # maximum angular velocity rad/s
-    maxOmega: 2.0
+    maxOmega: 1.5
 
 # Following the indication of: http://www.inaut.unsj.edu.ar/Files/Ca1277_03.pdf 
 lineFollower: 
@@ -243,13 +249,13 @@ lineFollower:
     
 # Following the indication of: http://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 Uturn:
-    k1: 5
-    k2: 1
-    k3:  0.5
+    k1: 2
+    k2: 2
+    k3: 0.5
     beta: 0.2
     lambda: 1.5
     headPoleThreshold: 2.0
-    endEpsilon: 0.2
+    endEpsilon: 0.8
     endGamma: 0.2
 
 ##---------------------------------------------------------------------------##

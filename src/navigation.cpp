@@ -110,6 +110,23 @@ int main(int argc, char **argv)
 
     nav::Control control = {0.0f, 0.0f};
 
+    // Kalman filter for control output
+    cv::KalmanFilter
+            kfLinear(2,1,0),
+            kfAngular(2,1,0);
+    cv::Mat measurement = cv::Mat::zeros(1, 1, CV_32F);
+    cv::setIdentity(kfLinear.measurementMatrix);
+    cv::setIdentity(kfLinear.processNoiseCov, cv::Scalar::all(1e-5));
+    cv::setIdentity(kfLinear.measurementNoiseCov, cv::Scalar::all(1e-3));
+    cv::setIdentity(kfLinear.errorCovPost, cv::Scalar::all(1));
+    cv::setIdentity(kfLinear.statePost, cv::Scalar::all(0));
+
+    cv::setIdentity(kfAngular.measurementMatrix);
+    cv::setIdentity(kfAngular.processNoiseCov, cv::Scalar::all(1e-5));
+    cv::setIdentity(kfAngular.measurementNoiseCov, cv::Scalar::all(1e-4));
+    cv::setIdentity(kfAngular.errorCovPost, cv::Scalar::all(1));
+    cv::setIdentity(kfAngular.statePost, cv::Scalar::all(0));
+
     std::vector<nav::Frame> framesVector;
 
     /// TODO: switch to a YAML format log?
@@ -172,9 +189,9 @@ int main(int argc, char **argv)
         std::shared_ptr< std::vector<pcl::PointIndices> > obstacleIndices;
         float
                 minRange = 0.2f,
-                maxRange = 4.0f,
-                minAngle = -180*M_PI/180,
-                maxAngle = 180*M_PI/180,
+                maxRange = 2.0f,
+                minAngle = -45*M_PI/180,
+                maxAngle = 45*M_PI/180,
                 clusterTolerance = 0.1,
                 minClusterSize = 4;
         bool isObstacle = obstacleDetector(tempCloud,
@@ -344,16 +361,16 @@ int main(int argc, char **argv)
             // messi qui solo per test -> devono essere variabili globali
             /// Posizione del palo fisso
             // punto (x,y)
-            cv::Point2f fixedPolePosition(9.5f, 4.5f);      // da setup
+            cv::Point2f fixedPolePosition(0.0f, 6.0f);      // da setup
 
             /// ATTENTO, il vettore va in coordinate polari:
             // il primo valore è la distanza del target dal palo fisso (positiva e in metri),
             // il secondo è l'angolo di direzione del target rispetto al palo fisso (tra -PI e + PI in radianti)
-            cv::Vec2f targetPoleVector(-2.0f, 0.0f);            // da setup
+            cv::Vec2f targetPoleVector(1.5f, 0);            // da setup
 
             /// questa è la direzione voluta del robot al target
             // angolo in radianti
-            float targetBearing = (-6)*M_PI/180;                   // da setup
+            float targetBearing = (85-90)*M_PI/180;                   // da setup
 
             if (!initialized)
             {
@@ -390,6 +407,19 @@ int main(int argc, char **argv)
 
             }
         }
+
+        std::cout << "value: (" << control.linear << ", " << control.angular << ")";
+        kfLinear.predict();
+        measurement.at<float>(0) = control.linear;
+        kfLinear.correct(measurement);
+        control.linear = kfLinear.statePost.at<float>(0);
+
+        std::cout;
+        kfAngular.predict();
+        measurement.at<float>(0) = control.angular;
+        kfAngular.correct(measurement);
+        control.angular = kfAngular.statePost.at<float>(0);
+        std::cout << " kalman value: (" << control.linear << ", " << control.angular << ")" << std::endl;
 
         if (isObstacle)
         {
