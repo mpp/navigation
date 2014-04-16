@@ -3,17 +3,18 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "../motion_planners/endlineturnmp.h"
-#include "../motion_planners/linefollowermp.h"
+#include <motion_planners/endlineturnmp.h>
+#include <motion_planners/linefollowermp.h>
 
-#include "../data_manipulation/egomotionestimator.h"
+#include <data_manipulation/egomotionestimator.h>
 
-#include "../data_manipulation/ekfstateestimator.h"
+#include <data_manipulation/ekfstateestimator.h>
 
-#include "../data_manipulation/poleextractor.h"
-#include "../data_manipulation/lineextractor.h"
+#include <data_manipulation/poleextractor.h>
+#include <data_manipulation/lineextractor.h>
 
-#include "../utils/gui.h"
+#include <utils/gui.h>
+#include <data_types/pole.h>
 
 namespace nav {
 
@@ -57,7 +58,8 @@ public:
      */
     explicit LineFollowerMO(const cv::FileStorage &fs,
                             const bool onRight,
-                            const std::shared_ptr<gui> &gui = nullptr);
+                            const std::shared_ptr<gui> &gui = nullptr,
+                            const std::string& operation = "");
 
     /*!
      * \brief initialize
@@ -117,6 +119,17 @@ private:
         on_right_;
     int
         min_line_size_;
+    int
+    	num_pole_;
+    int
+    	tot_num_pole_;
+    bool
+    	last_nearest_setted_;
+    int
+    	last_nearest_ID_;
+    cv::Point2f
+    	last_nearest_centroid_;
+
     float
         min_head_pole_distance_;
     float
@@ -126,6 +139,9 @@ private:
 
     float
         current_bearing_;
+
+    std::string
+    	operation_;
 
     Control
         last_control_;
@@ -177,7 +193,7 @@ public:
 
     Control computeOperationControl();
 
-    float checkOperationEnd();
+    float checkOperationEnd() const;
 
     inline void getLogStatus(float &r,
                              float &theta,

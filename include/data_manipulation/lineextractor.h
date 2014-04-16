@@ -34,8 +34,8 @@
 #include <list>
 #include <memory>
 
-#include "../data_types/line.h"
-#include "../utils/angles.h"
+#include <data_types/line.h>
+#include <utils/angles.h>
 
 namespace vineyard
 {
@@ -48,6 +48,18 @@ public:
      * \param maxPoleDistance
      */
     LineExtractor(const cv::FileStorage &fs);
+
+    /*!
+         * \brief extractAccessPathFromNearestPole
+         * \param [in] polesVector
+         * \param [in] nearest
+         * \param [out] line
+         */
+    void extractAccessPathFromNearestPole(
+    		const std::shared_ptr< const std::vector< Pole::Ptr > > polesVector,
+        const Pole::Ptr &nearest,
+        Line::Ptr &line,
+        const bool useLastLine);
 
     /*!
      * \brief extractLineFromNearestPole

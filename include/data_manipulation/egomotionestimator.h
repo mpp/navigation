@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "../data_types/pole.h"
+#include <data_types/pole.h>
 
 namespace nav {
 

@@ -27,7 +27,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "line.h"
+#include <data_types/line.h>
 
 namespace vineyard {
 

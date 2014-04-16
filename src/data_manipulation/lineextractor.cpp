@@ -27,7 +27,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "lineextractor.h"
+#include <data_manipulation/lineextractor.h>
 
 namespace vineyard
 {
@@ -53,6 +53,78 @@ float LineExtractor::distanceLinePole(const LineParams &lineParam,
     dx = std::abs(poleCenter.x - x);
     dy = std::abs(poleCenter.y - y);
     return (dx < dy) ? dx : dy;
+}
+
+void LineExtractor::extractAccessPathFromNearestPole(
+		const std::shared_ptr< const std::vector< Pole::Ptr > > polesVector,
+    const Pole::Ptr &nearest,
+    Line::Ptr &line,
+    const bool useLastLine)
+{
+  if (!nearest || !polesVector)
+  {
+      return;
+  }
+
+  LineParams lineParam;
+  // Initialize a temporary Line container
+  Line temp(polesVector, lineParam);
+
+  // If I already have a line I use it as a reference to accept or refuse poles
+  if (useLastLine)
+  {
+      lineParam = line->getLineParameters();
+  }
+
+  Pole::Ptr
+  	lowestButNearest = 0,
+  	actualPole;
+  PoleIndex
+		nearestIndex,
+		lowestButNearestIndex;
+
+  for (int i = 0; i < polesVector->size(); i++)
+	{
+  	actualPole = (*polesVector)[i];
+		if (actualPole->ID() != nearest->ID())
+		{
+			if (actualPole->getCentroid().y < 0  && (!lowestButNearest || actualPole->getCentroid().y > lowestButNearest->getCentroid().y))
+			{
+				lowestButNearest = actualPole;
+				lowestButNearestIndex = i;
+			}
+		}
+		else
+		{
+			nearestIndex = i;
+		}
+	}
+
+  temp.insert_head(nearestIndex);
+  temp.insert_head(lowestButNearestIndex);
+
+  std::vector<cv::Point2f>
+  	linePoints;
+  linePoints.push_back(nearest->getCentroid());
+  linePoints.push_back(lowestButNearest->getCentroid());
+
+  // Fit the line and set the parameters in the line object
+	 cv::Vec4f lineParamVec;
+	 cv::fitLine(linePoints, lineParamVec, CV_DIST_L1, 0, reps_, aeps_);
+
+	 lineParam.head_pole_ID = nearest->ID();
+	 lineParam.head_pole_x = nearest->getCentroid().x;
+	 lineParam.head_pole_y = nearest->getCentroid().y;
+	 lineParam.vx = lineParamVec[0];
+	 lineParam.vy = lineParamVec[1];
+	 lineParam.x0 = lineParamVec[2];
+	 lineParam.y0 = lineParamVec[3];
+
+	 temp.setLineParameters(lineParam);
+
+	 line = std::make_shared<Line>(temp);
+
+
 }
 
 void LineExtractor::extractLineFromNearestPole(const std::shared_ptr< const std::vector< Pole::Ptr > > polesVector,

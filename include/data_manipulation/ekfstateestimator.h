@@ -3,7 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "../data_types/line.h"
+#include <data_types/line.h>
 
 namespace nav
 {
