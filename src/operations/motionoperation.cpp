@@ -23,6 +23,13 @@ LineFollowerMO::LineFollowerMO(const cv::FileStorage &fs,
     last_control_ = { 0.0f, 0.0f };
     end_operation_counter_ = 0;
     min_number_of_end_frames_ = 15; /// TODO: move it to the config file
+
+    head_Pole_kf_.init(2,2);
+    cv::setIdentity(head_Pole_kf_.measurementMatrix);
+    cv::setIdentity(head_Pole_kf_.processNoiseCov, cv::Scalar::all(1e-5));
+    cv::setIdentity(head_Pole_kf_.measurementNoiseCov, cv::Scalar::all(1e-3));
+    cv::setIdentity(head_Pole_kf_.errorCovPost, cv::Scalar::all(1));
+    cv::setIdentity(head_Pole_kf_.statePost, cv::Scalar::all(0));
 }
 
 void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard::Pole::Ptr> > &polesVector,
@@ -30,6 +37,26 @@ void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard
                                       const float currentBearing,
                                       const float vineyardBearing)
 {
+//    /// Predict the new position of the head pole
+//    // a frame every 20ms
+//    float dt = 0.02f;
+//    // New robot position after the applied control
+//    // r1.x = r0.x + v*cos(theta0)*dt
+//    // r1.x = r0.x + v*sin(theta0)*dt
+//    // TODO: use odometry
+//    cv::Point2f r1(lastControl.linear * std::cos(0) * dt,
+//                   lastControl.linear * std::sin(0) * dt);
+//    // theta1 = currentBearing
+//    cv::Matx22f rotation;
+//    float rotationAngle = normalizeAngle_PI(current_bearing_-currentBearing);
+//    rotation[0,0] = std::cos(rotationAngle);
+//    rotation[0,1] = -std::sin(rotationAngle);
+//    rotation[1,0] = std::sin(rotationAngle);
+//    rotation[1,1] = std::cos(rotationAngle);
+
+//    cv::Point2f headPolePredicted = (head_pole_center_ - r1) * rotation;
+//    /// End prediction
+
     current_bearing_ = currentBearing;
 
     last_control_.angular = lastControl.angular;
@@ -91,11 +118,21 @@ void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard
         }
     }
 
-//    // If line update a kalman filter of the head pole
-//    if (line_)
-//    {
+    // If line update a kalman filter of the head pole
+    if (line_)
+    {
+        head_Pole_kf_.predict();
+        cv::Mat measurement = cv::Mat::zeros(2,1,CV_32FC1);
+        measurement.at<float>(0) = head_pole_center_.x;
+        measurement.at<float>(1) = head_pole_center_.y;
+        head_Pole_kf_.correct(measurement);
+        std::cout << "measured: " << head_pole_center_;
+        head_pole_center_ = cv::Point2f(head_Pole_kf_.statePost.at<float>(0),head_Pole_kf_.statePost.at<float>(1));
+        std::cout << " - corrected: " <<  head_pole_center_ << std::endl;
 
-//    }
+        if (GUI_) { GUI_->drawCross(head_pole_center_); }
+    }
+
 }
 
 void LineFollowerMO::computeErrorXErrorTheta(float &errorX, float &errorTheta,

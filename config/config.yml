@@ -22,7 +22,7 @@ logparser:
     # /home/mpp/DODICH/Registrazioni/
     # -- Laboratorio
     # /home/dodich/DODICH/Registrazioni/
-    path: /home/mpp/DODICH/Registrazioni/
+    path: /home/dodich/DODICH/Registrazioni/
 
     # Opzioni
     #
@@ -151,7 +151,9 @@ logparser:
     # 04111358_ls_sick
     # 04111609_ls_sick errore zig-zag a fine manovra
     # 04111550_ls_sick errore fine filare
-    file: "04111358_ls_sick.csv"
+    # 04111609_ls_sick
+    # 04081920_ls_sick
+    file: "03291616_F01L_si.csv"
 
 
     # Here goes the operation, it can be

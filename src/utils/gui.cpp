@@ -234,6 +234,16 @@ void gui::drawPoles(const std::vector<vineyard::Pole::Ptr> &polesVector)
     }
 }
 
+void gui::drawCross(const cv::Point2f &pt)
+{
+    cv::line(image_,
+             cv::Point2f(pt.x - 0.12, pt.y - 0.12) * factor_ + center_,
+             cv::Point2f(pt.x + 0.12, pt.y + 0.12) * factor_ + center_, red_, 2);
+    cv::line(image_,
+             cv::Point2f(pt.x - 0.12, pt.y + 0.12) * factor_ + center_,
+             cv::Point2f(pt.x + 0.12, pt.y - 0.12) * factor_ + center_, red_, 2);
+}
+
 void gui::drawLine(const std::vector<vineyard::Pole::Ptr> &polesVector,
                    const vineyard::Line::Ptr &line)
 {

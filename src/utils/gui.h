@@ -35,6 +35,8 @@ public:
 
     void drawPoles(const std::vector< vineyard::Pole::Ptr > &polesVector);
 
+    void drawCross(const cv::Point2f &pt);
+
     void drawLine(const std::vector< vineyard::Pole::Ptr > &polesVector,
                   const vineyard::Line::Ptr &line);
 
