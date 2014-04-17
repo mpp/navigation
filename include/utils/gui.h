@@ -4,8 +4,8 @@
 #include <opencv2/opencv.hpp>
 #include <pcl/common/common_headers.h>
 
-#include "../data_types/commontypes.h"
-#include "../data_manipulation/ekfstateestimator.h"
+#include <data_types/commontypes.h>
+#include <data_manipulation/ekfstateestimator.h>
 
 namespace nav
 {

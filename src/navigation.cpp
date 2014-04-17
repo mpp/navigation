@@ -4,11 +4,11 @@
 #include <opencv2/opencv.hpp>
 #include <deque>
 
-#include "sensors_drivers/logparser.h"
-#include "data_manipulation/poleextractor.h"
-#include "data_manipulation/lineextractor.h"
-#include "operations/motionoperation.h"
-#include "utils/gui.h"
+#include <sensors_drivers/logparser.h>
+#include <data_manipulation/poleextractor.h>
+#include <data_manipulation/lineextractor.h>
+#include <operations/motionoperation.h>
+#include <utils/gui.h>
 
 void help();
 
@@ -90,8 +90,12 @@ int main(int argc, char **argv)
     }
     else if (operation.compare("H01L") == 0)
     {
-        mo = std::make_shared<nav::LineFollowerMO>(fs, false, GUI);
+        mo = std::make_shared<nav::LineFollowerMO>(fs, false, GUI,operation);
     }
+    else if (operation.compare("H01R") == 0)
+	{
+		mo = std::make_shared<nav::LineFollowerMO>(fs, true, GUI,operation);
+	}
     else if (operation.compare("T01L") == 0)
     {
         mo = std::make_shared<nav::TurnWithCompassMO>(fs, false, GUI);
@@ -227,7 +231,8 @@ int main(int argc, char **argv)
         /// Select the right operation to do
         if (operation.compare("F01L") == 0 ||
             operation.compare("F01R") == 0 ||
-            operation.compare("H01L") == 0)     // H01L to test the line follower if it works also for the headers follower problem
+            operation.compare("H01L") == 0 ||
+            operation.compare("H01R") == 0) // H01L to test the line follower if it works also for the headers follower problem
         {
             std::shared_ptr<nav::LineFollowerMO> lfmo = std::static_pointer_cast<nav::LineFollowerMO>(mo);
 
@@ -250,6 +255,7 @@ int main(int argc, char **argv)
             lfmo->getFinalStatus(lineAngle, initialPolePosition);
 
             float progress = lfmo->checkOperationEnd();
+            //std::cout << "frame ID: " << f.frameID << "  " << std::endl;
             //std::cout << "progress: " << progress << " - initialPolePosition: " << initialPolePosition.x << std::endl;
             if (progress == 1)
             {

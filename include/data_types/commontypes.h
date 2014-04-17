@@ -1,8 +1,8 @@
 #ifndef COMMONTYPES_H
 #define COMMONTYPES_H
 
-#include "pole.h"
-#include "line.h"
+#include <data_types/pole.h>
+#include <data_types/line.h>
 
 namespace nav {
 

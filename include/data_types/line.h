@@ -35,7 +35,7 @@
 #include <memory>
 #include <limits>
 
-#include "pole.h"
+#include <data_types/pole.h>
 
 namespace vineyard {
 

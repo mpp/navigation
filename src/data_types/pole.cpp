@@ -29,7 +29,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "pole.h"
+#include <data_types/pole.h>
 
 namespace vineyard
 {
