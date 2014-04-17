@@ -267,10 +267,10 @@ float LineFollowerMO::checkOperationEnd()
 	if (operation_.compare("H01L")==0 || operation_.compare("H01R")==0)
 	{
 		return num_pole_ / tot_num_pole_;
-	}
-	else
-	{
-	float end = 0.0f;
+    }
+
+    float end = 0.0f;
+
     float s = 4.0f;
 
     if (head_pole_center_.x < end)
@@ -300,8 +300,8 @@ float LineFollowerMO::checkOperationEnd()
 /// Turn with compass Motion Operation
 ///////////////////////////////////////////////////////////////////////
 TurnWithCompassMO::TurnWithCompassMO(const cv::FileStorage &fs,
-                                                                   const bool onRight,
-                                                                   const std::shared_ptr<gui> &gui)
+                                     const bool onRight,
+                                     const std::shared_ptr<gui> &gui)
     : ego_(EgoMotionEstimator(4)),
       u_turn_mp_(EndLineTurnMP(fs)),
       ego_initialized_(false),

@@ -168,8 +168,8 @@ public:
      * \param onRight true if following a line on right
      */
     explicit TurnWithCompassMO(const cv::FileStorage &fs,
-                                              const bool onRight,
-                                              const std::shared_ptr<gui> &gui = nullptr);
+                               const bool onRight,
+                               const std::shared_ptr<gui> &gui = nullptr);
 
     void initialize(const std::shared_ptr< std::vector< vineyard::Pole::Ptr > > &polesVector,
                     const float currentBearing,
@@ -193,7 +193,7 @@ public:
 
     Control computeOperationControl();
 
-    float checkOperationEnd() const;
+    float checkOperationEnd();
 
     inline void getLogStatus(float &r,
                              float &theta,
