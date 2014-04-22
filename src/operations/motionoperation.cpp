@@ -266,7 +266,8 @@ float LineFollowerMO::checkOperationEnd()
 {
 	if (operation_.compare("H01L")==0 || operation_.compare("H01R")==0)
 	{
-		return num_pole_ / tot_num_pole_;
+        std::cout << num_pole_ << " poles of " << tot_num_pole_ << " - progress:" << (float)num_pole_ / (float)tot_num_pole_ << std::endl;
+        return (float)num_pole_ / (float)tot_num_pole_;
     }
 
     float end = 0.0f;

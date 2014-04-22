@@ -153,7 +153,7 @@ logparser:
     # 04111550_ls_sick errore fine filare
     # 04111609_ls_sick
     # 04081920_ls_sick
-    file: "03291616_F01L_si.csv"
+    file: "04011527_ls_sick.csv"
 
 
     # Here goes the operation, it can be
@@ -169,7 +169,7 @@ logparser:
     # 003L con T01L Turn left
     # 05HL con H01L Header left
     # 07TL con P01L Point left
-    operation: "F01L"
+    operation: "H01L"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
@@ -179,7 +179,7 @@ laserscanfilter:
     minDistance: 0.3 
 
     # minimum distance threshold (mt)
-    maxDistance: 11.0
+    maxDistance: 6.0
 
     # minimum angle of scan (deg) - 0° is in front of the scanner
     minAngle: -2.10
