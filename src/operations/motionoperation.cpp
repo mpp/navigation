@@ -225,7 +225,7 @@ Control LineFollowerMO::computeOperationControl()
 
         // Compute the error
         float errorX = desired_x_ - state_.dy;
-        float errorTheta = on_right_?1:-1 * (desired_theta_ - state_.dtheta);
+        float errorTheta = (on_right_?1:-1) * (desired_theta_ - state_.dtheta);
 
         // Compute the velocities
         //std::cout << "(ex, et) = (" << errorX << ", " << errorTheta << ")" << std::endl;

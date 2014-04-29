@@ -153,7 +153,9 @@ logparser:
     # 04111550_ls_sick errore fine filare
     # 04111609_ls_sick
     # 04081920_ls_sick
-    file: "03291616_F01L_si.csv"
+    # -- Casi 35 15 aprile
+    # 04151856_ls_sick errore F01R end_gamma_ troppo grande
+    file: "04151856_ls_sick.csv"
 
 
     # Here goes the operation, it can be
@@ -169,7 +171,7 @@ logparser:
     # 003L con T01L Turn left
     # 05HL con H01L Header left
     # 07TL con P01L Point left
-    operation: "F01L"
+    operation: "F01R"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
