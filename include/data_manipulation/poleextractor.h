@@ -38,7 +38,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "../data_types/pole.h"
+#include <data_types/pole.h>
 
 namespace vineyard
 {

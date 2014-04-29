@@ -1,4 +1,5 @@
-#include "motionoperation.h"
+#include <operations/motionoperation.h>
+#include <data_types/pole.h>
 
 namespace nav {
 
@@ -7,7 +8,8 @@ namespace nav {
 ///////////////////////////////////////////////////////////////////////
 LineFollowerMO::LineFollowerMO(const cv::FileStorage &fs,
                                const bool onRight,
-                               const std::shared_ptr<gui> &gui)
+                               const std::shared_ptr<gui> &gui,
+                               const std::string& operation)
     : le_(vineyard::LineExtractor(fs)),
       pe_(vineyard::PoleExtractor(fs)),
       on_right_(onRight),
@@ -17,10 +19,14 @@ LineFollowerMO::LineFollowerMO(const cv::FileStorage &fs,
       head_pole_center_((0.0f,0.0f)),
       line_follower_(fs, fs["lineFollower"]["desiredDistance"], fs["lineFollower"]["desiredTheta"]),
       desired_x_(fs["lineFollower"]["desiredDistance"]),
-      desired_theta_(fs["lineFollower"]["desiredTheta"])
+      desired_theta_(fs["lineFollower"]["desiredTheta"]),
+			num_pole_(0),
+			tot_num_pole_(10)
 {
     GUI_ = gui;
     last_control_ = { 0.0f, 0.0f };
+    operation_ = operation;
+    last_nearest_setted_ = false;
     end_operation_counter_ = 0;
     min_number_of_end_frames_ = 15; /// TODO: move it to the config file
 
@@ -99,7 +105,27 @@ void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard
             if (GUI_) { GUI_->drawLastLine(line_,false); }
         }
         //le_.extractLineFromNearestPole(polesVector, nearest_, line_, useLastLine);
-        le_.extractLineFromNearestPole(polesVector, nearest_, line_, true);
+        //le_.extractLineFromNearestPole(polesVector, nearest_, line_, true);
+        if (operation_.compare("H01L")==0 || operation_.compare("H01R")==0)
+        {
+        	le_.extractAccessPathFromNearestPole(polesVector, nearest_, line_, true);
+        	if (last_nearest_setted_ && last_nearest_ID_ != nearest_->ID() && cv::norm(last_nearest_centroid_-nearest_->getCentroid()) > 2.5)
+        		num_pole_++;
+        	else
+        	{
+        		if (!last_nearest_setted_)
+        			std::cout << "Last è vuoto" << std::endl;
+        		else
+        		{
+        			std::cout << "Last Nearest ID: " << last_nearest_ID_ << "      Nearest ID: " << nearest_->ID() << "    Distance: " <<  cv::norm(last_nearest_centroid_-nearest_->getCentroid()) << std::endl;
+        		}
+        	}
+        	last_nearest_ID_ = nearest_->ID();
+        	last_nearest_centroid_ = nearest_->getCentroid();
+        	last_nearest_setted_ = true;
+        }
+        else //TODO: check what is the best option
+        	le_.extractLineFromNearestPole(polesVector, nearest_, line_, true);
 
         if (line_)
         {
@@ -238,7 +264,14 @@ Control LineFollowerMO::computeOperationControl()
 
 float LineFollowerMO::checkOperationEnd()
 {
+	if (operation_.compare("H01L")==0 || operation_.compare("H01R")==0)
+	{
+        std::cout << num_pole_ << " poles of " << tot_num_pole_ << " - progress:" << (float)num_pole_ / (float)tot_num_pole_ << std::endl;
+        return (float)num_pole_ / (float)tot_num_pole_;
+    }
+
     float end = 0.0f;
+
     float s = 4.0f;
 
     if (head_pole_center_.x < end)
@@ -268,8 +301,8 @@ float LineFollowerMO::checkOperationEnd()
 /// Turn with compass Motion Operation
 ///////////////////////////////////////////////////////////////////////
 TurnWithCompassMO::TurnWithCompassMO(const cv::FileStorage &fs,
-                                                                   const bool onRight,
-                                                                   const std::shared_ptr<gui> &gui)
+                                     const bool onRight,
+                                     const std::shared_ptr<gui> &gui)
     : ego_(EgoMotionEstimator(4)),
       u_turn_mp_(EndLineTurnMP(fs)),
       ego_initialized_(false),

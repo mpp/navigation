@@ -1,4 +1,4 @@
-#include "phidgetdevice.h"
+#include <sensors_drivers/phidgetdevice.h>
 
 namespace nav {
 
