@@ -22,7 +22,7 @@ logparser:
     # /home/mpp/DODICH/Registrazioni/
     # -- Laboratorio
     # /home/dodich/DODICH/Registrazioni/
-    path: /home/mpp/DODICH/Registrazioni/
+    path: /home/dodich/DODICH/Registrazioni/
 
     # Opzioni
     #
@@ -155,7 +155,9 @@ logparser:
     # 04081920_ls_sick
     # -- Casi 35 15 aprile
     # 04151856_ls_sick errore F01R end_gamma_ troppo grande
-    file: "04011527_ls_sick.csv"
+    # -- Casi 36 20 aprile
+    # 04201649_ls_sick
+    file: "04201649_ls_sick.csv"
 
 
     # Here goes the operation, it can be
@@ -171,7 +173,7 @@ logparser:
     # 003L con T01L Turn left
     # 05HL con H01L Header left
     # 07TL con P01L Point left
-    operation: "F01R"
+    operation: "F01L"
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter
@@ -181,7 +183,7 @@ laserscanfilter:
     minDistance: 0.3 
 
     # minimum distance threshold (mt)
-    maxDistance: 6.0
+    maxDistance: 11.0
 
     # minimum angle of scan (deg) - 0° is in front of the scanner
     minAngle: -2.10
@@ -200,10 +202,10 @@ poleExtractor:
     clusterTolerance: 0.25 
 
     # the minimum number of point to define a pole
-    minClusterSize: 2
+    minClusterSize: 3
 
     # the maximum number of point that can rely to a pole
-    maxClusterSize: 30
+    maxClusterSize: 250
 
     # the maximum distance between 2 poles candidates to be considered the same pole, for tracking purposes
     maximumPolesDistance: 0.8

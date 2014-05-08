@@ -10,6 +10,8 @@
 #include <operations/motionoperation.h>
 #include <utils/gui.h>
 
+#define MAX_V 2.0f
+
 void help();
 
 bool endsWith(const std::string& s, const std::string& suffix);
@@ -272,7 +274,7 @@ int main(int argc, char **argv)
 //                cv::Point2f initialPolePosition;
 //                lfmo->getFinalStatus(lineAngle, initialPolePosition);
 
-//                /**LOG*/
+//                //LOG
 //                // usa i tuoi dati, quelli globali, dove io uso quelli del frame
 //                cv::FileStorage log("operation_log.yml", cv::FileStorage::WRITE);
 //                log << "epoch" << f.epoch;
@@ -292,7 +294,7 @@ int main(int argc, char **argv)
 //                log << "]";
 
 //                log.release();
-//                /**LOG*/
+//                //LOG
 
 //                cv::waitKey();
 //                return 0;
@@ -344,12 +346,12 @@ int main(int argc, char **argv)
                     float currentLineAngle = 0.0f;
                     twcmo->getLogStatus(r, theta, sigma, targetPoint, headPole, currentLineAngle);
 
-                    /**LOG*/std::ofstream logStream("operation_log.csv", std::ios::app);
-                    /**LOG*/logStream << f.epoch << ";" << f.frameID << ";" << f.oper_t << ";"
-                    /**LOG*/          << r << ";" << theta << ";" << sigma << ";" << currentLineAngle << ";"
-                    /**LOG*/          << targetPoint.x << ";" << targetPoint.y << ";" << headPole.x << ";" << headPole.y;
-                    /**LOG*/logStream << ";yes" << std::endl;
-                    /**LOG*/logStream.close();
+                    //LOGstd::ofstream logStream("operation_log.csv", std::ios::app);
+                    //LOGlogStream << f.epoch << ";" << f.frameID << ";" << f.oper_t << ";"
+                    //LOG          << r << ";" << theta << ";" << sigma << ";" << currentLineAngle << ";"
+                    //LOG          << targetPoint.x << ";" << targetPoint.y << ";" << headPole.x << ";" << headPole.y;
+                    //LOGlogStream << ";yes" << std::endl;
+                    //LOGlogStream.close();
 
                     cv::waitKey();
                     return 0;
@@ -524,3 +526,221 @@ bool obstacleDetector(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
         return true;
     return false;
 }
+
+float computeVelLinearRamp(float startVel, float finalVel, int steps, int currentStep)
+{
+    float progress = (float)currentStep / (float)steps;
+
+    float startEndDiff = finalVel - startVel;
+
+    return startVel + /*(startEndDiff > 0) ? */(progress * startEndDiff)/* : ((1 - progress) * startEndDiff)*/;
+}
+
+/*/// Rampa da 0 a MAX_V e rampa da MAX_V a 0
+void ramp_positive()
+{
+    int dt = 1000.0f; // microseconds
+
+    // the ramp is va -> vb -> va
+    float velA = 0.0f;
+    float velB = MAX_V;
+
+    /**TODO: pass as arguments*/
+    int
+        startSteps = 1000,      // number of dt-steps for the start phase with velocity = 0
+        upRampSteps = 1000,     // number of dt-steps for the up ramp phase passing from 0 to MAX_V
+        idleSteps = 1000,       // number of dt-steps for the idle phase with velocity = MAX_V
+        downRampSteps = 1000,   // number of dt-steps for the down ramp phase passing from MAX_V to 0
+        stopSteps = 1000;       // number of dt-steps for the stop phase with velocity = 0
+
+    int totalSteps = startSteps +
+                     upRampSteps +
+                     idleSteps +
+                     downRampSteps +
+                     stopSteps;
+
+    int stepCounter = 0;
+
+    float vel;
+
+    while (stepCounter < totalSteps)
+    {
+        // the start phase with velocity = 0
+        if (stepCounter < startSteps)
+        {
+            vel = velA;
+        }
+        // the up ramp phase passing from 0 to MAX_V
+        else if (stepCounter >= startSteps && stepCounter < (upRampSteps + startSteps))
+        {
+            vel = computeVelLinearRamp(velA, velB, upRampSteps, stepCounter-startSteps);
+        }
+        // the idle phase with velocity = MAX_V
+        else if (stepCounter >= (upRampSteps + startSteps) && stepCounter < (idleSteps + upRampSteps + startSteps))
+        {
+            vel = velB;
+        }
+        // the down ramp phase passing from MAX_V to 0
+        else if (stepCounter >= (idleSteps + upRampSteps + startSteps) && stepCounter < (downRampSteps + idleSteps + upRampSteps + startSteps))
+        {
+            vel = computeVelLinearRamp(velB, velA, downRampSteps, stepCounter-(startSteps + upRampSteps + idleSteps));
+        }
+        // the stop phase with velocity = 0
+        else if (stepCounter >= (downRampSteps + idleSteps + upRampSteps + startSteps))
+        {
+            vel = velA;
+        }
+
+        std::cout << stepCounter << " - " << vel << std::endl;
+
+        stepCounter += 1;
+        usleep(dt);
+    }
+
+}
+
+/// Rampa da 0 a -MAX_V e rampa da -MAX_V a 0
+void ramp_negative()
+{
+    int dt = 1000.0f; // microseconds
+
+    // the ramp is va -> vb -> va
+    float velA = 0.0f;
+    float velB = -MAX_V;
+
+    /**TODO: pass as arguments*/
+    int
+        startSteps = 1000,      // number of dt-steps for the start phase with velocity = 0
+        upRampSteps = 1000,     // number of dt-steps for the up ramp phase passing from 0 to MAX_V
+        idleSteps = 1000,       // number of dt-steps for the idle phase with velocity = MAX_V
+        downRampSteps = 1000,   // number of dt-steps for the down ramp phase passing from MAX_V to 0
+        stopSteps = 1000;       // number of dt-steps for the stop phase with velocity = 0
+
+    int totalSteps = startSteps +
+                     upRampSteps +
+                     idleSteps +
+                     downRampSteps +
+                     stopSteps;
+
+    int stepCounter = 0;
+
+    float vel;
+    while (stepCounter < totalSteps)
+    {
+        // the start phase with velocity = 0
+        if (stepCounter < startSteps)
+        {
+            vel = velA;
+        }
+        // the up ramp phase passing from 0 to MAX_V
+        else if (stepCounter >= startSteps && stepCounter < (upRampSteps + startSteps))
+        {
+            vel = computeVelLinearRamp(velA, velB, upRampSteps, stepCounter-startSteps);
+        }
+        // the idle phase with velocity = MAX_V
+        else if (stepCounter >= (upRampSteps + startSteps) && stepCounter < (idleSteps + upRampSteps + startSteps))
+        {
+            vel = velB;
+        }
+        // the down ramp phase passing from MAX_V to 0
+        else if (stepCounter >= (idleSteps + upRampSteps + startSteps) && stepCounter < (downRampSteps + idleSteps + upRampSteps + startSteps))
+        {
+            vel = computeVelLinearRamp(velB, velA, downRampSteps, stepCounter-(startSteps + upRampSteps + idleSteps));
+        }
+        // the stop phase with velocity = 0
+        else if (stepCounter >= (downRampSteps + idleSteps + upRampSteps + startSteps))
+        {
+            vel = velA;
+        }
+
+        std::cout << stepCounter << " - " << vel << std::endl;
+
+        stepCounter += 1;
+        usleep(dt);
+    }
+
+}
+
+/// Rampa da 0 a -MAX_V e rampa da -MAX_V a MAX_V e rampa da MAX_V a 0
+void ramp_mixed()
+{
+    int dt = 1000.0f; // microseconds
+
+    // the ramp is va -> vb -> va
+    float velA = 0.0f;
+    float velB = MAX_V;
+    float velC = -MAX_V;
+
+    /**TODO: pass as arguments*/
+    int
+        startSteps = 1000,      // number of dt-steps for the start phase with velocity = 0
+        upRampSteps = 1000,     // number of dt-steps for the up ramp phase passing from 0 to MAX_V
+        idleSteps = 1000,       // number of dt-steps for the idle phase with velocity = MAX_V
+        downRampSteps = 1000,   // number of dt-steps for the down ramp phase passing from MAX_V to 0
+        stopSteps = 1000;       // number of dt-steps for the stop phase with velocity = 0
+
+    int totalSteps = startSteps +
+                     upRampSteps +
+                     idleSteps +
+                     downRampSteps +
+                     idleSteps +
+                     upRampSteps +
+                     stopSteps;
+
+    int stepCounter = 0;
+
+    float vel;
+    while (stepCounter < totalSteps)
+    {
+        // the start phase with velocity = 0
+        if (stepCounter < startSteps)
+        {
+            vel = velA;
+        }
+        // the up ramp phase passing from 0 to MAX_V
+        else if (stepCounter >= startSteps && stepCounter < (upRampSteps + startSteps))
+        {
+            vel = computeVelLinearRamp(velA, velB, upRampSteps, stepCounter-startSteps);
+        }
+        // the idle phase with velocity = MAX_V
+        else if (stepCounter >= (upRampSteps + startSteps) && stepCounter < (idleSteps + upRampSteps + startSteps))
+        {
+            vel = velB;
+        }
+        // the down ramp phase passing from MAX_V to -MAX_V
+        else if (stepCounter >= (idleSteps + upRampSteps + startSteps) && stepCounter < (downRampSteps + idleSteps + upRampSteps + startSteps))
+        {
+            vel = computeVelLinearRamp(velB, velC, downRampSteps, stepCounter-(startSteps + upRampSteps + idleSteps));
+        }
+        // the idle phase with velocity = 0
+        else if (stepCounter >= (downRampSteps + idleSteps + upRampSteps + startSteps) && stepCounter < (idleSteps + downRampSteps + idleSteps + upRampSteps + startSteps))
+        {
+            vel = velC;
+        }
+        // the up ramp phase passing from -MAX_V to 0
+        else if (stepCounter >= (idleSteps + downRampSteps + idleSteps + upRampSteps + startSteps) && stepCounter < (upRampSteps + idleSteps + downRampSteps + idleSteps + upRampSteps + startSteps))
+        {
+            vel = computeVelLinearRamp(velC, velA, upRampSteps, stepCounter-(idleSteps + downRampSteps + idleSteps + upRampSteps + startSteps));
+        }
+        // the stop phase with velocity = 0
+        else if (stepCounter >= (upRampSteps + idleSteps + downRampSteps + idleSteps + upRampSteps + startSteps))
+        {
+            vel = velA;
+        }
+
+        std::cout << stepCounter << " - " << vel << std::endl;
+
+        stepCounter += 1;
+        usleep(dt);
+    }
+
+}
+
+int main(int argc, char **argv)
+{
+    //ramp_negative();
+
+    //ramp_positive();
+
+    ramp_mixed();
+}*/
