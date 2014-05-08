@@ -274,7 +274,11 @@ int main(int argc, char **argv)
 //                cv::Point2f initialPolePosition, nearest;
 //                lfmo->getFinalStatus(nearest, initialPolePosition, lineAngle);
 
+<<<<<<< HEAD
 //                //
+=======
+//                //LOG
+>>>>>>> e95eccf3df01beeec2059682114d980c7edc6502
 //                // usa i tuoi dati, quelli globali, dove io uso quelli del frame
 //                cv::FileStorage log("operation_log.yml", cv::FileStorage::WRITE);
 //                log << "epoch" << f.epoch;
@@ -294,7 +298,11 @@ int main(int argc, char **argv)
 //                log << "]";
 
 //                log.release();
+<<<<<<< HEAD
 //                //
+=======
+//                //LOG
+>>>>>>> e95eccf3df01beeec2059682114d980c7edc6502
 
 //                cv::waitKey();
 //                return 0;
@@ -346,12 +354,21 @@ int main(int argc, char **argv)
                     float currentLineAngle = 0.0f;
                     twcmo->getLogStatus(r, theta, sigma, targetPoint, headPole, currentLineAngle);
 
+<<<<<<< HEAD
                     //std::ofstream logStream("operation_log.csv", std::ios::app);
                     //logStream << f.epoch << ";" << f.frameID << ";" << f.oper_t << ";"
                     //          << r << ";" << theta << ";" << sigma << ";" << currentLineAngle << ";"
                     //          << targetPoint.x << ";" << targetPoint.y << ";" << headPole.x << ";" << headPole.y;
                     //logStream << ";yes" << std::endl;
                     //logStream.close();
+=======
+                    //LOGstd::ofstream logStream("operation_log.csv", std::ios::app);
+                    //LOGlogStream << f.epoch << ";" << f.frameID << ";" << f.oper_t << ";"
+                    //LOG          << r << ";" << theta << ";" << sigma << ";" << currentLineAngle << ";"
+                    //LOG          << targetPoint.x << ";" << targetPoint.y << ";" << headPole.x << ";" << headPole.y;
+                    //LOGlogStream << ";yes" << std::endl;
+                    //LOGlogStream.close();
+>>>>>>> e95eccf3df01beeec2059682114d980c7edc6502
 
                     cv::waitKey();
                     return 0;
@@ -527,6 +544,7 @@ bool obstacleDetector(pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
     return false;
 }
 
+<<<<<<< HEAD
 /*
 float computeVelLinearRamp(float startVel, float finalVel, float steps, float currentStep)
 {
@@ -537,6 +555,18 @@ float computeVelLinearRamp(float startVel, float finalVel, float steps, float cu
 }
 
 /// Rampa da 0 a MAX_V e rampa da MAX_V a 0
+=======
+float computeVelLinearRamp(float startVel, float finalVel, int steps, int currentStep)
+{
+    float progress = (float)currentStep / (float)steps;
+
+    float startEndDiff = finalVel - startVel;
+
+    return startVel + /*(startEndDiff > 0) ? */(progress * startEndDiff)/* : ((1 - progress) * startEndDiff)*/;
+}
+
+/*/// Rampa da 0 a MAX_V e rampa da MAX_V a 0
+>>>>>>> e95eccf3df01beeec2059682114d980c7edc6502
 void ramp_positive()
 {
     int dt = 1000.0f; // microseconds
@@ -545,7 +575,11 @@ void ramp_positive()
     float velA = 0.0f;
     float velB = MAX_V;
 
+<<<<<<< HEAD
     ///TODO: pass as arguments
+=======
+    /**TODO: pass as arguments*/
+>>>>>>> e95eccf3df01beeec2059682114d980c7edc6502
     int
         startSteps = 1000,      // number of dt-steps for the start phase with velocity = 0
         upRampSteps = 1000,     // number of dt-steps for the up ramp phase passing from 0 to MAX_V
@@ -593,10 +627,13 @@ void ramp_positive()
 
         std::cout << stepCounter << " - " << vel << std::endl;
 
+<<<<<<< HEAD
         float outVelocity = vel / MAX_V; // valore tra 0 e 1 di velocità
         reference_left = outVelocity;
         reference_right = outVelocity;
 
+=======
+>>>>>>> e95eccf3df01beeec2059682114d980c7edc6502
         stepCounter += 1;
         usleep(dt);
     }
@@ -612,7 +649,11 @@ void ramp_negative()
     float velA = 0.0f;
     float velB = -MAX_V;
 
+<<<<<<< HEAD
     //TODO: pass as arguments
+=======
+    /**TODO: pass as arguments*/
+>>>>>>> e95eccf3df01beeec2059682114d980c7edc6502
     int
         startSteps = 1000,      // number of dt-steps for the start phase with velocity = 0
         upRampSteps = 1000,     // number of dt-steps for the up ramp phase passing from 0 to MAX_V
@@ -659,10 +700,13 @@ void ramp_negative()
 
         std::cout << stepCounter << " - " << vel << std::endl;
 
+<<<<<<< HEAD
         float outVelocity = vel / MAX_V; // valore tra 0 e 1 di velocità
         reference_left = outVelocity;
         reference_right = outVelocity;
 
+=======
+>>>>>>> e95eccf3df01beeec2059682114d980c7edc6502
         stepCounter += 1;
         usleep(dt);
     }
@@ -679,7 +723,11 @@ void ramp_mixed()
     float velB = MAX_V;
     float velC = -MAX_V;
 
+<<<<<<< HEAD
     //TODO: pass as arguments
+=======
+    /**TODO: pass as arguments*/
+>>>>>>> e95eccf3df01beeec2059682114d980c7edc6502
     int
         startSteps = 1000,      // number of dt-steps for the start phase with velocity = 0
         upRampSteps = 1000,     // number of dt-steps for the up ramp phase passing from 0 to MAX_V
@@ -738,16 +786,20 @@ void ramp_mixed()
 
         std::cout << stepCounter << " - " << vel << std::endl;
 
+<<<<<<< HEAD
         float outVelocity = vel / MAX_V; // valore tra 0 e 1 di velocità
         reference_left = outVelocity;
         reference_right = outVelocity;
 
+=======
+>>>>>>> e95eccf3df01beeec2059682114d980c7edc6502
         stepCounter += 1;
         usleep(dt);
     }
 
 }
 
+<<<<<<< HEAD
 int main()
 {
     ramp_mixed();
@@ -755,4 +807,13 @@ int main()
     ramp_negative();
 
     ramp_positive();
+=======
+int main(int argc, char **argv)
+{
+    //ramp_negative();
+
+    //ramp_positive();
+
+    ramp_mixed();
+>>>>>>> e95eccf3df01beeec2059682114d980c7edc6502
 }*/
