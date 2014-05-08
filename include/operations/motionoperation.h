@@ -81,10 +81,17 @@ public:
 
     float checkOperationEnd();
 
-    void getFinalStatus(float &exitLineAngle,
-                        cv::Point2f &headPole) const
-            { exitLineAngle = std::atan2(line_->getLineParameters().vy, line_->getLineParameters().vx);
-              headPole = head_pole_center_;}
+    void getFinalStatus(cv::Point2f &nearest,
+                        cv::Point2f &headPole,
+                        float &exitLineAngle) const
+            {
+                if (line_)
+                {
+                    exitLineAngle = std::atan2(line_->getLineParameters().vy, line_->getLineParameters().vx);
+                }
+                    headPole = head_pole_center_;
+                    nearest = nearest_->getCentroid();
+            }
 
 private:
 

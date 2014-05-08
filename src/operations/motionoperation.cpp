@@ -21,7 +21,7 @@ LineFollowerMO::LineFollowerMO(const cv::FileStorage &fs,
       desired_x_(fs["lineFollower"]["desiredDistance"]),
       desired_theta_(fs["lineFollower"]["desiredTheta"]),
 			num_pole_(0),
-			tot_num_pole_(10)
+            tot_num_pole_(10)
 {
     GUI_ = gui;
     last_control_ = { 0.0f, 0.0f };
@@ -33,7 +33,7 @@ LineFollowerMO::LineFollowerMO(const cv::FileStorage &fs,
     head_Pole_kf_.init(2,2);
     cv::setIdentity(head_Pole_kf_.measurementMatrix);
     cv::setIdentity(head_Pole_kf_.processNoiseCov, cv::Scalar::all(1e-5));
-    cv::setIdentity(head_Pole_kf_.measurementNoiseCov, cv::Scalar::all(1e-3));
+    cv::setIdentity(head_Pole_kf_.measurementNoiseCov, cv::Scalar::all(1e-4));
     cv::setIdentity(head_Pole_kf_.errorCovPost, cv::Scalar::all(1));
     cv::setIdentity(head_Pole_kf_.statePost, cv::Scalar::all(0));
 }
@@ -109,20 +109,30 @@ void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard
         if (operation_.compare("H01L")==0 || operation_.compare("H01R")==0)
         {
         	le_.extractAccessPathFromNearestPole(polesVector, nearest_, line_, true);
-        	if (last_nearest_setted_ && last_nearest_ID_ != nearest_->ID() && cv::norm(last_nearest_centroid_-nearest_->getCentroid()) > 2.5)
-        		num_pole_++;
+
+            if (last_nearest_setted_ && last_nearest_ID_ != nearest_->ID() &&
+                    cv::norm(last_nearest_centroid_ - nearest_->getCentroid()) > 2.0 &&
+                    last_nearest_centroid_.x < nearest_->getCentroid().x)
+            {
+                num_pole_++;
+
+                last_nearest_ID_ = nearest_->ID();
+                last_nearest_centroid_ = nearest_->getCentroid();
+                last_nearest_setted_ = true;
+            }
         	else
         	{
         		if (!last_nearest_setted_)
         			std::cout << "Last è vuoto" << std::endl;
         		else
         		{
-        			std::cout << "Last Nearest ID: " << last_nearest_ID_ << "      Nearest ID: " << nearest_->ID() << "    Distance: " <<  cv::norm(last_nearest_centroid_-nearest_->getCentroid()) << std::endl;
+                    std::cout << "Last Nearest ID: " << last_nearest_ID_
+                              << "      Nearest ID: " << nearest_->ID()
+                              << "    Distance: " <<  cv::norm(last_nearest_centroid_-nearest_->getCentroid())
+                              << std::endl;
         		}
         	}
-        	last_nearest_ID_ = nearest_->ID();
-        	last_nearest_centroid_ = nearest_->getCentroid();
-        	last_nearest_setted_ = true;
+
         }
         else //TODO: check what is the best option
         	le_.extractLineFromNearestPole(polesVector, nearest_, line_, true);
@@ -133,31 +143,35 @@ void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard
             // Check the head pole distance
             int headPoleIndex = line_->getPolesList().front();
 
-            cv::Point2f measuredHeadPoleCenter = (*polesVector)[headPoleIndex]->getCentroid();
+            cv::Point2f measuredHeadPoleCenter;
+            if (line_->getPolesList().size() > 0)
+            {
+                measuredHeadPoleCenter = (*polesVector)[headPoleIndex]->getCentroid();
 
-            ///
+                ///
 
-            head_pole_center_ = measuredHeadPoleCenter;
-            head_pole_distance_ = cv::norm(head_pole_center_);
+                head_pole_center_ = measuredHeadPoleCenter;
+                head_pole_distance_ = cv::norm(head_pole_center_);
+            }
 
             if (GUI_) { drawPrevPath(); }
         }
     }
 
     // If line update a kalman filter of the head pole
-    if (line_)
-    {
-        head_Pole_kf_.predict();
-        cv::Mat measurement = cv::Mat::zeros(2,1,CV_32FC1);
-        measurement.at<float>(0) = head_pole_center_.x;
-        measurement.at<float>(1) = head_pole_center_.y;
-        head_Pole_kf_.correct(measurement);
-        std::cout << "measured: " << head_pole_center_;
-        head_pole_center_ = cv::Point2f(head_Pole_kf_.statePost.at<float>(0),head_Pole_kf_.statePost.at<float>(1));
-        std::cout << " - corrected: " <<  head_pole_center_ << std::endl;
+    //if (line_)
+    //{
+    head_Pole_kf_.predict();
+    cv::Mat measurement = cv::Mat::zeros(2,1,CV_32FC1);
+    measurement.at<float>(0) = head_pole_center_.x;
+    measurement.at<float>(1) = head_pole_center_.y;
+    head_Pole_kf_.correct(measurement);
+    std::cout << "measured: " << head_pole_center_;
+    head_pole_center_ = cv::Point2f(head_Pole_kf_.statePost.at<float>(0),head_Pole_kf_.statePost.at<float>(1));
+    std::cout << " - corrected: " <<  head_pole_center_ << std::endl;
 
-        if (GUI_) { GUI_->drawCross(head_pole_center_); }
-    }
+    if (GUI_) { GUI_->drawCross(head_pole_center_); }
+    //}
 
 }
 

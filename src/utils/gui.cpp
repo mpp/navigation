@@ -250,6 +250,10 @@ void gui::drawLine(const std::vector<vineyard::Pole::Ptr> &polesVector,
     int k = 0;
     const std::list<vineyard::PoleIndex> list = line->getPolesList();
     int size = list.size();
+    if (list.size() <= 0)
+    {
+        return;
+    }
     for (vineyard::PoleIndex IDX : list)
     {
         if (0 == k)

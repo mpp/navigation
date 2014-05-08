@@ -61,37 +61,42 @@ void LineExtractor::extractAccessPathFromNearestPole(
     Line::Ptr &line,
     const bool useLastLine)
 {
-  if (!nearest || !polesVector)
-  {
-      return;
-  }
+    if (!nearest || !polesVector)
+    {
+        return;
+    }
 
-  LineParams lineParam;
-  // Initialize a temporary Line container
-  Line temp(polesVector, lineParam);
+    LineParams lineParam;
+    // Initialize a temporary Line container
+    Line temp(polesVector, lineParam);
 
-  // If I already have a line I use it as a reference to accept or refuse poles
-  if (useLastLine)
-  {
-      lineParam = line->getLineParameters();
-  }
+    // If I already have a line I use it as a reference to accept or refuse poles
+    if (useLastLine)
+    {
+        lineParam = line->getLineParameters();
+    }
 
-  Pole::Ptr
-  	lowestButNearest = 0,
-  	actualPole;
-  PoleIndex
-		nearestIndex,
-		lowestButNearestIndex;
+    Pole::Ptr
+        lowestButNearest = 0,
+        actualPole;
 
-  for (int i = 0; i < polesVector->size(); i++)
+    PoleIndex
+        nearestIndex,
+        lowestButNearestIndex;
+
+    for (int i = 0; i < polesVector->size(); i++)
 	{
-  	actualPole = (*polesVector)[i];
+        actualPole = (*polesVector)[i];
 		if (actualPole->ID() != nearest->ID())
 		{
-			if (actualPole->getCentroid().y < 0  && (!lowestButNearest || actualPole->getCentroid().y > lowestButNearest->getCentroid().y))
+            if (actualPole->getCentroid().y < 0  &&
+                    (!lowestButNearest || actualPole->getCentroid().y > lowestButNearest->getCentroid().y))
 			{
-				lowestButNearest = actualPole;
-				lowestButNearestIndex = i;
+                if (actualPole->getCentroid().x > (1.5 + nearest->getCentroid().x))
+                {
+                    lowestButNearest = actualPole;
+                    lowestButNearestIndex = i;
+                }
 			}
 		}
 		else
@@ -100,15 +105,20 @@ void LineExtractor::extractAccessPathFromNearestPole(
 		}
 	}
 
-  temp.insert_head(nearestIndex);
-  temp.insert_head(lowestButNearestIndex);
+    if (!lowestButNearest)
+    {
+        return;
+    }
 
-  std::vector<cv::Point2f>
-  	linePoints;
-  linePoints.push_back(nearest->getCentroid());
-  linePoints.push_back(lowestButNearest->getCentroid());
+    temp.insert_head(nearestIndex);
+    temp.insert_head(lowestButNearestIndex);
 
-  // Fit the line and set the parameters in the line object
+    std::vector<cv::Point2f>
+    linePoints;
+    linePoints.push_back(nearest->getCentroid());
+    linePoints.push_back(lowestButNearest->getCentroid());
+
+    // Fit the line and set the parameters in the line object
 	 cv::Vec4f lineParamVec;
 	 cv::fitLine(linePoints, lineParamVec, CV_DIST_L1, 0, reps_, aeps_);
 
