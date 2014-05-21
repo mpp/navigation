@@ -38,9 +38,12 @@ public:
     void drawCross(const cv::Point2f &pt);
 
     void drawLine(const std::vector< vineyard::Pole::Ptr > &polesVector,
-                  const vineyard::Line::Ptr &line);
+                  const vineyard::Line::Ptr &line,
+                  const float desiredDistance = -1);
 
     void drawLastLine(const vineyard::Line::Ptr &line, bool safe = true);
+
+    void drawIdealDistanceLine(const float desiredDistance);
 
     void drawState(const nav::SystemState &state);
 

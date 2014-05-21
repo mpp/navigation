@@ -175,7 +175,16 @@ logparser:
     # 003L con T01L Turn left
     # 05HL con H01L Header left
     # 07TL con P01L Point left
-    operation: "P04R"
+    operation: "F01L"
+
+##---------------------------------------------------------------------------##
+## Robot's parameters
+##---------------------------------------------------------------------------##
+maxVelocities: # electro-valve aperture max = 1.0
+    F01L: 1.0
+    F01R: 1.0
+    P01L: 0.5
+    P01R: 0.5
 
 ##---------------------------------------------------------------------------##
 ## Parameters for the laser scan raw filter

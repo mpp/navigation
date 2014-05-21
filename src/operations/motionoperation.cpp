@@ -139,7 +139,7 @@ void LineFollowerMO::updateParameters(const std::shared_ptr<std::vector<vineyard
 
         if (line_)
         {
-            if (GUI_) { GUI_->drawLine(*polesVector,line_); }
+            if (GUI_) { GUI_->drawLine(*polesVector,line_,desired_x_); }
             // Check the head pole distance
             int headPoleIndex = line_->getPolesList().front();
 

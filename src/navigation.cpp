@@ -9,6 +9,7 @@
 #include <data_manipulation/lineextractor.h>
 #include <operations/motionoperation.h>
 #include <utils/gui.h>
+#include <utils/maneuvervelocities.h>
 
 #define MAX_V 2.0f
 
@@ -60,6 +61,9 @@ int main(int argc, char **argv)
         std::cerr << "Could not open settings file: " << settfilename << std::endl;
         exit(-2);
     }
+
+    nav::ManeuverVelocities manVel(fs);
+    //std::cout << manVel.getMaxVel("P01R");
 
     int waitkey;
     fs["logparser"]["waitkey"] >> waitkey;
@@ -220,13 +224,13 @@ int main(int argc, char **argv)
         }
 
         GUI->drawPoints(ptVector);
-        //GUI->drawPoles(*polesVector);
+        GUI->drawPoles(*polesVector);
         GUI->drawObstacle(isObstacle, filteredCloud, obstacleIndices, minRange, maxRange, minAngle, maxAngle);
 
         std::cout << operation << " - " << f.oper_t << std::endl;
 
-        GUI->show();
-        continue;
+        //GUI->show();
+        //continue;
 
         /// Check the operation frame
         if (f.oper_t.compare(operation) != 0)// || f.frameID <= 9200)
@@ -252,7 +256,7 @@ int main(int argc, char **argv)
             lfmo->updateParameters(polesVector,
                                    control,
                                    f.bearing,
-                                   180*M_PI/180);
+                                   355*M_PI/180);
 
             control = lfmo->computeOperationControl();
 
@@ -429,7 +433,7 @@ int main(int argc, char **argv)
 
         if (isObstacle)
         {
-            control = {0.0f, 0.0f};
+            //control = {0.0f, 0.0f};
         }
 
         /// Robot specific operations
@@ -445,6 +449,10 @@ int main(int argc, char **argv)
 
         lv = lv / maxWheelVelocityValue;
         rv = rv / maxWheelVelocityValue;
+
+        /// Set the velocity depending on the maneuver
+        lv = lv * manVel.getMaxVel(operation);
+        rv = rv * manVel.getMaxVel(operation);
 
         std::cout << "(lin, ome) = (" << control.linear << ", " << control.angular << ")" << std::endl;
         std::cout << "(lv,  rv ) = (" << lv << ", " << rv << ")" << std::endl;
